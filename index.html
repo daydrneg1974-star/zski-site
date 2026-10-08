@@ -12,12 +12,12 @@
 <meta property="og:description" content="Прокат горных лыж и сноубордов ZSKI в Яхроме (61-й км Дмитровского шоссе, рядом с Сорочанами и парком «Яхрома»). Комплект от 1500 ₽/день, шлемы, маски, SKI-сервис, ремонт и хранение. Открыто до 02:00 в пятницу и субботу.">
 <meta property="og:url" content="https://zski.ru/">
 <meta property="og:image" content="https://zski.ru/img/photos/hero-skier.jpg">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#070b14">
 <link rel="icon" href="img/favicon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <script type="application/ld+json">
 {
@@ -59,23 +59,35 @@
 <main id="main">
 
 <section class="hero">
-  <div class="hero-media" data-ph><img src="img/photos/hero-skier.jpg" alt="Лыжник в прыжке на фоне гор" fetchpriority="high" data-fallback></div>
+  <div class="hero-media" data-ph><img src="img/photos/hero-freeride.jpg" alt="Фрирайд: лыжник в прыжке над заснеженным склоном" fetchpriority="high" data-fallback></div>
+  <canvas class="snow" aria-hidden="true"></canvas>
   <div class="wrap">
     <span class="eyebrow">Яхрома · 61-й км Дмитровского шоссе</span>
-    <h1>Прокат лыж и сноубордов рядом со склонами</h1>
-    <p class="lead">Более 5 лет обеспечиваем лыжников, сноубордистов и любителей активного зимнего отдыха качественным инвентарём известных производителей. Подберём по размеру и уровню за 10 минут — и вы на склоне.</p>
+    <h1>Лучшее горнолыжное снаряжение <em>Дмитровского района</em></h1>
+    <p class="lead">Прокат лыж и сноубордов, собственный SKI-сервис, хранение и консервация. Инвентарь известных производителей, абсолютно все размеры, подбор за 10 минут — и вы на склоне.</p>
     <div class="hero-actions">
       <a class="btn btn-primary" data-phone href="tel:+79161718621"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
       <a class="btn btn-ghost" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать стоимость</a>
     </div>
     <div class="hero-badges">
       <span class="badge status" data-status></span>
-      <span class="badge">★ <span data-rating></span> на Яндекс Картах · <span data-rating-count></span> оценок</span>
       <span class="badge">Оплата картой</span>
-      <span class="badge">Абсолютно все размеры</span>
+      <span class="badge">Шлемы и маски в наличии</span>
+    </div>
+    <div class="hero-stats">
+      <div><b><span data-count="5">0</span>+</b><span>лет на Дмитровском шоссе</span></div>
+      <div><b><span data-rating></span> <small>★</small></b><span>рейтинг на Яндекс Картах</span></div>
+      <div><b><span data-count="529">0</span></b><span>оценок гостей</span></div>
+      <div><b>02:00</b><span>работаем до — в пятницу и субботу</span></div>
     </div>
   </div>
+  <div class="scroll-hint" aria-hidden="true"></div>
 </section>
+
+<div class="marquee" aria-hidden="true"><div class="track">
+  <span>Прокат лыж и сноубордов</span><span>Лучшие цены Московской области</span><span>Абсолютно все размеры</span><span>SKI-сервис и ремонт</span><span>Хранение и консервация</span><span>Яхрома · Сорочаны · Волен · Степаново</span>
+  <span>Прокат лыж и сноубордов</span><span>Лучшие цены Московской области</span><span>Абсолютно все размеры</span><span>SKI-сервис и ремонт</span><span>Хранение и консервация</span><span>Яхрома · Сорочаны · Волен · Степаново</span>
+</div></div>
 
 <section class="section">
   <div class="wrap">
@@ -162,7 +174,7 @@
           <li><strong>Верните инвентарь</strong><span class="muted">Работаем допоздна: в пятницу и субботу — до 02:00, в воскресенье — до полуночи.</span></li>
         </ol>
       </div>
-      <div class="gallery" style="grid-template-columns:1fr 1fr">
+      <div class="gallery even" style="grid-template-columns:1fr 1fr">
         <figure data-ph><img src="img/photos/fitting-boots.jpg" alt="Подбираем ботинки по ноге" loading="lazy" data-fallback><figcaption>Подбираем ботинки по ноге</figcaption></figure>
         <figure data-ph><img src="img/photos/ski-racks.jpg" alt="Горные лыжи всех ростовок" loading="lazy" data-fallback><figcaption>Горные лыжи всех ростовок</figcaption></figure>
         <figure data-ph><img src="img/photos/helmets.jpg" alt="Шлемы и маски" loading="lazy" data-fallback><figcaption>Шлемы и маски</figcaption></figure>
@@ -174,13 +186,14 @@
 
 <section class="section" style="padding-top:0">
   <div class="wrap">
-    <div class="cta-band">
-      <div>
-        <span class="eyebrow" style="color:#ffd3b0">SKI-сервис</span>
+    <div class="banner">
+      <img src="img/photos/service-banner.jpg" alt="Мастер ZSKI готовит лыжи" loading="lazy">
+      <div class="inner">
+        <span class="eyebrow">SKI-сервис</span>
         <h2>Заточка, парафин, ремонт и хранение</h2>
-        <p>Комплексная подготовка на станке от 900 ₽, вручную — от 1200 ₽. Установка креплений от 300 ₽. Летняя консервация и сезонное хранение инвентаря.</p>
+        <p style="color:#d9e2f1">Комплексная подготовка на станке от 900 ₽, вручную — от 1200 ₽. Установка креплений от 300 ₽. Консервация на лето — 300 ₽.</p>
+        <a class="btn btn-primary" href="service.html">Цены на сервис</a>
       </div>
-      <a class="btn btn-primary" href="service.html">Цены на сервис</a>
     </div>
   </div>
 </section>
@@ -292,7 +305,7 @@
         </ul>
       </div>
     </div>
-    <p class="copy">© <span data-year></span> ZSKI. Цены на сайте носят информационный характер и не являются публичной офертой. Фото: Pexels (свободная лицензия).</p>
+    <p class="copy">© <span data-year></span> ZSKI. Цены на сайте носят информационный характер и не являются публичной офертой. Фотографии — из фотоальбома ZSKI; пейзажи курортов — Pexels (свободная лицензия).</p>
   </div>
 </footer>
 <div class="actionbar">

@@ -181,6 +181,61 @@
     location.href = `mailto:${D.email}?subject=${encodeURIComponent("Заявка с сайта ZSKI")}&body=${encodeURIComponent(body)}`;
   }));
 
+
+  /* ---------- Шапка при скролле + параллакс hero ---------- */
+  const top = $(".topbar"), heroImg = $(".hero-media img");
+  const onScroll = () => {
+    const y = window.scrollY;
+    if (top) top.classList.toggle("scrolled", y > 40);
+    if (heroImg && y < 1200 && !matchMedia("(prefers-reduced-motion: reduce)").matches) heroImg.style.translate = `0 ${y * 0.18}px`;
+  };
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+
+  /* ---------- Появление при скролле ---------- */
+  const targets = $$(".section .card, .price-row, .album figure, .gallery figure, .resort, .steps li, details, .section h2, .section .lead, .cta-band, .about .photo, .stat, .hours li, .contact-list li, .video, .map, .banner, .notice, .calc-item, .calc-summary, [data-service] > div");
+  targets.forEach((el) => {
+    el.classList.add("reveal");
+    const sib = Array.from(el.parentElement.children).filter((c) => c.classList.contains("reveal"));
+    el.style.setProperty("--d", `${Math.min(sib.indexOf(el), 8) * 70}ms`);
+  });
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    targets.forEach((el) => io.observe(el));
+  } else targets.forEach((el) => el.classList.add("in"));
+  setTimeout(() => targets.forEach((el) => el.classList.add("in")), 3500); // страховка: всё видно даже без скролла
+
+  /* ---------- Счётчики ---------- */
+  $$("[data-count]").forEach((el) => {
+    const end = +el.dataset.count, suffix = el.dataset.suffix || "", dur = 1400;
+    const run = () => { const t0 = performance.now(); const step = (t) => { const k = Math.min(1, (t - t0) / dur); const v = Math.round(end * (1 - Math.pow(1 - k, 3))); el.textContent = new Intl.NumberFormat("ru-RU").format(v) + suffix; if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
+    if ("IntersectionObserver" in window) { const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { run(); io.disconnect(); } }); io.observe(el); } else run();
+  });
+
+  /* ---------- Снег в первом экране (лёгкий) ---------- */
+  const snow = $(".hero .snow");
+  if (snow && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const ctx = snow.getContext("2d"); let W, H, flakes = [];
+    const size = () => { W = snow.width = snow.offsetWidth; H = snow.height = snow.offsetHeight; flakes = Array.from({ length: Math.round(W / 22) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 2.2, s: 0.25 + Math.random() * 0.7, o: 0.25 + Math.random() * 0.5, w: Math.random() * 6.28 })); };
+    size(); addEventListener("resize", size);
+    let paused = false; document.addEventListener("visibilitychange", () => (paused = document.hidden));
+    (function draw() { if (!paused) { ctx.clearRect(0, 0, W, H); flakes.forEach((f) => { f.y += f.s; f.w += 0.01; f.x += Math.sin(f.w) * 0.3; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fillStyle = `rgba(255,255,255,${f.o})`; ctx.fill(); }); } requestAnimationFrame(draw); })();
+  }
+
+  /* ---------- Лайтбокс для фото ---------- */
+  const figs = $$(".album figure, .gallery figure");
+  if (figs.length) {
+    const lb = document.createElement("div"); lb.className = "lightbox"; lb.hidden = true;
+    lb.innerHTML = `<button class="close" aria-label="Закрыть">✕</button><button class="prev" aria-label="Предыдущее">‹</button><img alt=""><button class="next" aria-label="Следующее">›</button><div class="cap"></div>`;
+    document.body.appendChild(lb);
+    const img = $("img", lb), cap = $(".cap", lb); let i = 0;
+    const show = (n) => { i = (n + figs.length) % figs.length; const f = $("img", figs[i]); img.src = f.src; img.alt = f.alt; cap.textContent = f.alt; lb.hidden = false; document.body.style.overflow = "hidden"; };
+    const hide = () => { lb.hidden = true; document.body.style.overflow = ""; };
+    figs.forEach((f, n) => { f.setAttribute("tabindex", "0"); f.setAttribute("role", "button"); f.addEventListener("click", () => show(n)); f.addEventListener("keydown", (e) => { if (e.key === "Enter") show(n); }); });
+    $(".close", lb).addEventListener("click", hide); $(".prev", lb).addEventListener("click", () => show(i - 1)); $(".next", lb).addEventListener("click", () => show(i + 1));
+    lb.addEventListener("click", (e) => { if (e.target === lb) hide(); });
+    document.addEventListener("keydown", (e) => { if (lb.hidden) return; if (e.key === "Escape") hide(); if (e.key === "ArrowLeft") show(i - 1); if (e.key === "ArrowRight") show(i + 1); });
+  }
+
   /* ---------- Год в футере ---------- */
   $$("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
 })();
