@@ -8,9 +8,9 @@
   --line:rgba(255,255,255,.09);
   --text:#eef3fb;
   --muted:#a7b3c9;
-  --accent:#ff7a1a;        /* сигнальный оранжевый */
-  --accent-2:#ffa052;
-  --ice:#7cc8ff;           /* ледяной голубой */
+  --accent:#e3241b;        /* фирменный красный логотипа Z-SKI */
+  --accent-2:#ff4b3e;
+  --ice:#5fb3ff;           /* голубой полос логотипа */
   --ok:#3ddc84;
   --danger:#ff5d5d;
   --radius:18px;
@@ -44,8 +44,8 @@ p{margin:0 0 1em}
 /* ---------- Кнопки ---------- */
 .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.9rem 1.35rem;border-radius:999px;border:1px solid transparent;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s;font-size:1rem;font-family:inherit}
 .btn:active{transform:translateY(1px)}
-.btn-primary{background:var(--accent);color:#1a0d00}
-.btn-primary:hover{background:var(--accent-2);box-shadow:0 10px 30px rgba(255,122,26,.35)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-2);box-shadow:0 10px 30px rgba(227,36,27,.35)}
 .btn-ghost{background:transparent;border-color:var(--line);color:var(--text)}
 .btn-ghost:hover{border-color:var(--ice);color:var(--ice)}
 .btn-sm{padding:.55rem .95rem;font-size:.9rem}
@@ -55,7 +55,7 @@ p{margin:0 0 1em}
 .topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:1rem;height:68px}
 .logo{display:flex;align-items:center;gap:.6rem;font-weight:900;font-size:1.3rem;letter-spacing:.06em;text-decoration:none}
-.logo svg{width:34px;height:34px}
+.logo img{width:44px;height:44px;border-radius:50%}
 .logo small{display:block;font-size:.65rem;letter-spacing:.1em;color:var(--muted);font-weight:700}
 .menu{display:none;gap:1.6rem;list-style:none;margin:0;padding:0}
 .menu a{text-decoration:none;color:var(--muted);font-weight:600;font-size:.95rem}
@@ -107,7 +107,7 @@ img.failed{visibility:hidden}
 .price-row .note{display:block;font-size:.85rem;color:var(--muted);font-weight:500}
 .price{font-weight:900;font-size:1.15rem;white-space:nowrap}
 .price small{font-size:.75rem;color:var(--muted);font-weight:600}
-.pill{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;background:rgba(255,122,26,.15);color:var(--accent);padding:.25rem .55rem;border-radius:999px;margin-left:.5rem;font-weight:800;vertical-align:middle}
+.pill{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;background:rgba(227,36,27,.12);color:var(--accent);padding:.25rem .55rem;border-radius:999px;margin-left:.5rem;font-weight:800;vertical-align:middle}
 
 table.price-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
 .price-table th,.price-table td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line)}
@@ -146,7 +146,7 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .video img{width:100%;height:100%;object-fit:cover;opacity:.85}
 .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .video .play{position:absolute;inset:0;display:grid;place-items:center;background:none;border:0;cursor:pointer;color:#fff}
-.video .play span{width:76px;height:76px;border-radius:50%;background:var(--accent);display:grid;place-items:center;box-shadow:0 10px 40px rgba(255,122,26,.5)}
+.video .play span{width:76px;height:76px;border-radius:50%;background:var(--accent);display:grid;place-items:center;box-shadow:0 10px 40px rgba(227,36,27,.5)}
 .video .play svg{width:30px;height:30px;margin-left:4px}
 .video .title{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;font-weight:700;font-size:.95rem}
 
@@ -180,7 +180,9 @@ details p{padding-bottom:16px;color:var(--muted)}
 .contact-list a{text-decoration:none;font-weight:700}
 .contact-list a:hover{color:var(--ice)}
 .map{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);aspect-ratio:4/3;background:var(--card);position:relative}
-.map iframe{width:100%;height:100%;border:0}
+.map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
+.map-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-decoration:none;text-align:center;padding:20px;background:radial-gradient(600px 300px at 50% 40%,rgba(95,179,255,.18),transparent 70%),var(--card)}
+.map-ph span{color:var(--ice);font-weight:700}
 .map-links{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:12px}
 form.cb{display:grid;gap:12px}
 form.cb input,form.cb textarea,form.cb select{width:100%;padding:.85rem 1rem;border-radius:12px;border:1px solid var(--line);background:var(--bg-2);color:var(--text);font:inherit}
@@ -189,7 +191,7 @@ form.cb label{font-size:.85rem;color:var(--muted);font-weight:600}
 .form-note{font-size:.8rem;color:var(--muted)}
 
 /* ---------- CTA-полоса ---------- */
-.cta-band{background:linear-gradient(120deg,#163a6b,#0f6f8c);color:#fff;border-radius:var(--radius);padding:34px;display:grid;gap:18px;align-items:center}
+.cta-band{background:linear-gradient(120deg,#143a6e,#1c7fd1);color:#fff;border-radius:var(--radius);padding:34px;display:grid;gap:18px;align-items:center}
 @media(min-width:800px){.cta-band{grid-template-columns:1.5fr auto}}
 .cta-band h2{margin:0 0 .3rem}
 .cta-band p{margin:0;color:#d7e9f7}
@@ -214,7 +216,7 @@ footer{border-top:1px solid var(--line);padding:40px 0 100px;color:var(--muted);
 .notice svg{flex:0 0 22px;width:22px;height:22px;color:var(--ice);margin-top:2px}
 .steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:14px}
 .steps li{position:relative;padding-left:56px}
-.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:40px;height:40px;border-radius:12px;background:var(--accent);color:#1a0d00;font-weight:900;display:grid;place-items:center}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:40px;height:40px;border-radius:12px;background:var(--accent);color:#fff;font-weight:900;display:grid;place-items:center}
 .steps strong{display:block}
 .page-head{padding:60px 0 30px}
 .page-head h1{margin-bottom:.4rem}
@@ -222,3 +224,36 @@ footer{border-top:1px solid var(--line);padding:40px 0 100px;color:var(--muted);
 .skip:focus{left:10px;top:10px}
 :focus-visible{outline:3px solid var(--ice);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- Фотоальбом ---------- */
+.album{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:700px){.album{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.album{grid-template-columns:repeat(4,1fr)}}
+.album figure{margin:0;border-radius:14px;overflow:hidden;aspect-ratio:3/2;background:var(--card);position:relative}
+.album img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.album figure:hover img{transform:scale(1.04)}
+.album figcaption{position:absolute;left:0;right:0;bottom:0;padding:8px 10px;font-size:.78rem;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}
+.price-table.service th:nth-child(n+2),.price-table.service td:nth-child(n+2){text-align:right;white-space:nowrap;font-weight:800}
+.price-table.service td:nth-child(n+2){width:92px}
+.about{display:grid;gap:22px;align-items:center}
+@media(min-width:900px){.about{grid-template-columns:1.1fr 1fr}}
+.about .photo{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;box-shadow:var(--shadow)}
+.about .photo img{width:100%;height:100%;object-fit:cover}
+.stat-row{display:flex;flex-wrap:wrap;gap:22px;margin-top:18px}
+.stat{min-width:120px}
+.stat b{display:block;font-size:1.8rem;font-weight:900;letter-spacing:-.02em;color:var(--accent)}
+.stat span{font-size:.85rem;color:var(--muted)}
+.resort{display:grid;gap:0}
+.resort .photo{aspect-ratio:16/9;overflow:hidden;border-radius:14px 14px 0 0;background:var(--card)}
+.resort .photo img{width:100%;height:100%;object-fit:cover}
+.resort .card{border-radius:0 0 var(--radius) var(--radius)}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.facts span{font-size:.8rem;padding:.3rem .65rem;border-radius:999px;background:rgba(95,179,255,.12);color:var(--ice);font-weight:700}
+/* Таблицы сервиса на узких экранах */
+[data-service] > div{min-width:0;overflow-x:auto}
+@media(max-width:640px){
+  .price-table th,.price-table td{padding:10px 10px;font-size:.9rem}
+  .price-table.service td:nth-child(n+2){width:64px}
+}
+.hero .btn-ghost{color:#fff;border-color:rgba(255,255,255,.45)}
+.hero .btn-ghost:hover{border-color:#fff;color:#fff}

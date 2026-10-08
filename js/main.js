@@ -14,6 +14,9 @@
   $$("[data-rating-count]").forEach((el) => { el.textContent = new Intl.NumberFormat("ru-RU").format(D.rating.count); });
   $$("[data-href=yandex]").forEach((a) => (a.href = D.address.yandexMaps));
   $$("[data-href=gis2]").forEach((a) => (a.href = D.address.gis2));
+  $$("[data-href=route]").forEach((a) => (a.href = D.address.yandexRoute));
+  $$("[data-hint]").forEach((el) => (el.textContent = D.address.hint));
+  $$("[data-price-season]").forEach((el) => (el.textContent = D.priceSeason));
   $$("[data-messenger]").forEach((a) => {
     const kind = a.dataset.messenger;
     const val = D[kind];
@@ -102,8 +105,8 @@
     box.innerHTML = D.service.map((g) => `
       <div>
         <h3 style="margin-bottom:10px">${g.title}</h3>
-        <table class="price-table"><thead><tr><th>Услуга</th><th>Цена, ₽</th></tr></thead>
-        <tbody>${g.rows.map((r) => `<tr><td>${r.name}</td><td>${r.price}</td></tr>`).join("")}</tbody></table>
+        <table class="price-table service"><thead><tr><th>Услуга</th><th>Лыжи</th><th>Сноуборд</th></tr></thead>
+        <tbody>${g.rows.map((r) => `<tr><td>${r.name}</td><td>${r.ski}</td><td>${r.sb}</td></tr>`).join("")}</tbody></table>
       </div>`).join("");
   });
 
@@ -164,6 +167,7 @@
 
   /* ---------- Карта ---------- */
   $$("[data-map]").forEach((m) => {
+    m.innerHTML = `<a class="map-ph" href="${D.address.yandexMaps}" target="_blank" rel="noopener"><strong>ZSKI · ${D.address.short}</strong><span>Открыть карту в Яндекс Картах →</span></a>`;
     const f = document.createElement("iframe");
     f.src = D.address.mapEmbed; f.loading = "lazy"; f.title = "Карта: как добраться до ZSKI";
     f.setAttribute("allowfullscreen", ""); m.appendChild(f);
