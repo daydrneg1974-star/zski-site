@@ -47,3 +47,10 @@ html,body{margin:0;height:100%;background:#0b1220;color:#fff;font-family:var(--f
 @media (prefers-reduced-motion: reduce){.title,.menu,.gate-flash,.fade{transition:none}}
 
 @media(max-width:700px){.hint{font-size:.62rem;white-space:nowrap;bottom:84px}.title h1{font-size:1.5rem}}
+
+.grain{position:absolute;inset:-100px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:.09;mix-blend-mode:overlay;animation:grain .4s steps(2) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-30px,20px)}50%{transform:translate(20px,-40px)}75%{transform:translate(-10px,30px)}100%{transform:translate(0,0)}}
+.gate-flash small{display:block;font-family:var(--font);font-weight:700;font-size:.42em;letter-spacing:.12em;color:#ffd3b0;margin-top:4px}
+.skip[hidden]{display:none}
+button.skip{font-family:inherit;cursor:pointer;line-height:1}
+@media (prefers-reduced-motion: reduce){.grain{animation:none}}

@@ -20,7 +20,7 @@
   <svg class="goggles" viewBox="0 0 1600 900" preserveAspectRatio="none">
     <defs>
       <mask id="lens"><rect width="1600" height="900" fill="#fff"/><path id="lensPath" d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="#000"/></mask>
-      <linearGradient id="tint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd4ff" stop-opacity=".22"/><stop offset=".5" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ffb199" stop-opacity=".16"/></linearGradient>
+      <linearGradient id="tint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc48a" stop-opacity=".22"/><stop offset=".5" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ff8a7a" stop-opacity=".18"/></linearGradient>
     </defs>
     <rect width="1600" height="900" fill="#07090d" mask="url(#lens)" opacity=".96"/>
     <path d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="url(#tint)"/>
@@ -30,15 +30,16 @@
   <div class="glare"></div>
   <div class="frost"></div>
   <div class="vignette"></div>
+  <div class="grain"></div>
 </div>
 
 <div class="hud">
   <div class="hud-top">
     <a class="brand" href="index.html"><img src="img/logo.png" alt="">ZSKI</a>
-    <a class="skip" href="index.html">Пропустить →</a>
+    <span style="display:flex;gap:8px;align-items:center"><button class="skip" id="mute" type="button" hidden aria-label="Звук">🔊</button><a class="skip" href="index.html">Пропустить →</a></span>
   </div>
   <div class="center">
-    <div class="title" id="title"><h1>Вершина. 220 м над уровнем моря</h1><p>Сорочаны · Дмитровский район · ZSKI на 61-м км</p></div>
+    <div class="title" id="title"><h1>Вершина. 220 м. Закат</h1><p>Сорочаны · Дмитровский район · до проката ZSKI — один спуск</p></div>
     <div class="gate-flash" id="flash"></div>
   </div>
   <div class="hud-bottom">

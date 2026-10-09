@@ -29,22 +29,23 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xa9d3f5);
-scene.fog = new THREE.Fog(0xdceeff, 50, 300);
+scene.background = new THREE.Color(0xf3cdb8);
+scene.fog = new THREE.Fog(0xf6d6c6, 60, 330);
 
 const camera = new THREE.PerspectiveCamera(74, innerWidth / innerHeight, 0.05, 700);
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x8fb3d9, 1.15));
-const sun = new THREE.DirectionalLight(0xfff1dc, 1.7); sun.position.set(80, 90, -60); scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xffe2cc, 0x6d8fc4, 0.95));
+const SUN_DIR = new THREE.Vector3(0.55, 0.22, -0.8).normalize();
+const sun = new THREE.DirectionalLight(0xffb070, 2.2); sun.position.copy(SUN_DIR).multiplyScalar(200); scene.add(sun);
 
 /* Небо: большой градиентный купол */
 {
   const g = new THREE.SphereGeometry(650, 24, 12);
   const m = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { top: { value: new THREE.Color(0x3f8fe0) }, bottom: { value: new THREE.Color(0xdceeff) } },
+    uniforms: { top: { value: new THREE.Color(0x27508f) }, mid: { value: new THREE.Color(0xc98fb0) }, bottom: { value: new THREE.Color(0xffc08c) } },
     vertexShader: `varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-    fragmentShader: `uniform vec3 top; uniform vec3 bottom; varying vec3 vP; void main(){ float h = clamp(normalize(vP).y*1.6+0.15, 0.0, 1.0); gl_FragColor = vec4(mix(bottom, top, pow(h,0.8)), 1.0); }`
+    fragmentShader: `uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; varying vec3 vP; void main(){ float h = clamp(normalize(vP).y*1.5+0.12, 0.0, 1.0); vec3 c = h < 0.35 ? mix(bottom, mid, h/0.35) : mix(mid, top, (h-0.35)/0.65); gl_FragColor = vec4(c, 1.0); }`
   });
   const sky = new THREE.Mesh(g, m); scene.add(sky); scene.userData.sky = sky;
 }
@@ -64,7 +65,7 @@ function height(x, z) {
   const g = new THREE.PlaneGeometry(W, L, SX, SZ);
   g.rotateX(-Math.PI / 2);
   const pos = g.attributes.position, col = new Float32Array(pos.count * 3);
-  const cPiste = new THREE.Color(0xf7fbff), cSnow = new THREE.Color(0xd6e6f7), tmp = new THREE.Color();
+  const cPiste = new THREE.Color(0xfff3ea), cSnow = new THREE.Color(0xc6d6ee), tmp = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i) - 450;
     pos.setZ(i, z); pos.setY(i, height(x, z));
@@ -80,8 +81,8 @@ function height(x, z) {
 /* ---------- Ёлки и вешки ---------- */
 {
   const N = isMobile ? 260 : 620;
-  const tree = new THREE.InstancedMesh(new THREE.ConeGeometry(2.4, 9, 7), new THREE.MeshStandardMaterial({ color: 0x1e4a2d, roughness: 1 }), N);
-  const snowcap = new THREE.InstancedMesh(new THREE.ConeGeometry(1.3, 3.2, 7), new THREE.MeshStandardMaterial({ color: 0xf2f7ff, roughness: 1 }), N);
+  const tree = new THREE.InstancedMesh(new THREE.ConeGeometry(2.4, 9, 7), new THREE.MeshStandardMaterial({ color: 0x163a30, roughness: 1 }), N);
+  const snowcap = new THREE.InstancedMesh(new THREE.ConeGeometry(1.3, 3.2, 7), new THREE.MeshStandardMaterial({ color: 0xffe9dc, roughness: 1 }), N);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
   for (let i = 0; i < N; i++) {
     const side = i % 2 ? 1 : -1, x = side * (30 + Math.random() * 180), z = 60 - Math.random() * 1200;
@@ -123,13 +124,14 @@ function height(x, z) {
 }
 
 /* ---------- Ворота-разделы ---------- */
-function labelTexture(text, sub, w = 1024, h = 300) {
+function labelTexture(text, sub, w = 1200, h = 300) {
   const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d");
   const r = 60; x.fillStyle = "rgba(10,16,28,.92)"; x.beginPath(); x.roundRect(8, 8, w - 16, h - 16, r); x.fill();
   x.strokeStyle = "rgba(255,255,255,.35)"; x.lineWidth = 6; x.stroke();
   x.fillStyle = "#e3241b"; x.fillRect(60, 70, 14, h - 140);
-  x.fillStyle = "#fff"; x.font = "800 118px Unbounded, Manrope, sans-serif"; x.textBaseline = "middle"; x.fillText(text, 110, h / 2 - 28);
-  x.fillStyle = "#9fd4ff"; x.font = "700 52px Manrope, sans-serif"; x.fillText(sub, 114, h / 2 + 78);
+  const fit = (str, weight, fam, max, px) => { let f = px; do { x.font = `${weight} ${f}px ${fam}`; if (x.measureText(str).width <= max) break; f -= 4; } while (f > 24); };
+  x.fillStyle = "#fff"; x.textBaseline = "middle"; fit(text, 800, "Unbounded, Manrope, sans-serif", w - 180, 118); x.fillText(text, 110, h / 2 - 28);
+  x.fillStyle = "#ffd3b0"; fit(sub, 700, "Manrope, sans-serif", w - 190, 52); x.fillText(sub, 114, h / 2 + 78);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 }
 const gateSprites = [];
@@ -144,13 +146,13 @@ const gateSprites = [];
       const flag = new THREE.Mesh(flagG, new THREE.MeshStandardMaterial({ color: side < 0 ? 0xe3241b : 0x1c7fd1, side: THREE.DoubleSide })); flag.position.set(x + side * 0.85, y + 3.6, 0); grp.add(flag);
     }
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture(g.label, g.sub), transparent: true, depthTest: false }));
-    sp.scale.set(17, 5, 1); sp.position.set(0, height(0, g.z) + 7.2, 0); sp.userData = g; sp.renderOrder = 5; grp.add(sp); gateSprites.push(sp);
+    sp.scale.set(18, 4.5, 1); sp.position.set(0, height(0, g.z) + 7.2, 0); sp.userData = g; sp.renderOrder = 5; grp.add(sp); gateSprites.push(sp);
     scene.add(grp);
   });
   /* Финиш: арка и логотип */
   const fy = height(0, Z_END);
   const arch = new THREE.Mesh(new THREE.TorusGeometry(12, 0.5, 10, 40, Math.PI), new THREE.MeshStandardMaterial({ color: 0xe3241b })); arch.position.set(0, fy + 0.5, Z_END - 18); scene.add(arch);
-  const banner = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture("ZSKI · ПРОКАТ", "61-й км Дмитровского шоссе · Яхрома"), transparent: true })); banner.scale.set(26, 7.6, 1); banner.position.set(0, fy + 14, Z_END - 18); scene.add(banner);
+  const banner = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture("ZSKI · ПРОКАТ", "61-й км Дмитровского шоссе · Яхрома"), transparent: true })); banner.scale.set(28, 7, 1); banner.position.set(0, fy + 14, Z_END - 18); scene.add(banner);
   new THREE.TextureLoader().load("img/logo.png", (t) => { t.colorSpace = THREE.SRGBColorSpace; const l = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true })); l.scale.set(9, 9, 1); l.position.set(0, fy + 22, Z_END - 18); scene.add(l); });
 }
 
@@ -186,6 +188,26 @@ const snow = (() => {
   const holder = new THREE.Group(); holder.add(pts); scene.add(holder); return { holder, pts, N };
 })();
 
+
+/* ---------- Солнце и блик ---------- */
+const flare = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d");
+  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, "rgba(255,240,220,1)"); g.addColorStop(0.12, "rgba(255,200,150,.9)"); g.addColorStop(0.4, "rgba(255,160,110,.25)"); g.addColorStop(1, "rgba(255,140,90,0)");
+  x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.95 }));
+  sp.scale.set(140, 140, 1); sp.renderOrder = 9; scene.add(sp); return sp;
+})();
+
+/* ---------- Снежная пыль из-под лыж ---------- */
+const spray = (() => {
+  const N = 320, a = new Float32Array(N * 3), v = new Float32Array(N * 3), life = new Float32Array(N);
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(a, 3));
+  const c = document.createElement("canvas"); c.width = c.height = 32; const x = c.getContext("2d"); const gr = x.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, "rgba(255,255,255,.95)"); gr.addColorStop(0.5, "rgba(255,255,255,.35)"); gr.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = gr; x.fillRect(0, 0, 32, 32);
+  const m = new THREE.PointsMaterial({ map: new THREE.CanvasTexture(c), color: 0xffffff, size: 0.045, transparent: true, opacity: 0.55, depthWrite: false, depthTest: false });
+  const pts = new THREE.Points(g, m); pts.frustumCulled = false; pts.renderOrder = 3; camera.add(pts); return { pts, a, v, life, N, next: 0 };
+})();
+
 /* ---------- Состояние заезда ---------- */
 const state = { t: 0, z: 40, x: 0, speed: 0, phase: "intro", steer: 0, fast: false, gateIdx: 0, done: false };
 const clock = new THREE.Clock();
@@ -194,6 +216,25 @@ addEventListener("pointermove", (e) => (pointerX = (e.clientX / innerWidth - 0.5
 addEventListener("click", (e) => { if (state.phase === "ride" && !e.target.closest("a,button")) state.fast = true; });
 addEventListener("keydown", (e) => { if (e.key === "Escape") location.href = "index.html"; if (e.key === " " || e.key === "Enter") state.fast = true; });
 $("#replay").addEventListener("click", () => location.reload());
+
+
+/* ---------- Ветер (WebAudio, включается первым кликом) ---------- */
+const wind = {};
+function startWind() {
+  if (wind.ctx || reduce) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 300; filter.Q.value = 0.7;
+    const gain = ctx.createGain(); gain.gain.value = 0;
+    src.connect(filter).connect(gain).connect(ctx.destination); src.start();
+    wind.ctx = ctx; wind.filter = filter; wind.gain = gain;
+    const b = document.getElementById("mute"); if (b) { b.hidden = false; b.addEventListener("click", () => { wind.muted = !wind.muted; wind.ctx[wind.muted ? "suspend" : "resume"](); b.textContent = wind.muted ? "🔇" : "🔊"; }); }
+  } catch {}
+}
+["pointerdown", "keydown", "touchstart"].forEach((ev) => addEventListener(ev, startWind, { once: true, passive: true }));
 
 /* Клик по воротам — переход в раздел */
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -205,7 +246,7 @@ canvas.addEventListener("click", (e) => {
 function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); }
 addEventListener("resize", resize); resize();
 
-function showFlash(text) { flash.textContent = text; flash.classList.add("show"); clearTimeout(showFlash.t); showFlash.t = setTimeout(() => flash.classList.remove("show"), 1100); }
+function showFlash(text, sub) { flash.innerHTML = `${text}<small>${sub || ""}</small>`; flash.classList.add("show"); clearTimeout(showFlash.t); showFlash.t = setTimeout(() => flash.classList.remove("show"), 1100); }
 function finish() {
   if (state.done) return; state.done = true; state.phase = "finish";
   hint.style.display = "none"; menu.classList.add("show");
@@ -213,7 +254,7 @@ function finish() {
 
 /* Старт */
 requestAnimationFrame(() => { fade.classList.add("out"); title.classList.add("show"); });
-setTimeout(() => { if (state.phase === "intro") { state.phase = "ride"; } }, reduce ? 0 : 1800);
+setTimeout(() => { if (state.phase === "intro") { state.phase = "ride"; } }, reduce ? 0 : 3200);
 setTimeout(() => title.classList.remove("show"), 4200);
 if (reduce) { state.z = Z_END + 30; state.phase = "ride"; }
 
@@ -225,9 +266,9 @@ function frame() {
 
   /* скорость и движение */
   if (state.phase === "ride") {
-    const target = state.fast ? 140 : 62;
+    const target = state.fast ? 110 : 46;
     const remaining = state.z - Z_END;
-    const brake = remaining < 70 ? Math.max(0, remaining / 70) : 1;
+    const brake = remaining < 80 ? Math.max(0, remaining / 80) : 1;
     const want = Math.max(0, Math.min(target, target * brake + 2 * brake));
     state.speed += (want - state.speed) * Math.min(1, dt * (state.fast ? 2.2 : 0.9));
     if (remaining <= 1.2) { state.speed = 0; finish(); }
@@ -246,6 +287,7 @@ function frame() {
   camera.position.set(state.x, y, state.z);
   const aheadZ = state.z - 18, aheadX = state.x + dx * 1.4;
   if (state.phase === "finish") look.set(0, height(0, Z_END - 18) + 11, Z_END - 18);
+  else if (state.phase === "intro") { const k = Math.min(1, t / 3.2), e = 1 - Math.pow(1 - k, 3), yaw = -0.85 + 0.85 * e; look.set(state.x + Math.sin(yaw) * 20, height(state.x, state.z) + 1.9 - 0.8 * e, state.z - Math.cos(yaw) * 20); }
   else look.set(aheadX, height(aheadX, aheadZ) + 1.2 - state.speed * 0.012, aheadZ);
   camera.up.copy(up); camera.lookAt(look);
   camera.rotation.z += -dx * 0.045 - Math.sin(t * 0.55) * 0.035 * Math.min(1, state.speed / 40);
@@ -274,10 +316,34 @@ function frame() {
   scene.userData.sky.position.copy(camera.position);
 
   /* ворота: вспышка названия раздела при проезде */
-  if (state.gateIdx < GATES.length && state.z < GATES[state.gateIdx].z + 6) { showFlash(GATES[state.gateIdx].label); state.gateIdx++; }
+  if (state.gateIdx < GATES.length && state.z < GATES[state.gateIdx].z + 6) { showFlash(GATES[state.gateIdx].label, GATES[state.gateIdx].sub); state.gateIdx++; }
+
+
+  /* блик солнца держим на направлении SUN_DIR */
+  flare.position.copy(camera.position).addScaledVector(SUN_DIR, 400);
+
+  /* снежная пыль: сильнее в поворотах и на скорости */
+  {
+    const rate = Math.min(1, state.speed / 40) * (0.35 + Math.min(1.2, Math.abs(dx) * 0.9));
+    const emit = Math.round(rate * 7);
+    for (let k = 0; k < emit; k++) {
+      const i = spray.next; spray.next = (spray.next + 1) % spray.N; const side = k % 2 ? 1 : -1;
+      spray.a[i * 3] = side * 0.22 + (Math.random() - 0.5) * 0.06; spray.a[i * 3 + 1] = -0.7; spray.a[i * 3 + 2] = -0.9 - Math.random() * 0.8;
+      spray.v[i * 3] = side * (0.5 + Math.random() * 0.9) + dx * 0.35; spray.v[i * 3 + 1] = 0.35 + Math.random() * 0.9; spray.v[i * 3 + 2] = 1.2 + Math.random() * 2.0; spray.life[i] = 0.35 + Math.random() * 0.35;
+    }
+    for (let i = 0; i < spray.N; i++) {
+      if (spray.life[i] <= 0) { spray.a[i * 3 + 1] = -50; continue; }
+      spray.life[i] -= dt; spray.v[i * 3 + 1] -= 3.2 * dt;
+      spray.a[i * 3] += spray.v[i * 3] * dt; spray.a[i * 3 + 1] += spray.v[i * 3 + 1] * dt; spray.a[i * 3 + 2] += spray.v[i * 3 + 2] * dt;
+    }
+    spray.pts.geometry.attributes.position.needsUpdate = true;
+  }
+
+  /* ветер: громче и выше по тону на скорости */
+  if (wind.gain) { wind.gain.gain.setTargetAtTime(Math.min(0.5, state.speed / 110), wind.ctx.currentTime, 0.2); wind.filter.frequency.setTargetAtTime(180 + state.speed * 22, wind.ctx.currentTime, 0.2); }
 
   /* HUD */
-  speedEl.textContent = Math.round(state.speed * 1.15);
+  speedEl.textContent = Math.round(state.speed * 1.35);
   altEl.textContent = Math.max(0, Math.round(220 * (state.z - Z_END) / (40 - Z_END)));
 
   renderer.render(scene, camera);
