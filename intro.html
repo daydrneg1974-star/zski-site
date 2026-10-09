@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZSKI — спуск к прокату</title>
+<meta name="description" content="3D-интро ZSKI: спуск от первого лица с вершины к прокату лыж и сноубордов в Яхроме.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b1220">
+<link rel="icon" href="img/favicon-64.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/intro.css">
+</head>
+<body>
+<canvas id="scene" aria-label="3D-спуск по склону от первого лица"></canvas>
+
+<div class="overlay" aria-hidden="true">
+  <svg class="goggles" viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <defs>
+      <mask id="lens"><rect width="1600" height="900" fill="#fff"/><path id="lensPath" d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="#000"/></mask>
+      <linearGradient id="tint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd4ff" stop-opacity=".22"/><stop offset=".5" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ffb199" stop-opacity=".16"/></linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="#07090d" mask="url(#lens)" opacity=".96"/>
+    <path d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="url(#tint)"/>
+    <path d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="none" stroke="#1b2029" stroke-width="22"/>
+    <path d="M740,790 C760,740 840,740 860,790" fill="#14181f" stroke="#1b2029" stroke-width="10"/>
+  </svg>
+  <div class="glare"></div>
+  <div class="frost"></div>
+  <div class="vignette"></div>
+</div>
+
+<div class="hud">
+  <div class="hud-top">
+    <a class="brand" href="index.html"><img src="img/logo.png" alt="">ZSKI</a>
+    <a class="skip" href="index.html">Пропустить →</a>
+  </div>
+  <div class="center">
+    <div class="title" id="title"><h1>Вершина. 220 м над уровнем моря</h1><p>Сорочаны · Дмитровский район · ZSKI на 61-м км</p></div>
+    <div class="gate-flash" id="flash"></div>
+  </div>
+  <div class="hud-bottom">
+    <div class="meter"><b id="speed">0</b><span>км/ч</span></div>
+    <div class="hint" id="hint">Клик или касание — к прокату</div>
+    <div class="meter right"><b id="alt">220</b><span>м · высота</span></div>
+  </div>
+</div>
+
+<div class="menu" id="menu" role="dialog" aria-label="Разделы сайта">
+  <div class="panel">
+    <h2>Вы у проката ZSKI</h2>
+    <p>61-й км Дмитровского шоссе, Яхрома. Куда дальше?</p>
+    <div class="links">
+      <a class="main" href="index.html">Открыть сайт</a>
+      <a href="index.html#prokat">Прокат<small>лыжи и сноуборды</small></a>
+      <a href="prices.html">Цены<small>от 500 ₽ в день</small></a>
+      <a href="service.html">SKI-сервис<small>заточка, парафин</small></a>
+      <a href="slopes.html">Склоны<small>Сорочаны, Волен…</small></a>
+      <a href="contacts.html">Контакты<small>карта, график</small></a>
+    </div>
+    <button class="replay" id="replay" type="button">↺ Проехать ещё раз</button>
+  </div>
+</div>
+
+<div class="fade" id="fade"></div>
+<noscript><div class="nojs"><a href="index.html" style="color:#fff">Перейти на сайт →</a></div></noscript>
+<script type="module" src="js/intro.js"></script>
+</body>
+</html>
