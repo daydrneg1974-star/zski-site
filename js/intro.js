@@ -2,8 +2,8 @@
 const CFG = {
   pov: false,                 // true — показывать маску горнолыжных очков (для съёмки от первого лица)
   duration: 15,               // длительность спуска по умолчанию, если видео не сообщило свою
-  gatesAt: [0.1, 0.27, 0.44, 0.61, 0.78],   // доли длительности, когда появляются ворота-разделы
-  menuAt: 0.97,               // доля длительности, когда появляется меню
+  gatesAt: [0.14, 0.3, 0.46, 0.62, 0.78],   // доли длительности, когда появляются ворота-разделы
+  menuAt: 0.95,               // доля длительности, когда появляется меню
   maxSpeed: 68,               // км/ч на счётчике
   startAlt: 220
 };
@@ -31,7 +31,7 @@ function finish() {
 function spawnGate(i) {
   const g = GATES[i]; const a = document.createElement("a");
   a.className = "gate"; a.href = g.href; a.innerHTML = `${g.label}<small>${g.sub}</small>`;
-  a.style.setProperty("--dx", g.dx + "px"); a.style.setProperty("--dur", (state.fast ? 1.2 : Math.max(1.8, Math.min(3.4, state.dur * 0.24))) + "s");
+  a.style.setProperty("--dx", g.dx + "px"); a.style.setProperty("--dur", (state.fast ? 1.4 : 3.4) + "s");
   center.appendChild(a); requestAnimationFrame(() => a.classList.add("fly"));
   a.addEventListener("animationend", () => a.remove());
 }
@@ -49,7 +49,7 @@ function tick() {
 }
 function start() {
   if (state.started) return; state.started = true; state.t0 = performance.now();
-  setTimeout(() => title.classList.remove("show"), Math.min(3600, state.dur * 300));
+  setTimeout(() => title.classList.remove("show"), 3600);
   tick();
 }
 
