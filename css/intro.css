@@ -3,17 +3,16 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#0b1220;color:#fff;font-family:var(--font);overflow:hidden}
 #scene{position:fixed;inset:0;width:100%;height:100%;display:block}
-.overlay{position:fixed;inset:0;pointer-events:none}
-.goggles{position:absolute;inset:0;width:100%;height:100%}
-.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,transparent 55%,rgba(0,0,0,.55) 100%)}
-.frost{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 62%,rgba(255,255,255,.22) 100%);mix-blend-mode:screen;opacity:.8}
-.glare{position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.14) 0%,transparent 28%,transparent 70%,rgba(124,200,255,.12) 100%);opacity:.9}
+.overlay{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+/* Маска: эллипс-линза, всё вокруг — тёмная оправа (одна GPU-слойная тень вместо SVG-маски) */
+.lens{position:absolute;left:4%;top:15%;width:92%;height:72%;border-radius:50%;box-shadow:0 0 0 4000px #07090d,inset 0 0 0 12px #1b2029,inset 0 0 120px rgba(0,0,0,.45),inset 0 0 40px rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,196,138,.16),rgba(255,255,255,0) 45%,rgba(255,138,122,.14))}
+@media(max-aspect-ratio:3/4){.lens{left:5%;top:14%;width:90%;height:72%;border-radius:46%/30%}}
 .hud{position:absolute;inset:0;padding:22px;display:grid;grid-template-rows:auto 1fr auto;pointer-events:none}
 .hud > *{pointer-events:auto}
 .hud-top{display:flex;justify-content:space-between;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;letter-spacing:.1em;text-decoration:none;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .brand img{width:38px;height:38px;border-radius:50%;box-shadow:0 6px 18px rgba(227,36,27,.5)}
-.skip{font-weight:800;font-size:.9rem;color:#fff;text-decoration:none;padding:.6rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.25);backdrop-filter:blur(8px)}
+.skip{font-weight:800;font-size:.9rem;color:#fff;text-decoration:none;padding:.6rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.25);}
 .skip:hover{background:rgba(255,255,255,.15)}
 .hud-bottom{display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--display);font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .meter b{display:block;font-size:clamp(1.4rem,4vw,2.4rem);line-height:1}
@@ -33,7 +32,7 @@ html,body{margin:0;height:100%;background:#0b1220;color:#fff;font-family:var(--f
 .panel p{margin:0 0 1.4rem;color:#d9e2f1;font-weight:600}
 .links{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:720px){.links{grid-template-columns:repeat(5,1fr)}}
-.links a{display:block;padding:18px 12px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(10px);text-decoration:none;color:#fff;font-weight:800;transition:transform .25s,background .25s,border-color .25s}
+.links a{display:block;padding:18px 12px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);text-decoration:none;color:#fff;font-weight:800;transition:transform .25s,background .25s,border-color .25s}
 .links a small{display:block;font-weight:600;font-size:.74rem;color:#b9c5d9;margin-top:4px}
 .links a:hover{transform:translateY(-4px);background:rgba(255,255,255,.14);border-color:var(--ice)}
 .links a.main{grid-column:1/-1;background:linear-gradient(135deg,#ff4b3e,var(--accent));border-color:transparent;box-shadow:0 14px 40px rgba(227,36,27,.45);font-size:1.1rem}
@@ -48,9 +47,6 @@ html,body{margin:0;height:100%;background:#0b1220;color:#fff;font-family:var(--f
 
 @media(max-width:700px){.hint{font-size:.62rem;white-space:nowrap;bottom:84px}.title h1{font-size:1.5rem}}
 
-.grain{position:absolute;inset:-100px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:.09;mix-blend-mode:overlay;animation:grain .4s steps(2) infinite}
-@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-30px,20px)}50%{transform:translate(20px,-40px)}75%{transform:translate(-10px,30px)}100%{transform:translate(0,0)}}
 .gate-flash small{display:block;font-family:var(--font);font-weight:700;font-size:.42em;letter-spacing:.12em;color:#ffd3b0;margin-top:4px}
 .skip[hidden]{display:none}
 button.skip{font-family:inherit;cursor:pointer;line-height:1}
-@media (prefers-reduced-motion: reduce){.grain{animation:none}}

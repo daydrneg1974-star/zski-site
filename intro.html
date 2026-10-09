@@ -17,20 +17,8 @@
 <canvas id="scene" aria-label="3D-спуск по склону от первого лица"></canvas>
 
 <div class="overlay" aria-hidden="true">
-  <svg class="goggles" viewBox="0 0 1600 900" preserveAspectRatio="none">
-    <defs>
-      <mask id="lens"><rect width="1600" height="900" fill="#fff"/><path id="lensPath" d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="#000"/></mask>
-      <linearGradient id="tint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc48a" stop-opacity=".22"/><stop offset=".5" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ff8a7a" stop-opacity=".18"/></linearGradient>
-    </defs>
-    <rect width="1600" height="900" fill="#07090d" mask="url(#lens)" opacity=".96"/>
-    <path d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="url(#tint)"/>
-    <path d="M60,450 C60,240 330,150 800,150 C1270,150 1540,240 1540,450 C1540,660 1270,790 800,790 C330,790 60,660 60,450 Z" fill="none" stroke="#1b2029" stroke-width="22"/>
-    <path d="M740,790 C760,740 840,740 860,790" fill="#14181f" stroke="#1b2029" stroke-width="10"/>
-  </svg>
-  <div class="glare"></div>
-  <div class="frost"></div>
-  <div class="vignette"></div>
-  <div class="grain"></div>
+  <div class="lens"></div>
+</div>
 </div>
 
 <div class="hud">

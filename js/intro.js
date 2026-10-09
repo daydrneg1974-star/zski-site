@@ -23,7 +23,7 @@ const Z_END = -700;
 
 /* ---------- Рендерер и сцена ---------- */
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1 : 1.5));
+renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1 : 1.25));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -36,6 +36,7 @@ const camera = new THREE.PerspectiveCamera(74, innerWidth / innerHeight, 0.05, 7
 
 scene.add(new THREE.HemisphereLight(0xffe2cc, 0x6d8fc4, 0.95));
 const SUN_DIR = new THREE.Vector3(0.55, 0.22, -0.8).normalize();
+const fill = new THREE.PointLight(0xffd9c0, 0.9, 4); fill.position.set(0, -0.2, -0.6); camera.add(fill);
 const sun = new THREE.DirectionalLight(0xffb070, 2.2); sun.position.copy(SUN_DIR).multiplyScalar(200); scene.add(sun);
 
 /* Небо: большой градиентный купол */
@@ -101,26 +102,23 @@ function height(x, z) {
 }
 
 
-/* ---------- Кресельный подъёмник справа ---------- */
+/* ---------- Кресельный подъёмник справа (инстансы — 6 вызовов отрисовки) ---------- */
 {
   const X = 44, steel = new THREE.MeshStandardMaterial({ color: 0x8b95a3, metalness: 0.6, roughness: 0.5 }), chairM = new THREE.MeshStandardMaterial({ color: 0x1c2733 });
-  const pylonG = new THREE.CylinderGeometry(0.35, 0.5, 16, 8), barG = new THREE.BoxGeometry(6, 0.3, 0.3);
-  const pts = [];
-  for (let z = 80; z > -820; z -= 70) {
-    const y = height(X, z);
-    const py = new THREE.Mesh(pylonG, steel); py.position.set(X, y + 8, z); scene.add(py);
-    const bar = new THREE.Mesh(barG, steel); bar.position.set(X, y + 15.6, z); scene.add(bar);
-    pts.push(new THREE.Vector3(X - 2.6, y + 15.4, z), new THREE.Vector3(X + 2.6, y + 15.4, z));
-  }
-  const up = [], down = [];
-  for (let i = 0; i < pts.length; i += 2) { up.push(pts[i]); down.push(pts[i + 1]); }
+  const zs = []; for (let z = 80; z > -820; z -= 70) zs.push(z);
+  const pylons = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.35, 0.5, 16, 8), steel, zs.length), bars = new THREE.InstancedMesh(new THREE.BoxGeometry(6, 0.3, 0.3), steel, zs.length);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3(), up = [], down = [];
+  zs.forEach((z, i) => { const y = height(X, z); p.set(X, y + 8, z); m.compose(p, q, one); pylons.setMatrixAt(i, m); p.set(X, y + 15.6, z); m.compose(p, q, one); bars.setMatrixAt(i, m); up.push(new THREE.Vector3(X - 2.6, y + 15.4, z)); down.push(new THREE.Vector3(X + 2.6, y + 15.4, z)); });
+  scene.add(pylons, bars);
   for (const line of [up, down]) scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(line), new THREE.LineBasicMaterial({ color: 0x33404f })));
-  const chairG = new THREE.BoxGeometry(1.4, 0.9, 0.6), hangG = new THREE.CylinderGeometry(0.03, 0.03, 2.4, 5);
-  for (const line of [up, down]) for (let i = 0; i < line.length - 1; i++) for (let k = 0.2; k < 1; k += 0.4) {
-    const a = line[i], b = line[i + 1], px = a.x, py = a.y + (b.y - a.y) * k, pz = a.z + (b.z - a.z) * k;
-    const hang = new THREE.Mesh(hangG, steel); hang.position.set(px, py - 1.2, pz); scene.add(hang);
-    const chair = new THREE.Mesh(chairG, chairM); chair.position.set(px, py - 2.6, pz); scene.add(chair);
+  const NC = (zs.length - 1) * 2 * 2;
+  const hangs = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.03, 0.03, 2.4, 5), steel, NC), chairs = new THREE.InstancedMesh(new THREE.BoxGeometry(1.4, 0.9, 0.6), chairM, NC);
+  let k = 0;
+  for (const line of [up, down]) for (let i = 0; i < line.length - 1; i++) for (const f of [0.2, 0.6]) {
+    const a = line[i], b = line[i + 1]; p.set(a.x, a.y + (b.y - a.y) * f - 1.2, a.z + (b.z - a.z) * f); m.compose(p, q, one); hangs.setMatrixAt(k, m);
+    p.y -= 1.4; m.compose(p, q, one); chairs.setMatrixAt(k, m); k++;
   }
+  scene.add(hangs, chairs);
 }
 
 /* ---------- Ворота-разделы ---------- */
@@ -156,26 +154,48 @@ const gateSprites = [];
   new THREE.TextureLoader().load("img/logo.png", (t) => { t.colorSpace = THREE.SRGBColorSpace; const l = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true })); l.scale.set(9, 9, 1); l.position.set(0, fy + 22, Z_END - 18); scene.add(l); });
 }
 
-/* ---------- Рига от первого лица: лыжи, палки, перчатки ---------- */
+/* ---------- Рига от первого лица: лыжи и руки с палками ---------- */
 const rig = new THREE.Group(); camera.add(rig); scene.add(camera);
+const arms = [];
 {
-  const white = new THREE.MeshStandardMaterial({ color: 0xf4f6fa, roughness: 0.4, metalness: 0.1 }), red = new THREE.MeshStandardMaterial({ color: 0xe3241b, roughness: 0.5 }), black = new THREE.MeshStandardMaterial({ color: 0x15181d, roughness: 0.9 });
+  const white = new THREE.MeshStandardMaterial({ color: 0xf4f6fa, roughness: 0.4, metalness: 0.1 }), red = new THREE.MeshStandardMaterial({ color: 0xe3241b, roughness: 0.5 });
+  const jacket = new THREE.MeshStandardMaterial({ color: 0xd8261c, roughness: 0.8 }), glove = new THREE.MeshStandardMaterial({ color: 0x262b33, roughness: 0.85 }), steel = new THREE.MeshStandardMaterial({ color: 0x2a2f36, roughness: 0.5, metalness: 0.5 });
+  const UP = new THREE.Vector3(0, 1, 0);
+  const capsuleBetween = (from, to, r, mat) => {
+    const dir = new THREE.Vector3().subVectors(to, from), len = dir.length();
+    const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, Math.max(0.01, len - 2 * r), 6, 12), mat);
+    m.position.copy(from).add(to).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(UP, dir.normalize()); return m;
+  };
   for (const side of [-1, 1]) {
+    /* лыжа */
     const ski = new THREE.Group();
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.022, 2.3), white); body.position.z = -0.9; ski.add(body);
     const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.124, 0.024, 0.6), red); stripe.position.z = -1.2; ski.add(stripe);
     const tip = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.022, 0.36), white); tip.position.set(0, 0.045, -2.19); tip.rotation.x = -0.38; ski.add(tip);
     ski.position.set(side * 0.17, -0.66, -0.55); ski.rotation.y = side * 0.03; ski.userData.side = side; rig.add(ski);
-    const pole = new THREE.Group();
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.014, 1.5, 8), black); shaft.position.y = -0.75; pole.add(shaft);
-    const basket = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 6, 14), red); basket.position.y = -1.42; basket.rotation.x = Math.PI / 2; pole.add(basket);
-    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.024, 0.18, 8), black); pole.add(grip);
-    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.062, 14, 12), black); glove.scale.set(1.05, 0.72, 1.5); glove.position.set(side * -0.015, -0.02, 0.02); pole.add(glove);
-    const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.066, 0.11, 12), black); cuff.position.set(side * -0.02, -0.01, 0.13); cuff.rotation.x = Math.PI / 2; pole.add(cuff);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.008, 6, 16), red); ring.position.set(side * -0.02, -0.01, 0.1); pole.add(ring);
-    pole.position.set(side * 0.6, -0.42, -0.74); pole.rotation.set(-1.22, 0, side * -0.16); pole.userData.side = side; rig.add(pole);
+
+    /* рука: локоть за кадром снизу, предплечье в рукаве, кулак на рукоятке */
+    const arm = new THREE.Group(); arm.userData.side = side;
+    const elbow = new THREE.Vector3(side * 0.36, -0.58, 0.12), fist = new THREE.Vector3(0, 0, 0);
+    const sleeve = capsuleBetween(elbow, new THREE.Vector3(side * 0.03, -0.03, 0.06), 0.062, jacket); arm.add(sleeve);
+    const cuff = capsuleBetween(new THREE.Vector3(side * 0.07, -0.08, 0.17), new THREE.Vector3(side * 0.02, -0.02, 0.05), 0.064, glove); arm.add(cuff);
+    const palm = new THREE.Mesh(new THREE.SphereGeometry(0.056, 14, 12), glove); palm.scale.set(1.0, 0.8, 1.3); palm.position.copy(fist); arm.add(palm);
+    /* пальцы обхватывают рукоятку спереди-снизу, большой палец сверху */
+    for (let i = 0; i < 4; i++) {
+      const f = new THREE.Mesh(new THREE.CapsuleGeometry(0.016, 0.04, 4, 8), glove);
+      f.position.set(side * (-0.036 + i * 0.024), -0.028 - i * 0.004, -0.05); f.rotation.z = side * 0.35; f.rotation.x = 0.5; arm.add(f);
+    }
+    const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.017, 0.04, 4, 8), glove); thumb.position.set(side * -0.04, 0.025, -0.045); thumb.rotation.z = side * 1.35; thumb.rotation.x = 1.1; arm.add(thumb);
+    /* палка: рукоятка в кулаке, древко вперёд-вниз, кольцо на конце */
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.022, 0.2, 10), steel); grip.position.set(0, 0.0, -0.01); grip.rotation.x = 0.35; arm.add(grip);
+    const shaftDir = new THREE.Vector3(side * 0.12, -0.5, -0.86).normalize();
+    const shaft = capsuleBetween(new THREE.Vector3(0, -0.08, -0.03), shaftDir.clone().multiplyScalar(1.45).add(new THREE.Vector3(0, -0.08, -0.03)), 0.012, steel); arm.add(shaft);
+    const basket = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.011, 6, 14), red); basket.position.copy(shaftDir).multiplyScalar(1.4).add(new THREE.Vector3(0, -0.08, -0.03)); basket.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), shaftDir); arm.add(basket);
+    const strap = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.008, 6, 16), red); strap.position.set(side * 0.02, -0.02, 0.07); strap.rotation.x = Math.PI / 2; arm.add(strap);
+    arm.position.set(side * 0.42, -0.33, -0.78); arm.userData.base = arm.position.clone(); rig.add(arm); arms.push(arm);
   }
 }
+function fitRig() { const k = Math.min(1, Math.max(0.55, camera.aspect / 1.6)); arms.forEach((a) => { a.position.x = a.userData.base.x * k; a.position.y = a.userData.base.y - (1 - k) * 0.06; }); }
 
 /* ---------- Снег в воздухе ---------- */
 const snow = (() => {
@@ -243,7 +263,7 @@ canvas.addEventListener("click", (e) => {
   const hit = ray.intersectObjects(gateSprites, false)[0]; if (hit) location.href = hit.object.userData.href;
 });
 
-function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); }
+function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); fitRig(); }
 addEventListener("resize", resize); resize();
 
 function showFlash(text, sub) { flash.innerHTML = `${text}<small>${sub || ""}</small>`; flash.classList.add("show"); clearTimeout(showFlash.t); showFlash.t = setTimeout(() => flash.classList.remove("show"), 1100); }
@@ -253,10 +273,18 @@ function finish() {
 }
 
 /* Старт */
-requestAnimationFrame(() => { fade.classList.add("out"); title.classList.add("show"); });
+requestAnimationFrame(() => { fade.classList.add("out"); title.classList.add("show"); setTimeout(() => fade.remove(), 1500); });
 setTimeout(() => { if (state.phase === "intro") { state.phase = "ride"; } }, reduce ? 0 : 3200);
 setTimeout(() => title.classList.remove("show"), 4200);
 if (reduce) { state.z = Z_END + 30; state.phase = "ride"; }
+
+/* ---------- Адаптивное качество: если кадры идут медленно, снижаем разрешение ---------- */
+const perf = { frames: 0, acc: 0, steps: 0 };
+function degrade() {
+  perf.steps++;
+  const pr = Math.max(0.6, renderer.getPixelRatio() * 0.75); renderer.setPixelRatio(pr); resize();
+  if (perf.steps >= 2) { scene.fog.far = 230; snow.pts.geometry.setDrawRange(0, Math.floor(snow.N / 2)); spray.pts.visible = false; }
+}
 
 /* ---------- Кадр ---------- */
 const look = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
@@ -293,14 +321,16 @@ function frame() {
   camera.rotation.z += -dx * 0.045 - Math.sin(t * 0.55) * 0.035 * Math.min(1, state.speed / 40);
   camera.fov = 72 + state.speed * 0.16; camera.updateProjectionMatrix();
 
-  /* рига: лыжи дрожат, палки работают */
+  /* рига: лыжи дрожат, руки работают палками, в повороте внутренняя рука уходит вперёд */
   const sf = Math.min(1, state.speed / 45);
   rig.children.forEach((o) => {
     const s = o.userData.side;
-    if (o.children.length === 3) { /* лыжа */
+    if (o.userData.base) { /* рука */
+      const plant = Math.max(0, -dx * s) * 0.12;
+      o.rotation.x = Math.sin(t * 1.7 + s * 1.5) * 0.08 * sf - plant * 0.6; o.rotation.z = s * 0.05 + dx * 0.02;
+      o.position.z = o.userData.base.z - plant - Math.sin(t * 1.7 + s * 1.5) * 0.03 * sf; o.position.y = o.userData.base.y - (1 - Math.min(1, camera.aspect / 1.6)) * 0.06 + Math.sin(t * 9.5 + s) * 0.006 * sf;
+    } else { /* лыжа */
       o.rotation.x = Math.sin(t * 11 + s) * 0.012 * sf; o.position.y = -0.66 + Math.sin(t * 13 + s * 2) * 0.006 * sf; o.rotation.z = s * 0.02 + dx * 0.01;
-    } else { /* палка */
-      o.rotation.x = -1.22 + Math.sin(t * 1.6 + s * 1.5) * 0.16 * sf; o.position.y = -0.42 + Math.sin(t * 9.5 + s) * 0.008 * sf;
     }
   });
 
@@ -341,6 +371,8 @@ function frame() {
 
   /* ветер: громче и выше по тону на скорости */
   if (wind.gain) { wind.gain.gain.setTargetAtTime(Math.min(0.5, state.speed / 110), wind.ctx.currentTime, 0.2); wind.filter.frequency.setTargetAtTime(180 + state.speed * 22, wind.ctx.currentTime, 0.2); }
+
+  if (state.phase === "ride" && perf.steps < 3) { perf.frames++; perf.acc += dt; if (perf.acc > 1.5) { if (perf.frames / perf.acc < 40) degrade(); perf.frames = 0; perf.acc = 0; } }
 
   /* HUD */
   speedEl.textContent = Math.round(state.speed * 1.35);
