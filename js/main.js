@@ -287,7 +287,7 @@
   (() => {
     const box = $("[data-season-stat]"); if (!box || !D.seasonStart) return;
     const now = mskNow(), start = new Date(D.seasonStart + "T00:00:00+03:00"), end = D.seasonEnd ? new Date(D.seasonEnd + "T23:59:59+03:00") : null;
-    if (now < start) { const days = Math.ceil((start - now) / 864e5), m = days % 100, l = days % 10, w = m > 10 && m < 20 ? "дней" : l === 1 ? "день" : l > 1 && l < 5 ? "дня" : "дней"; box.innerHTML = `<b><span data-count="${days}">0</span></b><span>${w} до открытия сезона · ориентировочно</span>`; }
+    if (now < start) { const days = Math.ceil((start - now) / 864e5), m = days % 100, l = days % 10, w = m > 10 && m < 20 ? "дней" : l === 1 ? "день" : l > 1 && l < 5 ? "дня" : "дней"; box.innerHTML = `<b><span data-count="${days}">0</span></b><span>${w} до открытия сезона · 1 декабря</span>`; }
     else if (!end || now <= end) box.innerHTML = `<b>Сезон открыт</b><span>катаемся — приезжайте за инвентарём</span>`;
   })();
 

@@ -1,6 +1,6 @@
 /* ZSKI — сервис-воркер. HTML, CSS и JS — всегда из сети (кэш только как запасной вариант офлайн);
    шрифты, фото и видео — из кэша. VERSION подставляется при сборке, старые кэши удаляются. */
-const VERSION = "zski-202610100930";
+const VERSION = "zski-202610100948";
 const IMMUTABLE = /\.(woff2|webp|jpg|png|svg|mp4|webm)$/;
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSION).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
