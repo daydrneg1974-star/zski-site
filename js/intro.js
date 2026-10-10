@@ -2,10 +2,11 @@
 const CFG = {
   pov: false,
   duration: 15,            // если видео не сообщило длительность
-  stations: [0.14, 0.27, 0.40, 0.53, 0.66],   // доли длительности видео (11 с): последняя остановка ≈7.3 с, дальше ≈3.5 с спуска до финала
+  stations: [0.14, 0.255, 0.37, 0.485, 0.60], // доли длительности видео (11 с): последняя остановка ≈6.6 с, дальше ≈4.4 с спуска до финала
+  finalRate: 0.85,         // скорость ролика после последней станции: финальный спуск длиннее и спокойнее
   slowBefore: 0.9,         // за сколько секунд до станции начинаем тормозить
   minRate: 0.3,            // минимальная скорость перед остановкой
-  hold: 2300,              // пауза на станции, мс
+  hold: 1800,              // пауза на станции, мс
   maxSpeed: 68,
   startAlt: 220,
 };
@@ -73,7 +74,7 @@ function initIntro(root, opts) {
       const toNext = next - t;
       if (toNext <= 0.02) { arrive(st.idx); }
       else {
-        st.target = toNext < CFG.slowBefore ? Math.max(CFG.minRate, toNext / CFG.slowBefore) : 1;
+        st.target = toNext < CFG.slowBefore ? Math.max(CFG.minRate, toNext / CFG.slowBefore) : (st.idx >= STATIONS.length ? CFG.finalRate : 1);
         st.rate += (st.target - st.rate) * Math.min(1, dt * 6);
         if (st.usingVideo) { try { v.playbackRate = Math.max(0.1, st.rate); } catch {} }
         else st.fakeT += dt * st.rate;
