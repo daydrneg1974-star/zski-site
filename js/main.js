@@ -66,8 +66,14 @@
     ul.innerHTML = D.hours.map((d, i) =>
       `<li class="${i === dow ? "today" : ""}"><span class="d">${d.day}</span><strong>${hh(d.open)} – ${hh(d.close)}</strong></li>`).join("");
   });
+  const offSeason = (() => {
+    if (!D.seasonStart) return false;
+    const now = mskNow(), start = new Date(D.seasonStart + "T00:00:00+03:00"), end = D.seasonEnd ? new Date(D.seasonEnd + "T23:59:59+03:00") : null;
+    return now < start || (end && now > end);
+  })();
   $$("[data-status]").forEach((el) => {
     const s = isOpen();
+    if (offSeason) { el.innerHTML = `<span class="dot closed"></span> Межсезонье · инвентарь принимаем на хранение`; return; }
     el.innerHTML = s.open
       ? `<span class="dot"></span> Открыто · до ${hh(s.until)}`
       : `<span class="dot closed"></span> Сейчас закрыто · откроемся в ${hh(s.next)}`;
