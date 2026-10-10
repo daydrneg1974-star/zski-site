@@ -13,7 +13,7 @@ html,body{margin:0;height:100%;background:#1a2230;color:#fff;font-family:var(--f
 .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,22,.35),rgba(10,14,22,0) 35%,rgba(10,14,22,0) 60%,rgba(10,14,22,.65));pointer-events:none;transition:opacity .7s}
 /* Маска-очки: включается классом body.pov */
 .lens{position:absolute;left:4%;top:15%;width:92%;height:72%;border-radius:50%;pointer-events:none;display:none;box-shadow:0 0 0 4000px #1b1f26,inset 0 0 0 12px #2a2f38,inset 0 0 120px rgba(0,0,0,.45),inset 0 0 40px rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,196,138,.14),rgba(255,255,255,0) 45%,rgba(124,200,255,.12))}
-body.pov .lens{display:block}
+body.pov .lens,.stage.pov .lens{display:block}
 @media(max-aspect-ratio:3/4){.lens{left:5%;top:14%;width:90%;height:72%;border-radius:46%/30%}}
 .hud{position:fixed;inset:0;padding:22px;display:grid;grid-template-rows:auto 1fr auto;pointer-events:none}
 .hud > *{pointer-events:auto}

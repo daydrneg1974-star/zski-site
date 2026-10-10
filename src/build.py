@@ -12,7 +12,8 @@
   * прайс проката и таблицу SKI-сервиса предрендерит из js/data.js (src/render.mjs, нужен node);
   * проставляет штамп сборки BUILD (ГГГГММДДЧЧММ, UTC) в ?v=BUILD у css/js/шрифтов и
     в VERSION сервис-воркера sw.js — так браузеры и сервис-воркер не держат старые файлы;
-  * src/pages/intro.html копируется в intro.html как есть, только с подстановкой BUILD.
+  * src/pages/intro.html копируется в intro.html как есть, только с подстановкой BUILD;
+    его разметка также вставляется на главную вместо {{INTRO_MARKUP}} (слой интро при открытии сайта).
 
 Правила: правьте src/, потом запускайте сборку и коммитьте вместе с собранным HTML
 (GitHub Pages публикует корень репозитория без сборки).
@@ -62,6 +63,13 @@ def fill_data(html: str, data) -> str:
     return html
 
 
+def intro_markup() -> str:
+    """Разметка интро из src/pages/intro.html (между <body> и <noscript>) — для слоя на главной."""
+    src = read(SRC / "pages" / "intro.html")
+    inner = src.split("<body>\n", 1)[1].split("<noscript>", 1)[0]
+    return inner.strip("\n")
+
+
 def build_page(name: str, layout: dict, data, build: str) -> str:
     meta, body = front_matter(read(SRC / "pages" / f"{name}.html"))
     for k in ("title", "description", "canonical"):
@@ -73,6 +81,8 @@ def build_page(name: str, layout: dict, data, build: str) -> str:
             .replace("{{CANONICAL}}", meta["canonical"])
             .replace("{{SCHEMA}}", layout["schema"].rstrip("\n") if meta.get("schema") == "yes" else "")
             .replace("{{PRELOAD}}", f'<link rel="preload" as="image" href="{meta["preload"]}" type="image/webp">' if meta.get("preload") else ""))
+    if "{{INTRO_MARKUP}}" in body:
+        body = body.replace("{{INTRO_MARKUP}}", intro_markup())
     html = head + layout["header"] + body.rstrip("\n") + "\n" + layout["footer"]
     html = fill_data(html, data)
     return html.replace("{{BUILD}}", build)

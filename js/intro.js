@@ -17,119 +17,163 @@ const STATIONS = [
   { n: "05", label: "Контакты",   sub: "61-й км Дмитровского шоссе, карта, график", href: "contacts.html",   side: "right" },
 ];
 
-const $ = (s) => document.querySelector(s);
-const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"),
-      speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), hint = $("#hint"), startScreen = $("#start"), goBtn = $("#go"), stage = $(".stage");
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-if (CFG.pov) document.body.classList.add("pov");
+/* Плеер интро. root — document (страница intro.html) или ShadowRoot (слой поверх главной).
+   opts.close() — уйти на сайт, opts.replay() — проехать ещё раз. Возвращает функцию остановки. */
+function initIntro(root, opts) {
+  const $ = (s) => root.querySelector(s);
+  const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"),
+        speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), hint = $("#hint"), startScreen = $("#start"), goBtn = $("#go"), stage = $(".stage");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (CFG.pov) stage.classList.add("pov");
 
-const st = { started: false, done: false, usingVideo: false, rate: 1, target: 1, idx: 0, holding: false, t0: 0, dur: CFG.duration, raf: 0, fakeT: 0, card: null, holdTimer: 0 };
+  const st = { started: false, done: false, usingVideo: false, rate: 1, target: 1, idx: 0, holding: false, t0: 0, dur: CFG.duration, raf: 0, fakeT: 0, card: null, holdTimer: 0 };
 
-/* ---------- Карточка станции ---------- */
-function showCard(i) {
-  const s = STATIONS[i];
-  const a = document.createElement("a");
-  a.className = `station ${s.side}`; a.href = s.href;
-  a.innerHTML = `<span class="num">${s.n}</span><span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
-  center.appendChild(a); setTimeout(() => a.classList.add("in"), 120);
-  st.card = a; stage.classList.add("hold");
-}
-function hideCard() {
-  const a = st.card; if (!a) return; st.card = null; stage.classList.remove("hold");
-  a.classList.remove("in"); a.classList.add("out"); setTimeout(() => a.remove(), 600);
-}
-function finish() {
-  if (st.done) return; st.done = true; hideCard();
-  hint.style.display = "none"; menu.classList.add("show");
-  if (wind.gain) wind.gain.gain.setTargetAtTime(0, wind.ctx.currentTime, 0.4);
-}
-
-/* ---------- Время: видео или таймер на фото ---------- */
-const now = () => (st.usingVideo ? v.currentTime : st.fakeT);
-const total = () => (st.usingVideo && isFinite(v.duration) && v.duration > 1 ? v.duration : st.dur);
-
-function arrive(i) {
-  st.holding = true; st.rate = 0; if (st.usingVideo) v.pause(); title.classList.remove("show");
-  showCard(i);
-  st.holdTimer = setTimeout(resume, CFG.hold);
-}
-function resume() {
-  if (!st.holding) return; st.holding = false; clearTimeout(st.holdTimer);
-  hideCard(); st.idx++; st.target = 1;
-  if (st.usingVideo) { v.play().catch(() => {}); }
-}
-
-let last = performance.now();
-function loop(ts) {
-  if (st.done) return;
-  const dt = Math.min(0.05, (ts - last) / 1000); last = ts;
-  const T = total(), t = now();
-  if (!st.holding) {
-    /* торможение перед станцией */
-    const next = st.idx < STATIONS.length ? CFG.stations[st.idx] * T : Infinity;
-    const toNext = next - t;
-    if (toNext <= 0.02) { arrive(st.idx); }
-    else {
-      st.target = toNext < CFG.slowBefore ? Math.max(CFG.minRate, toNext / CFG.slowBefore) : 1;
-      st.rate += (st.target - st.rate) * Math.min(1, dt * 6);
-      if (st.usingVideo) { try { v.playbackRate = Math.max(0.1, st.rate); } catch {} }
-      else st.fakeT += dt * st.rate;
-    }
+  /* ---------- Карточка станции ---------- */
+  function showCard(i) {
+    const s = STATIONS[i];
+    const a = document.createElement("a");
+    a.className = `station ${s.side}`; a.href = s.href;
+    a.innerHTML = `<span class="num">${s.n}</span><span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
+    center.appendChild(a); setTimeout(() => a.classList.add("in"), 120);
+    st.card = a; stage.classList.add("hold");
   }
-  const p = Math.min(1, t / T);
-  speedEl.textContent = Math.round(CFG.maxSpeed * (st.holding ? 0 : Math.min(1, st.rate) * Math.min(1, p / 0.12 + 0.2)));
-  altEl.textContent = Math.max(0, Math.round(CFG.startAlt * (1 - p)));
-  if (wind.gain) { const k = st.holding ? 0 : st.rate; wind.gain.gain.setTargetAtTime(0.4 * k, wind.ctx.currentTime, 0.25); wind.filter.frequency.setTargetAtTime(160 + 800 * k, wind.ctx.currentTime, 0.25); }
-  if (!st.usingVideo && p >= 0.995 && st.idx >= STATIONS.length) finish();
-  st.raf = requestAnimationFrame(loop);
-}
-function start() {
-  if (st.started) return; st.started = true; last = performance.now();
-  setTimeout(() => title.classList.remove("show"), 2200);
-  requestAnimationFrame(loop);
+  function hideCard() {
+    const a = st.card; if (!a) return; st.card = null; stage.classList.remove("hold");
+    a.classList.remove("in"); a.classList.add("out"); setTimeout(() => a.remove(), 600);
+  }
+  function finish() {
+    if (st.done) return; st.done = true; hideCard();
+    hint.style.display = "none"; menu.classList.add("show");
+    if (wind.gain) wind.gain.gain.setTargetAtTime(0, wind.ctx.currentTime, 0.4);
+  }
+
+  /* ---------- Время: видео или таймер на фото ---------- */
+  const now = () => (st.usingVideo ? v.currentTime : st.fakeT);
+  const total = () => (st.usingVideo && isFinite(v.duration) && v.duration > 1 ? v.duration : st.dur);
+
+  function arrive(i) {
+    st.holding = true; st.rate = 0; if (st.usingVideo) v.pause(); title.classList.remove("show");
+    showCard(i);
+    st.holdTimer = setTimeout(resume, CFG.hold);
+  }
+  function resume() {
+    if (!st.holding) return; st.holding = false; clearTimeout(st.holdTimer);
+    hideCard(); st.idx++; st.target = 1;
+    if (st.usingVideo) { v.play().catch(() => {}); }
+  }
+
+  let last = performance.now();
+  function loop(ts) {
+    if (st.done) return;
+    const dt = Math.min(0.05, (ts - last) / 1000); last = ts;
+    const T = total(), t = now();
+    if (!st.holding) {
+      /* торможение перед станцией */
+      const next = st.idx < STATIONS.length ? CFG.stations[st.idx] * T : Infinity;
+      const toNext = next - t;
+      if (toNext <= 0.02) { arrive(st.idx); }
+      else {
+        st.target = toNext < CFG.slowBefore ? Math.max(CFG.minRate, toNext / CFG.slowBefore) : 1;
+        st.rate += (st.target - st.rate) * Math.min(1, dt * 6);
+        if (st.usingVideo) { try { v.playbackRate = Math.max(0.1, st.rate); } catch {} }
+        else st.fakeT += dt * st.rate;
+      }
+    }
+    const p = Math.min(1, t / T);
+    speedEl.textContent = Math.round(CFG.maxSpeed * (st.holding ? 0 : Math.min(1, st.rate) * Math.min(1, p / 0.12 + 0.2)));
+    altEl.textContent = Math.max(0, Math.round(CFG.startAlt * (1 - p)));
+    if (wind.gain) { const k = st.holding ? 0 : st.rate; wind.gain.gain.setTargetAtTime(0.4 * k, wind.ctx.currentTime, 0.25); wind.filter.frequency.setTargetAtTime(160 + 800 * k, wind.ctx.currentTime, 0.25); }
+    if (!st.usingVideo && p >= 0.995 && st.idx >= STATIONS.length) finish();
+    st.raf = requestAnimationFrame(loop);
+  }
+  function start() {
+    if (st.started) return; st.started = true; last = performance.now();
+    setTimeout(() => title.classList.remove("show"), 2200);
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- Видео ---------- */
+  v.addEventListener("playing", () => { if (!st.started) { st.usingVideo = true; v.classList.add("on"); start(); } }, { once: true });
+  v.addEventListener("ended", () => { if (st.idx >= STATIONS.length) finish(); else { arrive(st.idx); st.holdTimer = setTimeout(() => { hideCard(); finish(); }, CFG.hold + 600); } });
+  v.addEventListener("error", () => { if (!st.started) { st.usingVideo = false; start(); } }, { once: true });
+  function tryPlay() { const pr = v.play(); if (pr && pr.catch) pr.catch(() => { setTimeout(() => { if (!st.started) start(); }, 300); }); }
+  /* Старт только по кнопке: клик — это жест пользователя, поэтому и видео, и ветер стартуют сразу со звуком */
+  goBtn.addEventListener("click", () => {
+    startScreen.classList.add("off");
+    startWind(); wind.resumeOnGesture && wind.resumeOnGesture();
+    if (reduce) { finish(); return; }
+    title.classList.add("show");
+    if (v.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE) tryPlay(); else start();
+    setTimeout(() => { if (!st.started) start(); }, 2500);
+  });
+  requestAnimationFrame(() => { fade.classList.add("out"); setTimeout(() => fade.remove(), 1500); });
+
+  /* Клик мимо карточки во время остановки — едем дальше; Esc — на сайт */
+  root.addEventListener("click", (e) => { if (e.target.closest("a,button")) return; if (st.holding) resume(); });
+  const onKey = (e) => { if (e.key === "Escape") opts.close(); if ((e.key === " " || e.key === "Enter") && st.holding) resume(); };
+  addEventListener("keydown", onKey);
+  $("#replay").addEventListener("click", () => opts.replay());
+
+  /* ---------- Ветер (после первого клика) ---------- */
+  const wind = {};
+  function startWind() {
+    if (wind.ctx || reduce) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+      const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 300;
+      const gain = ctx.createGain(); gain.gain.value = 0;
+      src.connect(filter).connect(gain).connect(ctx.destination); src.start();
+      wind.ctx = ctx; wind.filter = filter; wind.gain = gain;
+      const b = $("#mute"); b.hidden = false;
+      const sync = () => { const on = ctx.state === "running" && !wind.muted; b.textContent = on ? "🔊" : "🔇 Включить звук"; b.classList.toggle("attn", !on); };
+      b.addEventListener("click", (e) => { e.stopPropagation(); if (ctx.state !== "running") { wind.muted = false; ctx.resume().then(sync); } else { wind.muted = !wind.muted; ctx[wind.muted ? "suspend" : "resume"]().then(sync); } });
+      ctx.addEventListener("statechange", sync);
+      if (ctx.state !== "running") ctx.resume().catch(() => {}); setTimeout(sync, 300);
+      wind.resumeOnGesture = () => { if (ctx.state !== "running" && !wind.muted) ctx.resume().then(sync); };
+    } catch {}
+  }
+  /* Если контекст звука был приостановлен браузером — возобновляем при любом жесте после старта */
+  ["pointerdown", "keydown", "touchstart"].forEach((ev) => root.addEventListener(ev, () => { if (startScreen.classList.contains("off")) { startWind(); wind.resumeOnGesture && wind.resumeOnGesture(); } }, { passive: true }));
+  return () => { st.done = true; cancelAnimationFrame(st.raf); clearTimeout(st.holdTimer); removeEventListener("keydown", onKey); try { v.pause(); } catch {} if (wind.ctx) wind.ctx.close().catch(() => {}); };
 }
 
-/* ---------- Видео ---------- */
-v.addEventListener("playing", () => { if (!st.started) { st.usingVideo = true; v.classList.add("on"); start(); } }, { once: true });
-v.addEventListener("ended", () => { if (st.idx >= STATIONS.length) finish(); else { arrive(st.idx); st.holdTimer = setTimeout(() => { hideCard(); finish(); }, CFG.hold + 600); } });
-v.addEventListener("error", () => { if (!st.started) { st.usingVideo = false; start(); } }, { once: true });
-function tryPlay() { const pr = v.play(); if (pr && pr.catch) pr.catch(() => { setTimeout(() => { if (!st.started) start(); }, 300); }); }
-/* Старт только по кнопке: клик — это жест пользователя, поэтому и видео, и ветер стартуют сразу со звуком */
-goBtn.addEventListener("click", () => {
-  startScreen.classList.add("off");
-  startWind(); wind.resumeOnGesture && wind.resumeOnGesture();
-  if (reduce) { finish(); return; }
-  title.classList.add("show");
-  if (v.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE) tryPlay(); else start();
-  setTimeout(() => { if (!st.started) start(); }, 2500);
-});
-requestAnimationFrame(() => { fade.classList.add("out"); setTimeout(() => fade.remove(), 1500); });
+/* ---------- Запуск ----------
+   intro.html: плеер на всей странице. index.html: разметка интро лежит в <template id="intro-tpl">
+   и показывается слоем поверх сайта, когда сайт открыли «снаружи» (адрес, закладка, поиск, обновление
+   страницы). Переходы внутри сайта (меню «Главная», «Открыть сайт», «Назад») интро не показывают. */
+(function () {
+  const tpl = document.getElementById("intro-tpl");
+  const cssHref = document.currentScript ? document.currentScript.src.replace(/js\/intro\.js/, "css/intro.css") : "css/intro.css";
+  if (!tpl) { initIntro(document, { close: () => { location.href = "index.html"; }, replay: () => location.reload() }); return; }
 
-/* Клик мимо карточки во время остановки — едем дальше; Esc — на сайт */
-addEventListener("click", (e) => { if (e.target.closest("a,button")) return; if (st.holding) resume(); });
-addEventListener("keydown", (e) => { if (e.key === "Escape") location.href = "index.html"; if ((e.key === " " || e.key === "Enter") && st.holding) resume(); });
-$("#replay").addEventListener("click", () => location.reload());
+  let host = null, stop = null;
+  const samePage = (href) => { const u = new URL(href, location.href); return u.origin === location.origin && u.pathname.replace(/index\.html$/, "") === location.pathname.replace(/index\.html$/, "") ? u : null; };
+  function close(hash) {
+    if (!host) return; stop && stop(); host.remove(); host = null; stop = null;
+    document.documentElement.style.overflow = "";
+    if (hash) { const el = document.querySelector(hash); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  }
+  function open() {
+    close();
+    host = document.createElement("div"); host.className = "intro-host"; host.setAttribute("role", "dialog"); host.setAttribute("aria-label", "Видео-интро: спуск к прокату");
+    const root = host.attachShadow({ mode: "open" });
+    root.innerHTML = `<link rel="stylesheet" href="${cssHref}"><style>:host{position:fixed;inset:0;z-index:5000;overflow:hidden;background:#1a2230;color:#fff;font-family:var(--font);--ice:#7cc8ff}*{box-sizing:border-box}</style>` + tpl.innerHTML;
+    document.documentElement.style.overflow = "hidden";
+    document.body.appendChild(host);
+    root.addEventListener("click", (e) => {
+      const a = e.target.closest("a[href]"); if (!a) return;
+      const u = samePage(a.getAttribute("href")); if (!u) return;
+      e.preventDefault(); close(u.hash);
+    });
+    stop = initIntro(root, { close: () => close(), replay: open });
+  }
 
-/* ---------- Ветер (после первого клика) ---------- */
-const wind = {};
-function startWind() {
-  if (wind.ctx || reduce) return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
-    const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 300;
-    const gain = ctx.createGain(); gain.gain.value = 0;
-    src.connect(filter).connect(gain).connect(ctx.destination); src.start();
-    wind.ctx = ctx; wind.filter = filter; wind.gain = gain;
-    const b = $("#mute"); b.hidden = false;
-    const sync = () => { const on = ctx.state === "running" && !wind.muted; b.textContent = on ? "🔊" : "🔇 Включить звук"; b.classList.toggle("attn", !on); };
-    b.addEventListener("click", (e) => { e.stopPropagation(); if (ctx.state !== "running") { wind.muted = false; ctx.resume().then(sync); } else { wind.muted = !wind.muted; ctx[wind.muted ? "suspend" : "resume"]().then(sync); } });
-    ctx.addEventListener("statechange", sync);
-    if (ctx.state !== "running") ctx.resume().catch(() => {}); setTimeout(sync, 300);
-    wind.resumeOnGesture = () => { if (ctx.state !== "running" && !wind.muted) ctx.resume().then(sync); };
-  } catch {}
-}
-/* Если контекст звука был приостановлен браузером — возобновляем при любом жесте после старта */
-["pointerdown", "keydown", "touchstart"].forEach((ev) => addEventListener(ev, () => { if (startScreen.classList.contains("off")) { startWind(); wind.resumeOnGesture && wind.resumeOnGesture(); } }, { passive: true }));
+  const nav = performance.getEntriesByType("navigation")[0], type = nav ? nav.type : "navigate";
+  const internal = document.referrer && document.referrer.indexOf(location.origin + "/") === 0;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!location.hash && !reduce && (type === "reload" || (type === "navigate" && !internal))) open();
+  document.querySelectorAll("a[data-intro]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); open(); }));
+})();

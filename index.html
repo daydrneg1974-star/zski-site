@@ -17,8 +17,8 @@
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="preload" href="fonts/unbounded-800-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/manrope-500-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="fonts/fonts.css?v=202610100806">
-<link rel="stylesheet" href="css/style.css?v=202610100806">
+<link rel="stylesheet" href="fonts/fonts.css?v=202610100833">
+<link rel="stylesheet" href="css/style.css?v=202610100833">
 <meta name="view-transition" content="same-origin">
 <script type="speculationrules">{"prerender":[{"source":"document","where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}</script>
 <script type="application/ld+json">
@@ -70,6 +70,7 @@
     <p class="lead">Прокат лыж и сноубордов, собственный SKI-сервис, хранение и консервация. Инвентарь известных производителей, абсолютно все размеры, подбор за 10 минут — и вы на склоне.</p>
     <div class="hero-actions">
       <a class="btn btn-primary" data-phone href="tel:+79161718621"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
+      <a class="btn btn-ghost" href="intro.html" data-intro aria-label="Посмотреть видео-спуск к прокату">▶ Спуск к прокату</a>
       <a class="btn btn-ghost" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать стоимость</a>
     </div>
     <div class="hero-badges">
@@ -321,6 +322,65 @@
   </div>
 </section>
 
+
+
+<!-- Интро «спуск к прокату»: показывается слоем поверх сайта при открытии главной «снаружи» (см. js/intro.js). Разметка — из src/pages/intro.html. -->
+<template id="intro-tpl">
+<div class="stage">
+  <div class="poster" id="poster" style="background-image:url('img/photos/intro-poster.jpg')"></div>
+  <video id="v" muted playsinline preload="auto" poster="img/photos/intro-poster.jpg" aria-label="Видео: горнолыжник спускается по склону">
+    <source src="video/descent.webm" type="video/webm">
+    <source src="video/descent.mp4" type="video/mp4">
+  </video>
+  <div class="shade"></div>
+  <div class="lens" aria-hidden="true"></div>
+</div>
+
+<div class="hud">
+  <div class="hud-top">
+    <a class="brand" href="index.html"><img src="img/logo.png" alt="">ZSKI</a>
+    <span style="display:flex;gap:8px;align-items:center"><button class="skip" id="mute" type="button" hidden aria-label="Звук">🔊</button><a class="skip" href="index.html">Пропустить →</a></span>
+  </div>
+  <div class="center" id="center">
+    <div class="title" id="title"><h1>Вершина</h1><p>Поехали вниз — первая остановка через пару секунд</p></div>
+  </div>
+  <div class="hud-bottom">
+    <div class="meter"><b id="speed">0</b><span>км/ч</span></div>
+    <div class="hint" id="hint">Клик или касание — к прокату</div>
+    <div class="meter right"><b id="alt">220</b><span>м · высота</span></div>
+  </div>
+</div>
+
+<div class="menu" id="menu" role="dialog" aria-label="Разделы сайта">
+  <div class="panel">
+    <h2>Вы у проката ZSKI</h2>
+    <p>61-й км Дмитровского шоссе, Яхрома. Куда дальше?</p>
+    <div class="links">
+      <a class="main" href="index.html">Открыть сайт</a>
+      <a href="index.html#prokat">Прокат<small>лыжи и сноуборды</small></a>
+      <a href="prices.html">Цены<small>от 500 ₽ в день</small></a>
+      <a href="service.html">SKI-сервис<small>заточка, парафин</small></a>
+      <a href="slopes.html">Склоны<small>Сорочаны, Волен…</small></a>
+      <a href="contacts.html">Контакты<small>карта, график</small></a>
+    </div>
+    <button class="replay" id="replay" type="button">↺ Проехать ещё раз</button>
+    <p style="margin:14px 0 0;font-size:.72rem;color:#9fb0c7">Видео: нейросетевая генерация для ZSKI</p>
+  </div>
+</div>
+
+<div class="start" id="start">
+  <div class="start-inner">
+    <img class="start-logo" src="img/logo.png" alt="ZSKI">
+    <h1>Ваш спуск к прокату</h1>
+    <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
+    <button class="btn-start" id="go" type="button"><span>▶</span>Поехали</button>
+    <a class="start-skip" href="index.html">Сразу на сайт →</a>
+  </div>
+</div>
+<div class="fade" id="fade"></div>
+</template>
+<script src="js/intro.js?v=202610100833" defer></script>
+
 </main>
 <footer>
   <div class="wrap">
@@ -351,8 +411,8 @@
   <a class="btn btn-primary" data-phone href="tel:+79161718621"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
   <a class="btn btn-ghost" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать</a>
 </div>
-<script src="js/data.js?v=202610100806"></script>
-<script src="js/main.js?v=202610100806"></script>
+<script src="js/data.js?v=202610100833"></script>
+<script src="js/main.js?v=202610100833"></script>
 <script>if("serviceWorker"in navigator)addEventListener("load",()=>{const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register("sw.js").then((r)=>r.update()).catch(()=>{});let once=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!once&&navigator.serviceWorker.controller&&sessionStorage.getItem("zski-sw-reload")!=="1"){once=true;sessionStorage.setItem("zski-sw-reload","1");location.reload();}});});</script>
 </body>
 </html>
