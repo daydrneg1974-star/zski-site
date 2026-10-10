@@ -160,7 +160,9 @@ function initIntro(root, opts) {
     if (st.noVideo) { finish(); return; }
     st.idx = 0;
     if (v.preload !== "auto") { v.preload = "auto"; v.load(); }
-    if (ready()) { st.phase = "run"; play(); } else waitForVideo();
+    /* play() внутри жеста: после этого iOS разрешает запускать ролик и из таймеров (ожидание буфера, «Назад») */
+    const pr = v.play(); if (pr && pr.catch) pr.catch(() => {});
+    if (ready()) { st.phase = "run"; watch(); } else { v.pause(); waitForVideo(); }
     setTimeout(() => { if ((st.phase === "run" || st.phase === "loading") && st.idx === 0 && v.currentTime === 0 && noVideoNow()) finish(); }, 2500);
   });
 
@@ -218,15 +220,31 @@ function initIntro(root, opts) {
     /* Слой спрятан (переход на главную): всё останавливаем, место спуска запоминаем */
     suspend() {
       st.suspended = true; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
-      try { v.pause(); } catch {}
+      try {
+        v.pause();
+        /* Слой скрыт — закачку ролика останавливаем, чтобы на слабом канале она не мешала странице.
+           Место запоминаем; при возврате («Назад») докачаем с него. */
+        const b = v.buffered, whole = b.length && b.end(b.length - 1) >= (v.duration || TIMELINE.duration) - 0.5;
+        if (st.phase !== "start" && st.phase !== "end" && !whole) {
+          st.resumeT = v.currentTime; st.aborted = true;
+          st.sources = Array.from(v.querySelectorAll("source")); st.sources.forEach((el) => el.remove()); v.load(); // без источников закачка прекращается
+        }
+      } catch {}
       if (wind.ctx && wind.ctx.state === "running") wind.ctx.suspend().catch(() => {});
     },
     /* Слой снова показан (кнопка «Назад»): продолжаем с того же места */
     wake() {
       st.suspended = false;
-      if (st.phase === "hold") armHold();
-      else if (st.phase === "run") play();
-      else if (st.phase === "loading") waitForVideo();
+      const go = () => {
+        if (st.phase === "hold") armHold();
+        else if (st.phase === "run" || st.phase === "blocked") { st.phase = "run"; play(); }
+        else if (st.phase === "loading") waitForVideo();
+      };
+      if (st.aborted) {                                   // закачку останавливали — продолжаем с того же места
+        st.aborted = false; (st.sources || []).forEach((el) => v.appendChild(el)); v.preload = "auto"; v.load();
+        const seek = () => { if (st.suspended) return; try { v.currentTime = st.resumeT || 0; } catch {} go(); };
+        if (v.readyState >= 1) seek(); else v.addEventListener("loadedmetadata", seek, { once: true });
+      } else go();
       if (st.phase !== "start" && st.phase !== "end" && wind.wake) wind.wake();
     },
     progress() { return { phase: st.phase === "loading" || st.phase === "blocked" ? "run" : st.phase, idx: st.idx, t: Math.round(v.currentTime * 1000) / 1000 }; },
@@ -345,12 +363,17 @@ function initIntro(root, opts) {
     e.preventDefault(); mount(true); show(); setState({ [KEY]: "open", p: null }, true);
   }));
 
-  if (boot.show && html.classList.contains("intro-open")) {
-    mount(false);
-    if (boot.restore) ctl.restore(boot.restore);
-    show();
-    setState({ [KEY]: "open", p: null });
-  } else {
-    host.hidden = true;
+  try {
+    if (boot.show && html.classList.contains("intro-open")) {
+      mount(false);
+      if (boot.restore) ctl.restore(boot.restore);
+      show();
+      setState({ [KEY]: "open", p: null });
+    } else {
+      host.hidden = true;
+    }
+  } catch (err) {
+    if (window.__zskiIntroFail) window.__zskiIntroFail(); // что-то пошло не так — сайт важнее интро
+    throw err;
   }
 })();

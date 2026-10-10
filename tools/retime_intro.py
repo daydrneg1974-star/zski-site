@@ -143,7 +143,7 @@ def main():
     commonvp9 = ["-an", "-c:v", "libvpx-vp9", "-b:v", WEBM_RATE, "-maxrate", WEBM_MAX, "-row-mt", "1",
                  "-deadline", "good", "-cpu-used", "2", "-g", "60", "-passlogfile", log]
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *commonvp9, "-pass", "1", "-f", "null", "-"])
-    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *commonvp9, "-pass", "2", out_webm])
+    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *commonvp9, "-pass", "2", "-cues_to_front", "1", out_webm])  # индекс в начале файла: перемотка без лишнего запроса
     # лёгкие версии для медленной сети
     scale = ["-vf", f"scale={LOW_W}:-2"]
     log = str(CACHE / "x264low")
@@ -155,7 +155,7 @@ def main():
     lowvp9 = ["-an", *scale, "-c:v", "libvpx-vp9", "-b:v", WEBM_LOW, "-maxrate", WEBM_LOW_MAX, "-row-mt", "1",
               "-deadline", "good", "-cpu-used", "2", "-g", "60", "-passlogfile", log]
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *lowvp9, "-pass", "1", "-f", "null", "-"])
-    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *lowvp9, "-pass", "2", ROOT / "video/descent-540.webm"])
+    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *lowvp9, "-pass", "2", "-cues_to_front", "1", ROOT / "video/descent-540.webm"])
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, "-frames:v", "1", "-q:v", "4", ROOT / "img/photos/intro-poster.jpg"])
     # постер виден на стартовом экране размытым — 960 px хватает, а грузится он вдвое быстрее
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, "-frames:v", "1", "-vf", "scale=960:-2", "-c:v", "libwebp", "-quality", "70",

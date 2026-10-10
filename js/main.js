@@ -211,10 +211,15 @@
 
   /* ---------- Шапка при скролле + параллакс hero ---------- */
   const top = $(".topbar"), heroImg = $(".hero-media img");
+  const parallax = heroImg && !matchMedia("(prefers-reduced-motion: reduce)").matches && !matchMedia("(pointer: coarse)").matches;
+  let scrolled = null, ticking = false;
   const onScroll = () => {
-    const y = window.scrollY;
-    if (top) top.classList.toggle("scrolled", y > 40);
-    if (heroImg && y < 1200 && !matchMedia("(prefers-reduced-motion: reduce)").matches) heroImg.style.translate = `0 ${y * 0.18}px`;
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false; const y = window.scrollY, s = y > 40;
+      if (top && s !== scrolled) { scrolled = s; top.classList.toggle("scrolled", s); }
+      if (parallax && y < 1200) heroImg.style.translate = `0 ${y * 0.18}px`;
+    });
   };
   addEventListener("scroll", onScroll, { passive: true }); onScroll();
 
@@ -229,7 +234,11 @@
     const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
     targets.forEach((el) => io.observe(el));
   } else targets.forEach((el) => el.classList.add("in"));
-  const revealAll = () => setTimeout(() => targets.forEach((el) => el.classList.add("in")), 3500); // страховка: всё видно даже без скролла
+  const revealAll = () => setTimeout(() => targets.forEach((el) => {   // страховка: всё видно даже без скролла
+    if (el.classList.contains("in")) return;
+    const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight * 1.3) el.classList.add("now"); // вне экрана — без анимации
+    el.classList.add("in");
+  }), 3500);
   if (document.documentElement.classList.contains("intro-open")) addEventListener("zski:intro-closed", revealAll, { once: true }); else revealAll();
 
   /* ---------- Счётчики ---------- */
@@ -245,9 +254,11 @@
   if (snow && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const ctx = snow.getContext("2d"); let W, H, flakes = [];
     const size = () => { if (!snow.offsetWidth) return; W = snow.width = snow.offsetWidth; H = snow.height = snow.offsetHeight; flakes = Array.from({ length: Math.round(W / 22) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 2.2, s: 0.25 + Math.random() * 0.7, o: 0.25 + Math.random() * 0.5, w: Math.random() * 6.28 })); };
-    size(); addEventListener("resize", size); addEventListener("zski:intro-closed", () => requestAnimationFrame(size));
-    let paused = false; document.addEventListener("visibilitychange", () => (paused = document.hidden));
-    (function draw() { if (!paused && !document.documentElement.classList.contains("intro-open")) { ctx.clearRect(0, 0, W, H); flakes.forEach((f) => { f.y += f.s; f.w += 0.01; f.x += Math.sin(f.w) * 0.3; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fillStyle = `rgba(255,255,255,${f.o})`; ctx.fill(); }); } requestAnimationFrame(draw); })();
+    size(); addEventListener("zski:intro-closed", () => requestAnimationFrame(size));
+    addEventListener("resize", () => { if (snow.offsetWidth && snow.offsetWidth !== W) size(); }); // на телефоне высота меняется при прокрутке — не пересоздаём
+    let paused = false, inView = true; document.addEventListener("visibilitychange", () => (paused = document.hidden));
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => (inView = es[0].isIntersecting)).observe(snow);
+    (function draw() { if (!paused && inView && W && !document.documentElement.classList.contains("intro-open")) { ctx.clearRect(0, 0, W, H); flakes.forEach((f) => { f.y += f.s; f.w += 0.01; f.x += Math.sin(f.w) * 0.3; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fillStyle = `rgba(255,255,255,${f.o})`; ctx.fill(); }); } requestAnimationFrame(draw); })();
   }
 
   /* ---------- Лайтбокс для фото ---------- */

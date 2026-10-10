@@ -2,6 +2,8 @@
    скрыта, стартовый экран из начала <body> рисуется сразу; в предзагрузку — постер интро, иначе фото первого экрана. */
 (function(){var d=document.documentElement,show=false,s={},type="navigate";try{var n=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];type=n?n.type:"navigate";s=history.state||{};var internal=document.referrer.indexOf(location.origin+"/")===0,bot=/bot|crawl|spider|slurp|lighthouse/i.test(navigator.userAgent),reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;show=!location.hash&&!reduce&&!bot&&((type==="navigate"&&!internal)||((type==="reload"||type==="back_forward")&&s.zskiIntro==="open"))}catch(e){}
 window.__zskiIntro={show:show,restore:show&&type==="back_forward"?s.p:null};
+/* Скрипт интро не загрузился или упал — сразу показываем сайт */
+window.__zskiIntroFail=function(){var h=document.querySelector(".intro-host");if(h)h.hidden=true;d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))};
 var l=document.createElement("link");l.rel="preload";l.as="image";l.type="image/webp";l.href=show?"img/photos/intro-poster.webp":"img/photos/hero-freeride.webp";l.setAttribute("fetchpriority","high");document.head.appendChild(l);
 if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v={{BUILD}}";document.head.appendChild(j)}
 if(show){d.classList.add("intro-open");setTimeout(function(){if(!(window.__zskiIntro&&window.__zskiIntro.booted)){d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))}},8000)}})();
