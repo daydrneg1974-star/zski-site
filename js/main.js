@@ -187,7 +187,7 @@
             <text x="34" y="20" font-family="Manrope, sans-serif" font-weight="700" font-size="14" fill="currentColor" opacity=".75">Яхрома, Левобережье</text>
           </g>
         </svg>
-        <button type="button" class="btn btn-ghost btn-sm map-load">Показать интерактивную карту</button>
+        <button type="button" class="btn btn-ghost btn-sm map-load">Открыть карту</button>
       </div>`;
     $(".map-load", m).addEventListener("click", () => {
       const f = document.createElement("iframe"); f.src = D.address.mapEmbed; f.title = "Карта: как добраться до ZSKI"; f.setAttribute("allowfullscreen", ""); m.appendChild(f); $(".map-card", m).remove();
