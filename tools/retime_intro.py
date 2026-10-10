@@ -25,8 +25,8 @@ CACHE = ROOT / ".cache"
 SOURCE_URL = "https://v3b.fal.media/files/b/0aadc649/E8onzkDSHsFKFWC8S0H-v_41a023595b5f435394bbacafdf48a90c.mp4"
 
 # ---- Сценарий (скорости — доли скорости исходника; секунды — время итогового ролика) ----
-CRUISE = 0.72          # обычный ход между станциями (как в одобренной версии)
-FINAL = 0.55           # ход после последней станции: длинный спокойный финальный спуск
+CRUISE = 0.60          # обычный ход между станциями (0.72 в первой версии; 0.60 — интервалы между карточками +0,5 с)
+FINAL = 0.42           # ход после последней станции: длинный спокойный финальный спуск (~6 с)
 ARRIVE = 0.35          # скорость в самом конце, у проката
 MIN = 0.20             # скорость в момент остановки на станции
 START_FROM = 0.15      # старт с вершины почти с места
@@ -35,11 +35,15 @@ ACCEL = 0.7            # разгон после станции, с
 DECEL = 0.9            # торможение перед станцией, с
 FINAL_ACCEL = 0.8      # разгон после последней станции, с
 FINAL_DECEL = 1.0      # замедление у проката в конце, с
-STATIONS_SRC = [1.12, 2.04, 2.96, 3.88, 4.80]   # где по исходнику стоят станции, с
+STATIONS_SRC = [1.12, 2.214, 3.308, 4.402, 5.496]   # где по исходнику стоят станции, с (шаг 1.094 → в ролике 2.36 с между остановками)
 FPS_OUT = 30
 FPS_MASTER = 120
 MP4_RATE, MP4_MAX = "2000k", "3000k"     # H.264 для Safari
 WEBM_RATE, WEBM_MAX = "1500k", "2400k"   # VP9 для Chrome, Firefox, Android
+# Лёгкие версии 960×540 для медленной сети (3G, экономия трафика): descent-540.*
+LOW_W = 960
+MP4_LOW, MP4_LOW_MAX = "1000k", "1500k"
+WEBM_LOW, WEBM_LOW_MAX = "750k", "1200k"
 
 
 def run(cmd, **kw):
@@ -140,6 +144,18 @@ def main():
                  "-deadline", "good", "-cpu-used", "2", "-g", "60", "-passlogfile", log]
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *commonvp9, "-pass", "1", "-f", "null", "-"])
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *commonvp9, "-pass", "2", out_webm])
+    # лёгкие версии для медленной сети
+    scale = ["-vf", f"scale={LOW_W}:-2"]
+    log = str(CACHE / "x264low")
+    low264 = ["-an", *scale, "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-b:v", MP4_LOW,
+              "-maxrate", MP4_LOW_MAX, "-bufsize", MP4_LOW_MAX, "-pix_fmt", "yuv420p", "-g", "60", "-passlogfile", log]
+    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *low264, "-pass", "1", "-f", "null", "-"])
+    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *low264, "-pass", "2", "-movflags", "+faststart", ROOT / "video/descent-540.mp4"])
+    log = str(CACHE / "vp9low")
+    lowvp9 = ["-an", *scale, "-c:v", "libvpx-vp9", "-b:v", WEBM_LOW, "-maxrate", WEBM_LOW_MAX, "-row-mt", "1",
+              "-deadline", "good", "-cpu-used", "2", "-g", "60", "-passlogfile", log]
+    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *lowvp9, "-pass", "1", "-f", "null", "-"])
+    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *lowvp9, "-pass", "2", ROOT / "video/descent-540.webm"])
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, "-frames:v", "1", "-q:v", "4", ROOT / "img/photos/intro-poster.jpg"])
     # постер виден на стартовом экране размытым — 960 px хватает, а грузится он вдвое быстрее
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, "-frames:v", "1", "-vf", "scale=960:-2", "-c:v", "libwebp", "-quality", "70",
@@ -156,9 +172,11 @@ def main():
     js.write_text(s[:i] + block + s[j:], encoding="utf-8")
     if not args.keep_master:
         retimed.unlink(missing_ok=True)
+    low = [(ROOT / f"video/descent-540.{ext}").stat().st_size // 1024 for ext in ("mp4", "webm")]
     print(f"Готово: {n_out} кадров, {n_out / FPS_OUT:.2f} с; станции {stations_out}; "
           f"финальный спуск {n_out / FPS_OUT - stations_out[-1]:.2f} с; "
-          f"mp4 {out_mp4.stat().st_size // 1024} КБ, webm {out_webm.stat().st_size // 1024} КБ")
+          f"mp4 {out_mp4.stat().st_size // 1024} КБ, webm {out_webm.stat().st_size // 1024} КБ; "
+          f"540p: mp4 {low[0]} КБ, webm {low[1]} КБ")
 
 
 if __name__ == "__main__":

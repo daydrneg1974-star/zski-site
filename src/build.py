@@ -13,7 +13,8 @@
   * проставляет штамп сборки BUILD (ГГГГММДДЧЧММ, UTC) в ?v=BUILD у css/js/шрифтов и
     в VERSION сервис-воркера sw.js — так браузеры и сервис-воркер не держат старые файлы;
   * src/pages/intro.html копируется в intro.html как есть, только с подстановкой BUILD;
-    страницам с `intro: yes` (главная) в <head> добавляется src/layout/intro-head.html, а в начало <body> —
+    страницам с `intro: yes` (главная) CSS встраивается в <head> (стартовый экран не ждёт загрузки стилей),
+    в <head> добавляется src/layout/intro-head.html, а в начало <body> —
     слой интро: разметка src/pages/intro.html и стили css/intro.css в Declarative Shadow DOM
     (<template shadowrootmode>), чтобы стартовый экран рисовался сразу, без ожидания скриптов.
 
@@ -75,8 +76,14 @@ def intro_markup() -> str:
 def intro_host() -> str:
     """Слой интро для главной: скрыт атрибутом hidden, показывается классом html.intro-open (intro-head.html)."""
     css = read(ROOT / "css" / "intro.css").strip()
+    early = ("<script>/* Ролик начинает грузиться, как только показан постер (не отнимая у него канал); на медленной сети — версия 540p */"
+             "(function(){var h=document.querySelector('.intro-host'),r=h&&h.shadowRoot,v=r&&r.getElementById('v');if(!v)return;"
+             "var c=navigator.connection||{},slow=!!c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||'')||(c.downlink>0&&c.downlink<2.5);"
+             "if(slow){r.querySelectorAll('source').forEach(function(s){s.setAttribute('src',s.getAttribute('src').replace('descent.','descent-540.'))});v.dataset.quality='540'}"
+             "if(document.documentElement.classList.contains('intro-open')){var go=function(){if(v.preload!=='auto'){v.preload='auto';v.load()}};"
+             "var im=new Image();im.onload=im.onerror=go;im.src=r.getElementById('poster').style.backgroundImage.slice(5,-2);setTimeout(go,1500)}})();</script>")
     return ('<div class="intro-host" hidden role="dialog" aria-label="Видео-интро: спуск к прокату">'
-            '<template shadowrootmode="open"><style>' + css + '</style>\n' + intro_markup() + '\n</template></div>')
+            '<template shadowrootmode="open"><style>' + css + '</style>\n' + intro_markup() + '\n</template></div>\n' + early)
 
 
 def build_page(name: str, layout: dict, data, build: str) -> str:
@@ -94,6 +101,10 @@ def build_page(name: str, layout: dict, data, build: str) -> str:
     head = head.replace("\n\n</head>", "\n</head>") if "{{HEAD_EXTRA}}" not in head else head
     header = layout["header"]
     if meta.get("intro") == "yes":
+        # Стили встроены в страницу: первая отрисовка стартового экрана не ждёт загрузки CSS
+        fonts_css = read(ROOT / "fonts" / "fonts.css").replace("url(", "url(fonts/")
+        head = head.replace('<link rel="stylesheet" href="fonts/fonts.css?v={{BUILD}}">\n<link rel="stylesheet" href="css/style.css?v={{BUILD}}">',
+                            "<style>" + fonts_css.strip() + "\n" + read(ROOT / "css" / "style.css").strip() + "</style>")
         header = header.replace("<body>\n", "<body>\n" + intro_host() + "\n", 1)
     html = head + header + body.rstrip("\n") + "\n" + layout["footer"]
     html = fill_data(html, data)

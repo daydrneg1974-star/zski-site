@@ -80,7 +80,7 @@ p{margin:0 0 1em}
 .hero-media img{width:100%;height:100%;object-fit:cover;object-position:60% 40%;transform:scale(1.08);animation:kb 18s ease-out forwards;will-change:transform}
 @keyframes kb{to{transform:scale(1)}}
 .hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,30,56,.1) 0%,rgba(15,30,56,.3) 40%,rgba(15,30,56,.9) 100%),linear-gradient(90deg,rgba(15,30,56,.5),transparent 60%)}
-.hero .snow{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.7}
+.hero .snow{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.7}
 .hero .wrap{position:relative;padding-bottom:64px;padding-top:140px;width:100%}
 .hero h1{max-width:14.02em;text-shadow:0 10px 40px rgba(0,0,0,.5)}
 .hero h1 em{font-style:normal;color:transparent;background:linear-gradient(90deg,#fff,#7cc8ff);-webkit-background-clip:text;background-clip:text}

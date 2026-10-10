@@ -244,7 +244,7 @@
   const snow = $(".hero .snow");
   if (snow && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const ctx = snow.getContext("2d"); let W, H, flakes = [];
-    const size = () => { W = snow.width = snow.offsetWidth; H = snow.height = snow.offsetHeight; flakes = Array.from({ length: Math.round(W / 22) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 2.2, s: 0.25 + Math.random() * 0.7, o: 0.25 + Math.random() * 0.5, w: Math.random() * 6.28 })); };
+    const size = () => { if (!snow.offsetWidth) return; W = snow.width = snow.offsetWidth; H = snow.height = snow.offsetHeight; flakes = Array.from({ length: Math.round(W / 22) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 2.2, s: 0.25 + Math.random() * 0.7, o: 0.25 + Math.random() * 0.5, w: Math.random() * 6.28 })); };
     size(); addEventListener("resize", size); addEventListener("zski:intro-closed", () => requestAnimationFrame(size));
     let paused = false; document.addEventListener("visibilitychange", () => (paused = document.hidden));
     (function draw() { if (!paused && !document.documentElement.classList.contains("intro-open")) { ctx.clearRect(0, 0, W, H); flakes.forEach((f) => { f.y += f.s; f.w += 0.01; f.x += Math.sin(f.w) * 0.3; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fillStyle = `rgba(255,255,255,${f.o})`; ctx.fill(); }); } requestAnimationFrame(draw); })();

@@ -5,11 +5,13 @@
    того же профиля скорости, что и монтаж. */
 
 /* TIMELINE:BEGIN — генерируется tools/retime_intro.py, не править руками */
-const TIMELINE = {"duration": 15.8, "cruise": 0.72, "stations": [2.276, 4.132, 5.988, 7.843, 9.699], "segments": [[0.0, 1.0, 0.15, 0.72], [1.0, 1.376, 0.72, 0.72], [1.376, 2.276, 0.72, 0.2], [2.276, 2.976, 0.2, 0.72], [2.976, 3.232, 0.72, 0.72], [3.232, 4.132, 0.72, 0.2], [4.132, 4.832, 0.2, 0.72], [4.832, 5.088, 0.72, 0.72], [5.088, 5.988, 0.72, 0.2], [5.988, 6.688, 0.2, 0.72], [6.688, 6.943, 0.72, 0.72], [6.943, 7.843, 0.72, 0.2], [7.843, 8.543, 0.2, 0.72], [8.543, 8.799, 0.72, 0.72], [8.799, 9.699, 0.72, 0.2], [9.699, 10.499, 0.2, 0.55], [10.499, 14.802, 0.55, 0.55], [14.802, 15.802, 0.55, 0.35]]};
+const TIMELINE = {"duration": 18.0, "cruise": 0.6, "stations": [2.542, 4.898, 7.255, 9.612, 11.968], "segments": [[0.0, 1.0, 0.15, 0.6], [1.0, 1.642, 0.6, 0.6], [1.642, 2.542, 0.6, 0.2], [2.542, 3.242, 0.2, 0.6], [3.242, 3.998, 0.6, 0.6], [3.998, 4.898, 0.6, 0.2], [4.898, 5.598, 0.2, 0.6], [5.598, 6.355, 0.6, 0.6], [6.355, 7.255, 0.6, 0.2], [7.255, 7.955, 0.2, 0.6], [7.955, 8.712, 0.6, 0.6], [8.712, 9.612, 0.6, 0.2], [9.612, 10.312, 0.2, 0.6], [10.312, 11.068, 0.6, 0.6], [11.068, 11.968, 0.6, 0.2], [11.968, 12.768, 0.2, 0.42], [12.768, 17.025, 0.42, 0.42], [17.025, 18.025, 0.42, 0.35]]};
 /* TIMELINE:END */
 
 const CFG = {
   hold: 1800,      // пауза на станции, мс
+  preroll: 4,      // с: сколько ролика должно быть подгружено перед стартом
+  prerollMax: 8000,// мс: дольше не ждём — едем с тем, что есть
   maxSpeed: 68,    // км/ч на спидометре при обычном ходе
   startAlt: 220,   // м, высота на старте
 };
@@ -37,11 +39,11 @@ function initIntro(root, opts) {
   const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"), stage = $(".stage"),
         speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), startScreen = $("#start"), goBtn = $("#go"), hint = $("#hint");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const st = { phase: "start", idx: 0, card: null, holdTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, windK: -1, suspended: false };
+  const st = { phase: "start", idx: 0, card: null, holdTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, windK: -1, suspended: false, buffering: false, loadTimer: 0 };
 
   /* ---------- Спидометр и высота ---------- */
   function hud(t) {
-    const k = st.phase === "run" ? speedAt(t) / TIMELINE.cruise : 0;
+    const k = st.phase === "run" && !st.buffering ? speedAt(t) / TIMELINE.cruise : 0;
     const sp = Math.round(CFG.maxSpeed * Math.min(1, k));
     const alt = Math.max(0, Math.round(CFG.startAlt * (1 - t / TIMELINE.duration)));
     if (sp !== st.shownSpeed) { speedEl.textContent = sp; st.shownSpeed = sp; }
@@ -99,7 +101,7 @@ function initIntro(root, opts) {
     st.idx++; st.phase = "run"; play();
   }
   function play() {
-    hint.classList.remove("show");
+    if (!st.buffering) hint.classList.remove("show");
     const p = v.play();
     if (p && p.catch) p.catch((err) => {
       if (st.suspended || st.phase !== "run" || !err || err.name !== "NotAllowedError") return;
@@ -109,9 +111,29 @@ function initIntro(root, opts) {
     watch();
   }
   function unblock() { if (st.phase !== "blocked") return; st.phase = "run"; play(); }
+
+  /* ---------- Загрузка ролика ----------
+     Перед стартом ждём, пока подгрузится запас (CFG.preroll с), чтобы спуск не замирал на медленной сети;
+     показываем «Готовим спуск… N%». Если буфер иссяк по дороге (событие waiting) — подсказка и нулевая
+     скорость на спидометре, пока видео само не продолжит (playing). */
+  const bufferedAhead = (t) => { const b = v.buffered; for (let i = 0; i < b.length; i++) if (b.start(i) <= t + 0.1 && b.end(i) > t) return b.end(i) - t; return 0; };
+  const ready = () => v.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA || bufferedAhead(0) >= Math.min(CFG.preroll, TIMELINE.duration - 0.5);
+  function waitForVideo() {
+    st.phase = "loading"; const t0 = performance.now();
+    const show = () => { const pct = Math.min(99, Math.round(bufferedAhead(0) / Math.min(CFG.preroll, TIMELINE.duration) * 100)); hint.textContent = `Готовим спуск… ${pct}%`; hint.classList.add("show"); };
+    const tick = () => {
+      if (st.phase !== "loading") return;
+      if (st.noVideo || noVideoNow()) { finish(); return; }
+      if (ready() || performance.now() - t0 > CFG.prerollMax) { hint.classList.remove("show"); st.phase = "run"; play(); return; }
+      show(); st.loadTimer = setTimeout(tick, 200);
+    };
+    tick();
+  }
+  v.addEventListener("waiting", () => { if (st.phase !== "run" || st.suspended) return; st.buffering = true; stage.classList.add("buffering"); hint.textContent = "Подгружаем видео…"; hint.classList.add("show"); hud(v.currentTime); });
+  v.addEventListener("playing", () => { if (!st.buffering) return; st.buffering = false; stage.classList.remove("buffering"); if (st.phase === "run") hint.classList.remove("show"); });
   function finish() {
     if (st.phase === "end") return;
-    unwatch(); clearTimeout(st.holdTimer); hideCard(); stage.classList.remove("hold"); hint.classList.remove("show");
+    unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer); hideCard(); stage.classList.remove("hold"); stage.classList.remove("buffering"); st.buffering = false; hint.classList.remove("show");
     st.phase = "end"; hud(TIMELINE.duration);
     menu.classList.add("show");
     if (wind.gain) wind.gain.gain.setTargetAtTime(0, wind.ctx.currentTime, 0.4);
@@ -121,7 +143,7 @@ function initIntro(root, opts) {
   v.addEventListener("error", (e) => {
     if (e.target !== v && e.target !== lastSource) return; // первый источник не подошёл — браузер берёт следующий
     st.noVideo = true;                                     // ролик недоступен (офлайн, 404, формат) — сразу меню
-    if (st.phase === "run" || st.phase === "blocked" || st.restoring) finish();
+    if (st.phase === "run" || st.phase === "blocked" || st.phase === "loading" || st.restoring) finish();
   }, true);
   /* Страховка: после старта ролик так и не начал грузиться (нет ни одного источника, ошибка) — показать меню */
   const noVideoNow = () => st.noVideo || !!v.error || (v.readyState === 0 && v.networkState === HTMLMediaElement.NETWORK_NO_SOURCE);
@@ -136,9 +158,10 @@ function initIntro(root, opts) {
     if (reduce) { finish(); return; }
     title.classList.add("show"); setTimeout(() => title.classList.remove("show"), 2200);
     if (st.noVideo) { finish(); return; }
-    st.phase = "run"; st.idx = 0;
-    play(); // если ни один источник не подойдёт, обработчик error покажет меню
-    setTimeout(() => { if (st.phase === "run" && st.idx === 0 && v.currentTime === 0 && noVideoNow()) finish(); }, 2500);
+    st.idx = 0;
+    if (v.preload !== "auto") { v.preload = "auto"; v.load(); }
+    if (ready()) { st.phase = "run"; play(); } else waitForVideo();
+    setTimeout(() => { if ((st.phase === "run" || st.phase === "loading") && st.idx === 0 && v.currentTime === 0 && noVideoNow()) finish(); }, 2500);
   });
 
   /* Клик мимо карточки во время остановки — едем дальше; пробел/Enter — тоже; Esc — на сайт */
@@ -194,7 +217,7 @@ function initIntro(root, opts) {
   return {
     /* Слой спрятан (переход на главную): всё останавливаем, место спуска запоминаем */
     suspend() {
-      st.suspended = true; unwatch(); clearTimeout(st.holdTimer);
+      st.suspended = true; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
       try { v.pause(); } catch {}
       if (wind.ctx && wind.ctx.state === "running") wind.ctx.suspend().catch(() => {});
     },
@@ -203,9 +226,10 @@ function initIntro(root, opts) {
       st.suspended = false;
       if (st.phase === "hold") armHold();
       else if (st.phase === "run") play();
+      else if (st.phase === "loading") waitForVideo();
       if (st.phase !== "start" && st.phase !== "end" && wind.wake) wind.wake();
     },
-    progress() { return { phase: st.phase, idx: st.idx, t: Math.round(v.currentTime * 1000) / 1000 }; },
+    progress() { return { phase: st.phase === "loading" || st.phase === "blocked" ? "run" : st.phase, idx: st.idx, t: Math.round(v.currentTime * 1000) / 1000 }; },
     /* Возврат «Назад» без кэша страницы: продолжить с сохранённой станции (звук — по касанию) */
     restore(p) {
       if (!p || p.phase === "start") return;
