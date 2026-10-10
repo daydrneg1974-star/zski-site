@@ -2,7 +2,7 @@
 const CFG = {
   pov: false,
   duration: 15,            // если видео не сообщило длительность
-  stations: [0.16, 0.3, 0.44, 0.58, 0.72],   // доли длительности видео, где останавливаемся (после последней — ещё ~3 с спуска)
+  stations: [0.14, 0.27, 0.40, 0.53, 0.66],   // доли длительности видео (11 с): последняя остановка ≈7.3 с, дальше ≈3.5 с спуска до финала
   slowBefore: 0.9,         // за сколько секунд до станции начинаем тормозить
   minRate: 0.3,            // минимальная скорость перед остановкой
   hold: 2300,              // пауза на станции, мс
@@ -19,7 +19,7 @@ const STATIONS = [
 
 const $ = (s) => document.querySelector(s);
 const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"),
-      speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), hint = $("#hint"), playBtn = $("#play"), stage = $(".stage");
+      speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), hint = $("#hint"), startScreen = $("#start"), goBtn = $("#go"), stage = $(".stage");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 if (CFG.pov) document.body.classList.add("pov");
 
@@ -93,13 +93,18 @@ function start() {
 v.addEventListener("playing", () => { if (!st.started) { st.usingVideo = true; v.classList.add("on"); start(); } }, { once: true });
 v.addEventListener("ended", () => { if (st.idx >= STATIONS.length) finish(); else { arrive(st.idx); st.holdTimer = setTimeout(() => { hideCard(); finish(); }, CFG.hold + 600); } });
 v.addEventListener("error", () => { if (!st.started) { st.usingVideo = false; start(); } }, { once: true });
-function tryPlay() { const pr = v.play(); if (pr && pr.catch) pr.catch(() => { if (!st.started) playBtn.classList.add("show"); }); }
-playBtn.addEventListener("click", () => { playBtn.classList.remove("show"); startWind(); wind.resumeOnGesture && wind.resumeOnGesture(); tryPlay(); setTimeout(() => { if (!st.started) start(); }, 800); });
-if (v.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE) tryPlay();
-setTimeout(() => { if (!st.started && !playBtn.classList.contains("show")) start(); }, 2500);
-if (reduce) setTimeout(finish, 300);
-
-requestAnimationFrame(() => { fade.classList.add("out"); title.classList.add("show"); setTimeout(() => fade.remove(), 1500); });
+function tryPlay() { const pr = v.play(); if (pr && pr.catch) pr.catch(() => { setTimeout(() => { if (!st.started) start(); }, 300); }); }
+/* Старт только по кнопке: клик — это жест пользователя, поэтому и видео, и ветер стартуют сразу со звуком */
+goBtn.addEventListener("click", () => {
+  startScreen.classList.add("off");
+  startWind(); wind.resumeOnGesture && wind.resumeOnGesture();
+  if (reduce) { finish(); return; }
+  title.classList.add("show");
+  if (v.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE) tryPlay(); else start();
+  setTimeout(() => { if (!st.started) start(); }, 2500);
+});
+v.load();
+requestAnimationFrame(() => { fade.classList.add("out"); setTimeout(() => fade.remove(), 1500); });
 
 /* Клик мимо карточки во время остановки — едем дальше; Esc — на сайт */
 addEventListener("click", (e) => { if (e.target.closest("a,button")) return; if (st.holding) resume(); });
@@ -127,6 +132,5 @@ function startWind() {
     wind.resumeOnGesture = () => { if (ctx.state !== "running" && !wind.muted) ctx.resume().then(sync); };
   } catch {}
 }
-/* Пробуем включить звук сразу (сработает, если браузер уже разрешил автозапуск для сайта), иначе — по первому жесту */
-startWind();
-["pointerdown", "keydown", "touchstart"].forEach((ev) => addEventListener(ev, () => { startWind(); wind.resumeOnGesture && wind.resumeOnGesture(); }, { passive: true }));
+/* Если контекст звука был приостановлен браузером — возобновляем при любом жесте после старта */
+["pointerdown", "keydown", "touchstart"].forEach((ev) => addEventListener(ev, () => { if (startScreen.classList.contains("off")) { startWind(); wind.resumeOnGesture && wind.resumeOnGesture(); } }, { passive: true }));

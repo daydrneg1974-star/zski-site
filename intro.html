@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/intro.css?v=202610100544">
+<link rel="stylesheet" href="css/intro.css?v=202610100556">
 </head>
 <body>
 <div class="stage">
@@ -30,7 +30,7 @@
     <span style="display:flex;gap:8px;align-items:center"><button class="skip" id="mute" type="button" hidden aria-label="Звук">🔊</button><a class="skip" href="index.html">Пропустить →</a></span>
   </div>
   <div class="center" id="center">
-    <div class="title" id="title"><h1>Ваш спуск к прокату</h1><p>Пять остановок по пути · выберите, куда свернуть</p></div>
+    <div class="title" id="title"><h1>Вершина</h1><p>Поехали вниз — первая остановка через пару секунд</p></div>
   </div>
   <div class="hud-bottom">
     <div class="meter"><b id="speed">0</b><span>км/ч</span></div>
@@ -56,9 +56,17 @@
   </div>
 </div>
 
-<button class="play" id="play" type="button"><span>▶</span>Поехали</button>
+<div class="start" id="start">
+  <div class="start-inner">
+    <img class="start-logo" src="img/logo.png" alt="ZSKI">
+    <h1>Ваш спуск к прокату</h1>
+    <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
+    <button class="btn-start" id="go" type="button"><span>▶</span>Поехали</button>
+    <a class="start-skip" href="index.html">Сразу на сайт →</a>
+  </div>
+</div>
 <div class="fade" id="fade"></div>
 <noscript><div style="position:fixed;inset:0;display:grid;place-items:center;background:#1a2230"><a href="index.html" style="color:#fff">Перейти на сайт →</a></div></noscript>
-<script src="js/intro.js?v=202610100544"></script>
+<script src="js/intro.js?v=202610100556"></script>
 </body>
 </html>

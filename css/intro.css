@@ -89,3 +89,18 @@ body.pov .lens{display:block}
 /* Кнопка звука, когда браузер запретил автозапуск */
 .skip.attn{background:linear-gradient(135deg,#ff4b3e,var(--accent));border-color:transparent;animation:attn 1.6s ease-in-out infinite}
 @keyframes attn{50%{box-shadow:0 0 0 10px rgba(227,36,27,.25)}}
+
+/* Стартовый экран */
+.start{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:24px;text-align:center;color:#fff;background:radial-gradient(ellipse at 50% 40%,rgba(10,16,28,.25),rgba(10,16,28,.8));backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transition:opacity .6s,visibility .6s}
+.start.off{opacity:0;visibility:hidden;pointer-events:none}
+.start-inner{max-width:560px;display:grid;justify-items:center;gap:14px}
+.start-logo{width:92px;height:92px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 6px rgba(255,255,255,.12),0 18px 50px rgba(0,0,0,.5)}
+.start h1{margin:6px 0 0;font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,4rem);line-height:1.02;letter-spacing:-.02em;text-shadow:0 6px 30px rgba(0,0,0,.5)}
+.start p{margin:0;font-size:clamp(.95rem,1.6vw,1.15rem);color:rgba(255,255,255,.82);max-width:46ch}
+.btn-start{margin-top:14px;display:inline-flex;align-items:center;gap:14px;padding:12px 30px 12px 12px;border:0;border-radius:999px;cursor:pointer;color:#fff;font-family:var(--display);font-weight:800;font-size:1.15rem;background:linear-gradient(135deg,#ff4b3e,var(--accent));box-shadow:0 14px 40px rgba(227,36,27,.45);animation:startPulse 2.2s ease-in-out infinite;transition:transform .2s}
+.btn-start:hover{transform:translateY(-2px) scale(1.03)}
+.btn-start span{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:1.3rem;padding-left:4px}
+@keyframes startPulse{0%,100%{box-shadow:0 14px 40px rgba(227,36,27,.45)}50%{box-shadow:0 14px 56px rgba(227,36,27,.75),0 0 0 10px rgba(227,36,27,.12)}}
+.start-skip{color:rgba(255,255,255,.7);font-size:.9rem;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:2px}
+.start-skip:hover{color:#fff}
+@media (prefers-reduced-motion:reduce){.btn-start{animation:none}}
