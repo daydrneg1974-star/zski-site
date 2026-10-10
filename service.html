@@ -15,10 +15,13 @@
 <meta name="theme-color" content="#f3f5f9">
 <link rel="icon" href="img/favicon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/unbounded-800-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/manrope-500-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/style.css">
+<meta name="view-transition" content="same-origin">
+<script type="speculationrules">{"prerender":[{"source":"document","where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}</script>
+
 
 </head>
 <body>
@@ -65,14 +68,14 @@
   </div>
 </section>
 
-<section class="section" style="padding-top:0">
+<section class="section band-navy">
   <div class="wrap">
     <div class="grid grid-2" style="align-items:center">
       <div class="gallery even" style="grid-template-columns:1fr 1fr">
-        <figure data-ph><img src="img/photos/technician-2.jpg" alt="Ручная подготовка лыж" loading="lazy" data-fallback><figcaption>Ручная подготовка лыж</figcaption></figure>
-        <figure data-ph><img src="img/photos/service-machine.jpg" alt="Станок для шлифовки и заточки" loading="lazy" data-fallback><figcaption>Станок для шлифовки и заточки</figcaption></figure>
-        <figure data-ph><img src="img/photos/service-room.jpg" alt="Мастерская ZSKI" loading="lazy" data-fallback><figcaption>Мастерская ZSKI</figcaption></figure>
-        <figure data-ph><img src="img/photos/bindings.jpg" alt="Установка и регулировка креплений" loading="lazy" data-fallback><figcaption>Установка и регулировка креплений</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/technician-2.webp" type="image/webp"><img src="img/photos/technician-2.jpg" alt="Ручная подготовка лыж" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Ручная подготовка лыж</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/service-machine.webp" type="image/webp"><img src="img/photos/service-machine.jpg" alt="Станок для шлифовки и заточки" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Станок для шлифовки и заточки</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/service-room.webp" type="image/webp"><img src="img/photos/service-room.jpg" alt="Мастерская ZSKI" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Мастерская ZSKI</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/bindings.webp" type="image/webp"><img src="img/photos/bindings.jpg" alt="Установка и регулировка креплений" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Установка и регулировка креплений</figcaption></figure>
       </div>
       <div>
         <span class="eyebrow">Когда пора в сервис</span>
@@ -145,5 +148,6 @@
 </div>
 <script src="js/data.js"></script>
 <script src="js/main.js"></script>
+<script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
 </body>
 </html>

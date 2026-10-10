@@ -15,10 +15,12 @@
 <meta name="theme-color" content="#f3f5f9">
 <link rel="icon" href="img/favicon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/unbounded-800-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/manrope-500-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/style.css">
+<meta name="view-transition" content="same-origin">
+<script type="speculationrules">{"prerender":[{"source":"document","where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -39,6 +41,7 @@
   "sameAs": ["https://yandex.ru/maps/org/zski_prokat_lyzh_i_snoubordov/35493323132/"]
 }
 </script>
+<link rel="preload" as="image" href="img/photos/hero-freeride.webp" type="image/webp">
 </head>
 <body>
 <a class="skip" href="#main">К содержанию</a>
@@ -59,7 +62,7 @@
 <main id="main">
 
 <section class="hero">
-  <div class="hero-media" data-ph><img src="img/photos/hero-freeride.jpg" alt="Фрирайд: лыжник в прыжке над заснеженным склоном" fetchpriority="high" data-fallback></div>
+  <div class="hero-media" data-ph><picture><source srcset="img/photos/hero-freeride.webp" type="image/webp"><img src="img/photos/hero-freeride.jpg" alt="Фрирайд: лыжник в прыжке над заснеженным склоном" fetchpriority="high" decoding="async" data-fallback></picture></div>
   <canvas class="snow" aria-hidden="true"></canvas>
   <div class="wrap">
     <span class="eyebrow">Яхрома · 61-й км Дмитровского шоссе</span>
@@ -71,6 +74,7 @@
     </div>
     <div class="hero-badges">
       <span class="badge status" data-status></span>
+      <span class="badge" data-weather hidden></span>
       <span class="badge">Оплата картой</span>
       <span class="badge">Шлемы и маски в наличии</span>
     </div>
@@ -78,7 +82,7 @@
       <div><b><span data-count="5">0</span>+</b><span>лет на Дмитровском шоссе</span></div>
       <div><b><span data-rating></span> <small>★</small></b><span>рейтинг на Яндекс Картах</span></div>
       <div><b><span data-count="529">0</span></b><span>оценок гостей</span></div>
-      <div><b>02:00</b><span>работаем до — в пятницу и субботу</span></div>
+      <div data-season-stat><b>02:00</b><span>работаем до — в пятницу и субботу</span></div>
     </div>
   </div>
   <div class="scroll-hint" aria-hidden="true"></div>
@@ -104,10 +108,45 @@
   </div>
 </section>
 
+<section class="section band-navy" id="quiz">
+  <div class="wrap">
+    <div class="grid grid-2" style="align-items:center">
+      <div>
+        <span class="eyebrow">Подбор за 30 секунд</span>
+        <h2>Какой комплект вам нужен?</h2>
+        <p class="lead">Три вопроса — и мы покажем комплект, цену за день и что взять с собой. Позвоните, и мы отложим его на ваше имя.</p>
+      </div>
+      <div class="card quiz" data-quiz>
+        <div class="quiz-step" data-step="1">
+          <div class="q">На чём катаетесь?</div>
+          <div class="opts"><button type="button" data-k="type" data-v="ski">Горные лыжи</button><button type="button" data-k="type" data-v="snowboard">Сноуборд</button></div>
+        </div>
+        <div class="quiz-step" data-step="2" hidden>
+          <div class="q">Ваш уровень?</div>
+          <div class="opts"><button type="button" data-k="level" data-v="new">Первый раз</button><button type="button" data-k="level" data-v="mid">Катаюсь уверенно</button><button type="button" data-k="level" data-v="pro">Опытный</button></div>
+        </div>
+        <div class="quiz-step" data-step="3" hidden>
+          <div class="q">На сколько дней?</div>
+          <div class="opts"><button type="button" data-k="days" data-v="1">1 день</button><button type="button" data-k="days" data-v="2">2 дня</button><button type="button" data-k="days" data-v="3">3 дня и больше</button></div>
+        </div>
+        <div class="quiz-result" hidden>
+          <div class="eyebrow" style="margin-bottom:.4rem">Ваш комплект</div>
+          <div class="res-title"></div>
+          <ul class="res-list"></ul>
+          <div class="res-total"></div>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:14px"><a class="btn btn-primary" data-phone href="tel:+79161718621">Отложить комплект</a><a class="btn btn-ghost" href="prices.html#calc">Открыть калькулятор</a></div>
+          <button type="button" class="quiz-again">↺ Начать заново</button>
+        </div>
+        <div class="quiz-progress"><i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="section" style="padding-top:0">
   <div class="wrap">
     <div class="about">
-      <div class="photo" data-ph><img src="img/photos/shop-exterior.jpg" alt="Павильон проката ZSKI на 61-м км Дмитровского шоссе" loading="lazy" data-fallback></div>
+      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp" type="image/webp"><img src="img/photos/shop-exterior.jpg" alt="Павильон проката ZSKI на 61-м км Дмитровского шоссе" loading="lazy" decoding="async" data-fallback ></picture></div>
       <div>
         <span class="eyebrow">О нашем клубе</span>
         <h2>Более 5 лет на Дмитровском шоссе</h2>
@@ -127,14 +166,14 @@
     <span class="eyebrow">Фотоальбом</span>
     <h2>Как выглядит прокат изнутри</h2>
     <div class="album" style="margin-top:22px">
-      <figure data-ph><img src="img/photos/counter.jpg" alt="Стойка выдачи инвентаря" loading="lazy" data-fallback><figcaption>Стойка выдачи инвентаря</figcaption></figure>
-      <figure data-ph><img src="img/photos/snowboards.jpg" alt="Сноуборды с креплениями" loading="lazy" data-fallback><figcaption>Сноуборды с креплениями</figcaption></figure>
-      <figure data-ph><img src="img/photos/ski-racks-2.jpg" alt="Стеллажи с горными лыжами" loading="lazy" data-fallback><figcaption>Стеллажи с горными лыжами</figcaption></figure>
-      <figure data-ph><img src="img/photos/boots-shelf.jpg" alt="Ботинки по размерам" loading="lazy" data-fallback><figcaption>Ботинки по размерам</figcaption></figure>
-      <figure data-ph><img src="img/photos/helmet-skis.jpg" alt="Шлемы и лыжи" loading="lazy" data-fallback><figcaption>Шлемы и лыжи</figcaption></figure>
-      <figure data-ph><img src="img/photos/service-machine.jpg" alt="Станок SKI-сервиса" loading="lazy" data-fallback><figcaption>Станок SKI-сервиса</figcaption></figure>
-      <figure data-ph><img src="img/photos/slope-group.jpg" alt="Наши гости на склоне" loading="lazy" data-fallback><figcaption>Наши гости на склоне</figcaption></figure>
-      <figure data-ph><img src="img/photos/slope-kids.jpg" alt="Детские комплекты" loading="lazy" data-fallback><figcaption>Детские комплекты</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/counter.webp" type="image/webp"><img src="img/photos/counter.jpg" alt="Стойка выдачи инвентаря" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Стойка выдачи инвентаря</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/snowboards.webp" type="image/webp"><img src="img/photos/snowboards.jpg" alt="Сноуборды с креплениями" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Сноуборды с креплениями</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/ski-racks-2.webp" type="image/webp"><img src="img/photos/ski-racks-2.jpg" alt="Стеллажи с горными лыжами" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Стеллажи с горными лыжами</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/boots-shelf.webp" type="image/webp"><img src="img/photos/boots-shelf.jpg" alt="Ботинки по размерам" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Ботинки по размерам</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/helmet-skis.webp" type="image/webp"><img src="img/photos/helmet-skis.jpg" alt="Шлемы и лыжи" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Шлемы и лыжи</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/service-machine.webp" type="image/webp"><img src="img/photos/service-machine.jpg" alt="Станок SKI-сервиса" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Станок SKI-сервиса</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/slope-group.webp" type="image/webp"><img src="img/photos/slope-group.jpg" alt="Наши гости на склоне" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Наши гости на склоне</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/slope-kids.webp" type="image/webp"><img src="img/photos/slope-kids.jpg" alt="Детские комплекты" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Детские комплекты</figcaption></figure>
     </div>
   </div>
 </section>
@@ -175,10 +214,10 @@
         </ol>
       </div>
       <div class="gallery even" style="grid-template-columns:1fr 1fr">
-        <figure data-ph><img src="img/photos/fitting-boots.jpg" alt="Подбираем ботинки по ноге" loading="lazy" data-fallback><figcaption>Подбираем ботинки по ноге</figcaption></figure>
-        <figure data-ph><img src="img/photos/ski-racks.jpg" alt="Горные лыжи всех ростовок" loading="lazy" data-fallback><figcaption>Горные лыжи всех ростовок</figcaption></figure>
-        <figure data-ph><img src="img/photos/helmets.jpg" alt="Шлемы и маски" loading="lazy" data-fallback><figcaption>Шлемы и маски</figcaption></figure>
-        <figure data-ph><img src="img/photos/technician.jpg" alt="Мастер SKI-сервиса за работой" loading="lazy" data-fallback><figcaption>Мастер SKI-сервиса за работой</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/fitting-boots.webp" type="image/webp"><img src="img/photos/fitting-boots.jpg" alt="Подбираем ботинки по ноге" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Подбираем ботинки по ноге</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/ski-racks.webp" type="image/webp"><img src="img/photos/ski-racks.jpg" alt="Горные лыжи всех ростовок" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Горные лыжи всех ростовок</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/helmets.webp" type="image/webp"><img src="img/photos/helmets.jpg" alt="Шлемы и маски" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Шлемы и маски</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/technician.webp" type="image/webp"><img src="img/photos/technician.jpg" alt="Мастер SKI-сервиса за работой" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Мастер SKI-сервиса за работой</figcaption></figure>
       </div>
     </div>
   </div>
@@ -187,7 +226,7 @@
 <section class="section" style="padding-top:0">
   <div class="wrap">
     <div class="banner">
-      <img src="img/photos/service-banner.jpg" alt="Мастер ZSKI готовит лыжи" loading="lazy">
+      <picture><source srcset="img/photos/service-banner.webp" type="image/webp"><img src="img/photos/service-banner.jpg" alt="Мастер ZSKI готовит лыжи" loading="lazy" decoding="async" data-fallback ></picture>
       <div class="inner">
         <span class="eyebrow">SKI-сервис</span>
         <h2>Заточка, парафин, ремонт и хранение</h2>
@@ -211,7 +250,7 @@
   </div>
 </section>
 
-<section class="section" style="padding-top:0">
+<section class="section band-navy">
   <div class="wrap">
     <div class="grid grid-2" style="align-items:center">
       <div>
@@ -259,7 +298,7 @@
   </div>
 </section>
 
-<section class="section" style="padding-top:0">
+<section class="section band-navy">
   <div class="wrap">
     <div class="contact-grid">
       <div>
@@ -314,5 +353,6 @@
 </div>
 <script src="js/data.js"></script>
 <script src="js/main.js"></script>
+<script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
 </body>
 </html>

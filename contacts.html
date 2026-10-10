@@ -15,10 +15,12 @@
 <meta name="theme-color" content="#f3f5f9">
 <link rel="icon" href="img/favicon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/unbounded-800-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/manrope-500-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/style.css">
+<meta name="view-transition" content="same-origin">
+<script type="speculationrules">{"prerender":[{"source":"document","where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -39,6 +41,7 @@
   "sameAs": ["https://yandex.ru/maps/org/zski_prokat_lyzh_i_snoubordov/35493323132/"]
 }
 </script>
+
 </head>
 <body>
 <a class="skip" href="#main">К содержанию</a>
@@ -89,8 +92,8 @@
       <div>
         <div class="map" data-map></div>
         <div class="album" style="grid-template-columns:1fr 1fr;margin-top:18px">
-          <figure data-ph><img src="img/photos/shop-sign.jpg" alt="Наш павильон с вывеской «ПРОКАТ»" loading="lazy" data-fallback><figcaption>Наш павильон с вывеской «ПРОКАТ»</figcaption></figure>
-          <figure data-ph><img src="img/photos/landmark-mcdonalds.jpg" alt="Ориентир — ресторан быстрого питания рядом" loading="lazy" data-fallback><figcaption>Ориентир — ресторан быстрого питания рядом</figcaption></figure>
+          <figure data-ph><picture><source srcset="img/photos/shop-sign.webp" type="image/webp"><img src="img/photos/shop-sign.jpg" alt="Наш павильон с вывеской «ПРОКАТ»" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Наш павильон с вывеской «ПРОКАТ»</figcaption></figure>
+          <figure data-ph><picture><source srcset="img/photos/landmark-mcdonalds.webp" type="image/webp"><img src="img/photos/landmark-mcdonalds.jpg" alt="Ориентир — ресторан быстрого питания рядом" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Ориентир — ресторан быстрого питания рядом</figcaption></figure>
         </div>
         <div class="card" style="margin-top:18px">
           <h2 style="font-size:1.3rem">Как добраться</h2>
@@ -105,7 +108,7 @@
   </div>
 </section>
 
-<section class="section" style="padding-top:0">
+<section class="section band-navy">
   <div class="wrap">
     <div class="grid grid-2" style="align-items:start">
       <div>
@@ -160,5 +163,6 @@
 </div>
 <script src="js/data.js"></script>
 <script src="js/main.js"></script>
+<script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
 </body>
 </html>
