@@ -31,6 +31,6 @@
 </div>
 <script src="js/data.js?v={{BUILD}}"></script>
 <script src="js/main.js?v={{BUILD}}"></script>
-<script>if("serviceWorker"in navigator)addEventListener("load",()=>{const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.register("sw.js").then((r)=>r.update()).catch(()=>{});let once=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!once&&navigator.serviceWorker.controller&&sessionStorage.getItem("zski-sw-reload")!=="1"){once=true;sessionStorage.setItem("zski-sw-reload","1");location.reload();}});});</script>
+<script>if("serviceWorker"in navigator)addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").then((r)=>r.update()).catch(()=>{});});</script>
 </body>
 </html>

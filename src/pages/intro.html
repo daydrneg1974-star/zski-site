@@ -16,8 +16,8 @@
 <body>
 <div class="stage waiting">
   <div class="poster" id="poster" style="background-image:url('img/photos/intro-poster.webp')"></div>
-  <video id="v" muted playsinline preload="auto" poster="img/photos/intro-poster.webp" aria-label="Видео: горнолыжник спускается по склону">
-    <source src="video/descent.webm" type="video/webm">
+  <video id="v" muted playsinline preload="none" poster="img/photos/intro-poster.webp" aria-label="Видео: горнолыжник спускается по склону">
+    <source src="video/descent.webm" type='video/webm; codecs="vp9"'>
     <source src="video/descent.mp4" type="video/mp4">
   </video>
   <div class="shade"></div>
@@ -61,7 +61,7 @@
     <img class="start-logo" src="img/logo-240.webp" alt="ZSKI" width="92" height="92">
     <h1>Ваш спуск к прокату</h1>
     <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
-    <button class="btn-start" id="go" type="button"><span>▶</span>Поехали</button>
+    <button class="btn-start" id="go" type="button" onclick="window.__zskiGo=1"><span>▶</span>Поехали</button>
     <a class="start-skip" href="index.html">Сразу на сайт →</a>
   </div>
 </div>

@@ -3,12 +3,11 @@ title: ZSKI — прокат лыж и сноубордов в Яхроме, Д�
 description: Прокат горных лыж и сноубордов ZSKI в Яхроме (61-й км Дмитровского шоссе, рядом с Сорочанами и парком «Яхрома»). Комплект от 2000 ₽/день, шлемы, маски, SKI-сервис, ремонт и хранение. Открыто до 02:00 в пятницу и субботу.
 canonical: https://zski.ru/
 schema: yes
-preload: img/photos/hero-freeride.webp, img/photos/intro-poster.webp
 intro: yes
 ---
 
 <section class="hero">
-  <div class="hero-media" data-ph><picture><source srcset="img/photos/hero-freeride.webp" type="image/webp"><img src="img/photos/hero-freeride.jpg" alt="Фрирайд: лыжник в прыжке над заснеженным склоном" fetchpriority="high" decoding="async" data-fallback></picture></div>
+  <div class="hero-media" data-ph><picture><source srcset="img/photos/hero-freeride.webp" type="image/webp"><img src="img/photos/hero-freeride.jpg" alt="Фрирайд: лыжник в прыжке над заснеженным склоном" fetchpriority="high" loading="lazy" decoding="async" data-fallback></picture></div>
   <canvas class="snow" aria-hidden="true"></canvas>
   <div class="wrap">
     <span class="eyebrow">Яхрома · 61-й км Дмитровского шоссе</span>
@@ -270,9 +269,5 @@ intro: yes
 
 
 
-<!-- Интро «спуск к прокату»: показывается слоем поверх сайта при открытии главной «снаружи» (см. js/intro.js). Разметка — из src/pages/intro.html. -->
-<template id="intro-tpl">
-<style>{{INTRO_CSS}}</style>
-{{INTRO_MARKUP}}
-</template>
+<!-- Слой интро «спуск к прокату» вставляется сборкой в начало <body> (intro: yes), см. js/intro.js -->
 <script src="js/intro.js?v={{BUILD}}" defer></script>

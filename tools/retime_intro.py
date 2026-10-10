@@ -141,7 +141,8 @@ def main():
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *commonvp9, "-pass", "1", "-f", "null", "-"])
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, *commonvp9, "-pass", "2", out_webm])
     run(["ffmpeg", "-v", "error", "-y", "-i", retimed, "-frames:v", "1", "-q:v", "4", ROOT / "img/photos/intro-poster.jpg"])
-    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, "-frames:v", "1", "-c:v", "libwebp", "-quality", "70",
+    # постер виден на стартовом экране размытым — 960 px хватает, а грузится он вдвое быстрее
+    run(["ffmpeg", "-v", "error", "-y", "-i", retimed, "-frames:v", "1", "-vf", "scale=960:-2", "-c:v", "libwebp", "-quality", "70",
          ROOT / "img/photos/intro-poster.webp"])
 
     # блок TIMELINE в js/intro.js

@@ -35,7 +35,7 @@ function speedAt(t) {
 function initIntro(root, opts) {
   const $ = (s) => root.querySelector(s);
   const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"), stage = $(".stage"),
-        speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), startScreen = $("#start"), goBtn = $("#go");
+        speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), startScreen = $("#start"), goBtn = $("#go"), hint = $("#hint");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const st = { phase: "start", idx: 0, card: null, holdTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, windK: -1, suspended: false };
 
@@ -98,39 +98,71 @@ function initIntro(root, opts) {
     clearTimeout(st.holdTimer); hideCard(); stage.classList.remove("hold");
     st.idx++; st.phase = "run"; play();
   }
-  function play() { const p = v.play(); if (p && p.catch) p.catch(() => {}); watch(); }
+  function play() {
+    hint.classList.remove("show");
+    const p = v.play();
+    if (p && p.catch) p.catch((err) => {
+      if (st.suspended || st.phase !== "run" || !err || err.name !== "NotAllowedError") return;
+      unwatch(); st.phase = "blocked";               // браузер требует касания — просим и ждём
+      hint.textContent = "Коснитесь экрана, чтобы продолжить спуск"; hint.classList.add("show");
+    });
+    watch();
+  }
+  function unblock() { if (st.phase !== "blocked") return; st.phase = "run"; play(); }
   function finish() {
     if (st.phase === "end") return;
-    unwatch(); clearTimeout(st.holdTimer); hideCard(); stage.classList.remove("hold");
+    unwatch(); clearTimeout(st.holdTimer); hideCard(); stage.classList.remove("hold"); hint.classList.remove("show");
     st.phase = "end"; hud(TIMELINE.duration);
     menu.classList.add("show");
     if (wind.gain) wind.gain.gain.setTargetAtTime(0, wind.ctx.currentTime, 0.4);
   }
   v.addEventListener("ended", () => { if (st.phase === "run") finish(); });
-  v.addEventListener("error", () => { if (st.phase === "run") finish(); }, true);
+  const lastSource = v.querySelector("source:last-of-type");
+  v.addEventListener("error", (e) => {
+    if (e.target !== v && e.target !== lastSource) return; // первый источник не подошёл — браузер берёт следующий
+    st.noVideo = true;                                     // ролик недоступен (офлайн, 404, формат) — сразу меню
+    if (st.phase === "run" || st.phase === "blocked" || st.restoring) finish();
+  }, true);
+  /* Страховка: после старта ролик так и не начал грузиться (нет ни одного источника, ошибка) — показать меню */
+  const noVideoNow = () => st.noVideo || !!v.error || (v.readyState === 0 && v.networkState === HTMLMediaElement.NETWORK_NO_SOURCE);
   v.addEventListener("playing", () => v.classList.add("on"), { once: true });
 
   /* ---------- Старт по кнопке: клик — жест пользователя, поэтому звук ветра включается сразу ---------- */
   goBtn.addEventListener("click", () => {
+    window.__zskiGo = 0;
+    if (st.phase !== "start") return;
     startScreen.classList.add("off"); stage.classList.remove("waiting");
     startWind();
     if (reduce) { finish(); return; }
     title.classList.add("show"); setTimeout(() => title.classList.remove("show"), 2200);
+    if (st.noVideo) { finish(); return; }
     st.phase = "run"; st.idx = 0;
-    if (v.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) { finish(); return; }
-    play();
+    play(); // если ни один источник не подойдёт, обработчик error покажет меню
+    setTimeout(() => { if (st.phase === "run" && st.idx === 0 && v.currentTime === 0 && noVideoNow()) finish(); }, 2500);
   });
 
   /* Клик мимо карточки во время остановки — едем дальше; пробел/Enter — тоже; Esc — на сайт */
-  root.addEventListener("click", (e) => { if (e.target.closest("a,button")) return; if (st.phase === "hold") resume(); });
+  root.addEventListener("click", (e) => {
+    if (st.phase === "blocked") { if (!e.target.closest("a")) { e.preventDefault(); unblock(); } return; }
+    if (e.target.closest("a,button")) return;
+    if (st.phase === "hold") resume();
+  });
   const onKey = (e) => {
     if (st.suspended) return;
     if (e.key === "Escape") opts.close();
+    const el = e.composedPath ? e.composedPath()[0] : e.target;  // в Shadow DOM настоящая цель — первая в пути
+    if (el && el.closest && el.closest("a,button,input,select,textarea")) return;
     if ((e.key === " " || e.key === "Enter") && st.phase === "hold") { e.preventDefault(); resume(); }
+    else if ((e.key === " " || e.key === "Enter") && st.phase === "blocked") { e.preventDefault(); unblock(); }
   };
   addEventListener("keydown", onKey);
   $("#replay").addEventListener("click", () => opts.replay());
-  requestAnimationFrame(() => { fade.classList.add("out"); setTimeout(() => fade.remove(), 900); });
+  setTimeout(() => fade.remove(), 600);
+
+  /* Ролик в разметке с preload="none": качаем, только когда плеер действительно запущен */
+  if (v.preload !== "auto") { v.preload = "auto"; v.load(); }
+  /* Нажали «Поехали» раньше, чем загрузился этот скрипт, — стартуем сейчас */
+  if (window.__zskiGo) { window.__zskiGo = 0; setTimeout(() => goBtn.click(), 0); }
 
   /* ---------- Ветер (Web Audio, шум через фильтр) ---------- */
   const wind = {};
@@ -181,11 +213,15 @@ function initIntro(root, opts) {
       if (p.phase === "end") { finish(); return; }
       st.idx = Math.min(p.idx, STATIONS.length);
       const go = () => {
+        if (!st.restoring && st.phase === "end") return;
+        st.restoring = false;
         v.currentTime = p.t || 0; v.classList.add("on");
         if (p.phase === "hold" && st.idx < STATIONS.length) { st.phase = "hold"; stage.classList.add("hold"); showCard(st.idx); armHold(); hud(v.currentTime); }
         else { st.phase = "run"; play(); }
       };
-      if (v.readyState >= 1) go(); else v.addEventListener("loadedmetadata", go, { once: true });
+      if (v.readyState >= 1) go();
+      else if (st.noVideo) finish();                       // ролик недоступен — сразу меню
+      else { st.restoring = true; v.addEventListener("loadedmetadata", go, { once: true }); }
     },
     stop() {
       st.suspended = true; st.phase = "end"; unwatch(); clearTimeout(st.holdTimer);
@@ -198,48 +234,59 @@ function initIntro(root, opts) {
 
 /* ---------- Запуск ----------
    intro.html: плеер на всей странице.
-   index.html: разметка интро лежит в <template id="intro-tpl"> и поднимается слоем поверх сайта
-   (Shadow DOM — стили интро и сайта не пересекаются). Решение «показывать ли интро» принимает
-   маленький скрипт в <head> (src/layout/intro-head.html) ещё до первой отрисовки и ставит
-   <html class="intro-open">, пока слой открыт главная скрыта и не нагружает процессор.
-   История браузера: открытое интро — отдельная запись. Уход на главную («Открыть сайт»,
-   карточка «Прокат», «Пропустить», Esc) добавляет запись, поэтому «Назад» возвращает к спуску
+   index.html: слой <div class="intro-host" hidden> стоит в начале <body> со своей разметкой и стилями в
+   Declarative Shadow DOM (<template shadowrootmode="open">, вставляет src/build.py), поэтому стартовый
+   экран рисуется сразу, без ожидания скриптов. Показывать ли интро, решает скрипт в <head>
+   (src/layout/intro-head.html) до первой отрисовки: ставит <html class="intro-open">, пока слой открыт
+   главная скрыта и не нагружает процессор.
+   История браузера: открытое интро — отдельная запись. Уход на главную («Открыть сайт», карточка
+   «Прокат», «Пропустить», «Сразу на сайт», Esc) добавляет запись, поэтому «Назад» возвращает к спуску
    с того же места. Переход в другой раздел запоминает место спуска в записи истории. */
 (function () {
-  const tpl = document.getElementById("intro-tpl");
-  if (!tpl) {
+  let host = document.querySelector(".intro-host");
+  if (!host) {
     initIntro(document, { close: () => { location.href = "index.html"; }, replay: () => location.reload() });
     return;
   }
-  const html = document.documentElement;
-  const cssHref = document.currentScript ? document.currentScript.src.replace(/js\/intro\.js/, "css/intro.css") : "css/intro.css";
-  let host = null, ctl = null, hideTimer = 0;
-  const KEY = "zskiIntro";
+  const html = document.documentElement, KEY = "zskiIntro", boot = window.__zskiIntro || {};
+  boot.booted = true;
+  /* Браузер без Declarative Shadow DOM: собрать теневое дерево из <template> вручную */
+  const rootOf = (h) => {
+    if (!h.shadowRoot) {
+      const t = h.querySelector("template"), r = h.attachShadow({ mode: "open" });
+      if (t) { r.appendChild(t.content.cloneNode(true)); t.remove(); }
+    }
+    return h.shadowRoot;
+  };
+  const pristine = rootOf(host).innerHTML; // исходная разметка — для «Проехать ещё раз»
+  let ctl = null, hideTimer = 0;
   const setState = (extra, push, url) => {
     const s = Object.assign({}, history.state || {}, extra);
     try { push ? history.pushState(s, "", url) : history.replaceState(s, "", url); } catch {}
   };
   const samePage = (href) => {
-    const u = new URL(href, location.href);
-    const strip = (p) => p.replace(/index\.html$/, "");
+    const u = new URL(href, location.href), strip = (p) => p.replace(/index\.html$/, "");
     return u.origin === location.origin && strip(u.pathname) === strip(location.pathname) ? u : null;
   };
 
-  function mount() {
-    if (host) { ctl.stop(); host.remove(); }
-    host = document.createElement("div");
-    host.className = "intro-host"; host.setAttribute("role", "dialog"); host.setAttribute("aria-label", "Видео-интро: спуск к прокату");
-    const root = host.attachShadow({ mode: "open" });
-    root.innerHTML = `<link rel="stylesheet" href="${cssHref}">` + tpl.innerHTML;
-    document.body.appendChild(host);
+  /* Запустить плеер в слое; fresh — заново, с чистой разметкой */
+  function mount(fresh) {
+    if (ctl) ctl.stop();
+    if (fresh && ctl) {
+      const h = document.createElement("div");
+      h.className = host.className; h.setAttribute("role", "dialog"); h.setAttribute("aria-label", host.getAttribute("aria-label"));
+      h.attachShadow({ mode: "open" }).innerHTML = pristine;
+      host.replaceWith(h); host = h;
+    }
+    const root = rootOf(host);
     root.addEventListener("click", (e) => {
       const a = e.target.closest("a[href]"); if (!a) return;
       const u = samePage(a.getAttribute("href"));
       if (u) { e.preventDefault(); hide(true, u.hash); return; }
       setState({ [KEY]: "open", p: ctl.progress() }); // уходим в другой раздел — запомнить место спуска
     }, true);
-    ctl = initIntro(root, { close: () => hide(true, ""), replay: () => { mount(); show(); } });
-    return ctl;
+    ctl = initIntro(root, { close: () => hide(true, ""), replay: () => { mount(true); show(); } });
+    host.dataset.ready = "1";
   }
   function show() {
     clearTimeout(hideTimer);
@@ -248,7 +295,7 @@ function initIntro(root, opts) {
     ctl.wake();
   }
   function hide(push, hash) {
-    if (!host || host.hidden) return;
+    if (!ctl || host.hidden) return;
     ctl.suspend();
     if (push) setState({ [KEY]: "closed", p: null }, true, hash || location.pathname + location.search);
     html.classList.remove("intro-open");          // главная строится под ещё видимым слоем…
@@ -263,22 +310,23 @@ function initIntro(root, opts) {
 
   addEventListener("popstate", (e) => {
     const s = e.state || {};
-    if (s[KEY] === "open") { if (!host) { mount(); ctl.restore(s.p); } show(); }
+    if (s[KEY] === "open") { if (!ctl) { mount(false); ctl.restore(s.p); } show(); }
     else hide(false, "");
   });
   /* Возврат из кэша страниц (bfcache): слой остался как был — продолжить с того же места */
-  addEventListener("pageshow", (e) => { if (e.persisted && host && !host.hidden) ctl.wake(); });
+  addEventListener("pageshow", (e) => { if (e.persisted && ctl && !host.hidden) ctl.wake(); });
 
   /* Кнопка «▶ Спуск к прокату» на первом экране: новый спуск, отдельная запись истории */
   document.querySelectorAll("a[data-intro]").forEach((a) => a.addEventListener("click", (e) => {
-    e.preventDefault(); mount(); show(); setState({ [KEY]: "open", p: null }, true);
+    e.preventDefault(); mount(true); show(); setState({ [KEY]: "open", p: null }, true);
   }));
 
-  const boot = window.__zskiIntro;
-  if (boot && boot.show) {
-    mount();
+  if (boot.show && html.classList.contains("intro-open")) {
+    mount(false);
     if (boot.restore) ctl.restore(boot.restore);
     show();
     setState({ [KEY]: "open", p: null });
+  } else {
+    host.hidden = true;
   }
 })();
