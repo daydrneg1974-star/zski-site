@@ -1,0 +1,15 @@
+# Проверка, что HTML в корне собран из актуальных исходников src/ (python3 src/build.py --check).
+# Не блокирует публикацию: деплой идёт отдельным workflow pages.yml.
+name: Check build
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: python3 src/build.py --check

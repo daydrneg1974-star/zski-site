@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZSKI — спуск к прокату</title>
+<meta name="description" content="Видео-интро ZSKI: спуск горнолыжника к прокату лыж и сноубордов в Яхроме.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1a2230">
+<link rel="icon" href="img/favicon-64.png" type="image/png">
+<link rel="preload" href="fonts/unbounded-800-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/manrope-700-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css?v={{BUILD}}">
+<link rel="stylesheet" href="css/intro.css?v={{BUILD}}">
+</head>
+<body>
+<div class="stage">
+  <div class="poster" id="poster" style="background-image:url('img/photos/intro-poster.jpg')"></div>
+  <video id="v" muted playsinline preload="auto" poster="img/photos/intro-poster.jpg" aria-label="Видео: горнолыжник спускается по склону">
+    <source src="video/descent.webm" type="video/webm">
+    <source src="video/descent.mp4" type="video/mp4">
+  </video>
+  <div class="shade"></div>
+  <div class="lens" aria-hidden="true"></div>
+</div>
+
+<div class="hud">
+  <div class="hud-top">
+    <a class="brand" href="index.html"><img src="img/logo.png" alt="">ZSKI</a>
+    <span style="display:flex;gap:8px;align-items:center"><button class="skip" id="mute" type="button" hidden aria-label="Звук">🔊</button><a class="skip" href="index.html">Пропустить →</a></span>
+  </div>
+  <div class="center" id="center">
+    <div class="title" id="title"><h1>Вершина</h1><p>Поехали вниз — первая остановка через пару секунд</p></div>
+  </div>
+  <div class="hud-bottom">
+    <div class="meter"><b id="speed">0</b><span>км/ч</span></div>
+    <div class="hint" id="hint">Клик или касание — к прокату</div>
+    <div class="meter right"><b id="alt">220</b><span>м · высота</span></div>
+  </div>
+</div>
+
+<div class="menu" id="menu" role="dialog" aria-label="Разделы сайта">
+  <div class="panel">
+    <h2>Вы у проката ZSKI</h2>
+    <p>61-й км Дмитровского шоссе, Яхрома. Куда дальше?</p>
+    <div class="links">
+      <a class="main" href="index.html">Открыть сайт</a>
+      <a href="index.html#prokat">Прокат<small>лыжи и сноуборды</small></a>
+      <a href="prices.html">Цены<small>от 500 ₽ в день</small></a>
+      <a href="service.html">SKI-сервис<small>заточка, парафин</small></a>
+      <a href="slopes.html">Склоны<small>Сорочаны, Волен…</small></a>
+      <a href="contacts.html">Контакты<small>карта, график</small></a>
+    </div>
+    <button class="replay" id="replay" type="button">↺ Проехать ещё раз</button>
+    <p style="margin:14px 0 0;font-size:.72rem;color:#9fb0c7">Видео: нейросетевая генерация для ZSKI</p>
+  </div>
+</div>
+
+<div class="start" id="start">
+  <div class="start-inner">
+    <img class="start-logo" src="img/logo.png" alt="ZSKI">
+    <h1>Ваш спуск к прокату</h1>
+    <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
+    <button class="btn-start" id="go" type="button"><span>▶</span>Поехали</button>
+    <a class="start-skip" href="index.html">Сразу на сайт →</a>
+  </div>
+</div>
+<div class="fade" id="fade"></div>
+<noscript><div style="position:fixed;inset:0;display:grid;place-items:center;background:#1a2230"><a href="index.html" style="color:#fff">Перейти на сайт →</a></div></noscript>
+<script src="js/intro.js?v={{BUILD}}"></script>
+</body>
+</html>
