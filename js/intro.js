@@ -1,81 +1,112 @@
-/* ZSKI — видео-интро. Настройки ниже. */
+/* ZSKI — видео-интро «станции»: лыжник плавно тормозит, кадр замирает, появляется кликабельная карточка раздела. */
 const CFG = {
-  pov: false,                 // true — показывать маску горнолыжных очков (для съёмки от первого лица)
-  duration: 15,               // длительность спуска по умолчанию, если видео не сообщило свою
-  gatesAt: [0.1, 0.27, 0.44, 0.61, 0.78],   // доли длительности, когда появляются ворота-разделы
-  menuAt: 0.97,               // доля длительности, когда появляется меню
-  maxSpeed: 68,               // км/ч на счётчике
-  startAlt: 220
+  pov: false,
+  duration: 15,            // если видео не сообщило длительность
+  stations: [0.21, 0.38, 0.55, 0.71, 0.87],   // доли длительности видео, где останавливаемся
+  slowBefore: 0.9,         // за сколько секунд до станции начинаем тормозить
+  minRate: 0.3,            // минимальная скорость перед остановкой
+  hold: 1400,              // пауза на станции, мс
+  maxSpeed: 68,
+  startAlt: 220,
 };
-const GATES = [
-  { label: "ПРОКАТ",     sub: "лыжи · сноуборды", href: "index.html#prokat", dx: -260 },
-  { label: "ЦЕНЫ",       sub: "от 500 ₽ в день",  href: "prices.html",       dx: 240 },
-  { label: "SKI-СЕРВИС", sub: "заточка · парафин", href: "service.html",      dx: -220 },
-  { label: "СКЛОНЫ",     sub: "Сорочаны · Волен",  href: "slopes.html",       dx: 260 },
-  { label: "КОНТАКТЫ",   sub: "61-й км Дмитровки", href: "contacts.html",     dx: 0 },
+const STATIONS = [
+  { n: "01", label: "Прокат",     sub: "Лыжи и сноуборды известных брендов",     href: "index.html#prokat", side: "right" },
+  { n: "02", label: "Цены",       sub: "От 500 ₽ в день, калькулятор комплекта",  href: "prices.html",       side: "left" },
+  { n: "03", label: "SKI-сервис", sub: "Заточка, парафин, ремонт, хранение",      href: "service.html",      side: "right" },
+  { n: "04", label: "Склоны",     sub: "Сорочаны, Волен, Степаново, «Яхрома»",    href: "slopes.html",       side: "left" },
+  { n: "05", label: "Контакты",   sub: "61-й км Дмитровского шоссе, карта, график", href: "contacts.html",   side: "right" },
 ];
 
 const $ = (s) => document.querySelector(s);
-const v = $("#v"), poster = $("#poster"), fade = $("#fade"), title = $("#title"), center = $("#center"),
-      speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), hint = $("#hint"), playBtn = $("#play");
+const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"),
+      speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), hint = $("#hint"), playBtn = $("#play"), stage = $(".stage");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 if (CFG.pov) document.body.classList.add("pov");
 
-const state = { t0: 0, dur: CFG.duration, started: false, done: false, gate: 0, usingVideo: false, fast: false, raf: 0 };
+const st = { started: false, done: false, usingVideo: false, rate: 1, target: 1, idx: 0, holding: false, t0: 0, dur: CFG.duration, raf: 0, fakeT: 0, card: null, holdTimer: 0 };
 
+/* ---------- Карточка станции ---------- */
+function showCard(i) {
+  const s = STATIONS[i];
+  const a = document.createElement("a");
+  a.className = `station ${s.side}`; a.href = s.href;
+  a.innerHTML = `<span class="num">${s.n}</span><span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
+  center.appendChild(a); requestAnimationFrame(() => a.classList.add("in"));
+  st.card = a; stage.classList.add("hold");
+}
+function hideCard() {
+  const a = st.card; if (!a) return; st.card = null; stage.classList.remove("hold");
+  a.classList.remove("in"); a.classList.add("out"); setTimeout(() => a.remove(), 600);
+}
 function finish() {
-  if (state.done) return; state.done = true;
+  if (st.done) return; st.done = true; hideCard();
   hint.style.display = "none"; menu.classList.add("show");
   if (wind.gain) wind.gain.gain.setTargetAtTime(0, wind.ctx.currentTime, 0.4);
 }
-function spawnGate(i) {
-  const g = GATES[i]; const a = document.createElement("a");
-  a.className = "gate"; a.href = g.href; a.innerHTML = `${g.label}<small>${g.sub}</small>`;
-  a.style.setProperty("--dx", g.dx + "px"); a.style.setProperty("--dur", (state.fast ? 1.2 : Math.max(1.8, Math.min(3.4, state.dur * 0.24))) + "s");
-  center.appendChild(a); requestAnimationFrame(() => a.classList.add("fly"));
-  a.addEventListener("animationend", () => a.remove());
+
+/* ---------- Время: видео или таймер на фото ---------- */
+const now = () => (st.usingVideo ? v.currentTime : st.fakeT);
+const total = () => (st.usingVideo && isFinite(v.duration) && v.duration > 1 ? v.duration : st.dur);
+
+function arrive(i) {
+  st.holding = true; st.rate = 0; if (st.usingVideo) v.pause(); title.classList.remove("show");
+  showCard(i);
+  st.holdTimer = setTimeout(resume, CFG.hold);
 }
-function progress() { return Math.min(1, (state.usingVideo && v.duration ? v.currentTime / v.duration : (performance.now() - state.t0) / 1000 / state.dur) * (state.fast ? 1 : 1)); }
-function tick() {
-  if (state.done) return;
-  let p = progress();
-  if (state.fast && !state.usingVideo) p = Math.min(1, p + 0.0 );
-  const speedCurve = Math.sin(Math.min(1, p / 0.25) * Math.PI / 2) * (p > 0.88 ? Math.max(0, (1 - p) / 0.12) : 1);
-  speedEl.textContent = Math.round(CFG.maxSpeed * speedCurve);
+function resume() {
+  if (!st.holding) return; st.holding = false; clearTimeout(st.holdTimer);
+  hideCard(); st.idx++; st.target = 1;
+  if (st.usingVideo) { v.play().catch(() => {}); }
+}
+
+let last = performance.now();
+function loop(ts) {
+  if (st.done) return;
+  const dt = Math.min(0.05, (ts - last) / 1000); last = ts;
+  const T = total(), t = now();
+  if (!st.holding) {
+    /* торможение перед станцией */
+    const next = st.idx < STATIONS.length ? CFG.stations[st.idx] * T : Infinity;
+    const toNext = next - t;
+    if (toNext <= 0.02) { arrive(st.idx); }
+    else {
+      st.target = toNext < CFG.slowBefore ? Math.max(CFG.minRate, toNext / CFG.slowBefore) : 1;
+      st.rate += (st.target - st.rate) * Math.min(1, dt * 6);
+      if (st.usingVideo) { try { v.playbackRate = Math.max(0.1, st.rate); } catch {} }
+      else st.fakeT += dt * st.rate;
+    }
+  }
+  const p = Math.min(1, t / T);
+  speedEl.textContent = Math.round(CFG.maxSpeed * (st.holding ? 0 : Math.min(1, st.rate) * Math.min(1, p / 0.12 + 0.2)));
   altEl.textContent = Math.max(0, Math.round(CFG.startAlt * (1 - p)));
-  while (state.gate < CFG.gatesAt.length && p >= CFG.gatesAt[state.gate]) { spawnGate(state.gate); state.gate++; }
-  if (wind.gain) { wind.gain.gain.setTargetAtTime(0.45 * speedCurve, wind.ctx.currentTime, 0.2); wind.filter.frequency.setTargetAtTime(160 + 900 * speedCurve, wind.ctx.currentTime, 0.2); }
-  if (p >= CFG.menuAt) finish(); else state.raf = requestAnimationFrame(tick);
+  if (wind.gain) { const k = st.holding ? 0 : st.rate; wind.gain.gain.setTargetAtTime(0.4 * k, wind.ctx.currentTime, 0.25); wind.filter.frequency.setTargetAtTime(160 + 800 * k, wind.ctx.currentTime, 0.25); }
+  if (!st.usingVideo && p >= 0.995 && st.idx >= STATIONS.length) finish();
+  st.raf = requestAnimationFrame(loop);
 }
 function start() {
-  if (state.started) return; state.started = true; state.t0 = performance.now();
-  setTimeout(() => title.classList.remove("show"), Math.min(3600, state.dur * 300));
-  tick();
+  if (st.started) return; st.started = true; last = performance.now();
+  setTimeout(() => title.classList.remove("show"), 2200);
+  requestAnimationFrame(loop);
 }
 
-/* Видео: пробуем автозапуск; если браузер запретил — кнопка «Поехали»; если файла нет — спуск по таймеру на фото */
-v.addEventListener("playing", () => { state.usingVideo = true; v.classList.add("on"); start(); }, { once: true });
-v.addEventListener("ended", finish);
-v.addEventListener("error", () => { state.usingVideo = false; start(); }, { once: true });
-v.addEventListener("loadedmetadata", () => { if (isFinite(v.duration) && v.duration > 3) state.dur = v.duration; });
-function tryPlay() {
-  const pr = v.play();
-  if (pr && pr.catch) pr.catch(() => { if (!state.started) { playBtn.classList.add("show"); } });
-}
-playBtn.addEventListener("click", () => { playBtn.classList.remove("show"); startWind(); tryPlay(); setTimeout(() => { if (!state.started) start(); }, 800); });
+/* ---------- Видео ---------- */
+v.addEventListener("playing", () => { if (!st.started) { st.usingVideo = true; v.classList.add("on"); start(); } }, { once: true });
+v.addEventListener("ended", () => { if (st.idx >= STATIONS.length) finish(); else { arrive(st.idx); st.holdTimer = setTimeout(() => { hideCard(); finish(); }, CFG.hold + 600); } });
+v.addEventListener("error", () => { if (!st.started) { st.usingVideo = false; start(); } }, { once: true });
+function tryPlay() { const pr = v.play(); if (pr && pr.catch) pr.catch(() => { if (!st.started) playBtn.classList.add("show"); }); }
+playBtn.addEventListener("click", () => { playBtn.classList.remove("show"); startWind(); tryPlay(); setTimeout(() => { if (!st.started) start(); }, 800); });
 if (v.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE) tryPlay();
-setTimeout(() => { if (!state.started && !playBtn.classList.contains("show")) start(); }, 2500); // источник не загрузился — едем по фото
-if (reduce) { setTimeout(finish, 300); }
+setTimeout(() => { if (!st.started && !playBtn.classList.contains("show")) start(); }, 2500);
+if (reduce) setTimeout(finish, 300);
 
-/* Старт титров */
 requestAnimationFrame(() => { fade.classList.add("out"); title.classList.add("show"); setTimeout(() => fade.remove(), 1500); });
 
-/* Клик по кадру — ускорить, Esc — на сайт */
-addEventListener("click", (e) => { if (!state.done && state.started && !e.target.closest("a,button")) { state.fast = true; if (state.usingVideo) v.playbackRate = 2.2; else state.t0 -= state.dur * 400; } });
-addEventListener("keydown", (e) => { if (e.key === "Escape") location.href = "index.html"; });
+/* Клик мимо карточки во время остановки — едем дальше; Esc — на сайт */
+addEventListener("click", (e) => { if (e.target.closest("a,button")) return; if (st.holding) resume(); });
+addEventListener("keydown", (e) => { if (e.key === "Escape") location.href = "index.html"; if ((e.key === " " || e.key === "Enter") && st.holding) resume(); });
 $("#replay").addEventListener("click", () => location.reload());
 
-/* Ветер (включается первым кликом) */
+/* ---------- Ветер (после первого клика) ---------- */
 const wind = {};
 function startWind() {
   if (wind.ctx || reduce) return;
