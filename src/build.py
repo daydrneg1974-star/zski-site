@@ -13,7 +13,8 @@
   * проставляет штамп сборки BUILD (ГГГГММДДЧЧММ, UTC) в ?v=BUILD у css/js/шрифтов и
     в VERSION сервис-воркера sw.js — так браузеры и сервис-воркер не держат старые файлы;
   * src/pages/intro.html копируется в intro.html как есть, только с подстановкой BUILD;
-    его разметка также вставляется на главную вместо {{INTRO_MARKUP}} (слой интро при открытии сайта).
+    его разметка (и css/intro.css) также вставляется на главную вместо {{INTRO_MARKUP}} / {{INTRO_CSS}}
+    (слой интро при открытии сайта); страницам с `intro: yes` в <head> добавляется src/layout/intro-head.html.
 
 Правила: правьте src/, потом запускайте сборку и коммитьте вместе с собранным HTML
 (GitHub Pages публикует корень репозитория без сборки).
@@ -80,9 +81,12 @@ def build_page(name: str, layout: dict, data, build: str) -> str:
             .replace("{{DESCRIPTION}}", meta["description"])
             .replace("{{CANONICAL}}", meta["canonical"])
             .replace("{{SCHEMA}}", layout["schema"].rstrip("\n") if meta.get("schema") == "yes" else "")
+            .replace("{{HEAD_EXTRA}}", read(SRC / "layout" / "intro-head.html").rstrip("\n") if meta.get("intro") == "yes" else "")
             .replace("{{PRELOAD}}", "\n".join(f'<link rel="preload" as="image" href="{u.strip()}" type="image/webp">' for u in meta["preload"].split(",")) if meta.get("preload") else ""))
     if "{{INTRO_MARKUP}}" in body:
         body = body.replace("{{INTRO_MARKUP}}", intro_markup())
+        body = body.replace("{{INTRO_CSS}}", read(ROOT / "css" / "intro.css").strip())
+    head = head.replace("\n\n</head>", "\n</head>") if "{{HEAD_EXTRA}}" not in head else head
     html = head + layout["header"] + body.rstrip("\n") + "\n" + layout["footer"]
     html = fill_data(html, data)
     return html.replace("{{BUILD}}", build)

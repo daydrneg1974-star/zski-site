@@ -4,6 +4,7 @@ description: Прокат горных лыж и сноубордов ZSKI в Я
 canonical: https://zski.ru/
 schema: yes
 preload: img/photos/hero-freeride.webp, img/photos/intro-poster.webp
+intro: yes
 ---
 
 <section class="hero">
@@ -271,6 +272,7 @@ preload: img/photos/hero-freeride.webp, img/photos/intro-poster.webp
 
 <!-- Интро «спуск к прокату»: показывается слоем поверх сайта при открытии главной «снаружи» (см. js/intro.js). Разметка — из src/pages/intro.html. -->
 <template id="intro-tpl">
+<style>{{INTRO_CSS}}</style>
 {{INTRO_MARKUP}}
 </template>
 <script src="js/intro.js?v={{BUILD}}" defer></script>
