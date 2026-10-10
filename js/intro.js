@@ -5,7 +5,7 @@ const CFG = {
   stations: [0.21, 0.38, 0.55, 0.71, 0.87],   // доли длительности видео, где останавливаемся
   slowBefore: 0.9,         // за сколько секунд до станции начинаем тормозить
   minRate: 0.3,            // минимальная скорость перед остановкой
-  hold: 1400,              // пауза на станции, мс
+  hold: 2300,              // пауза на станции, мс
   maxSpeed: 68,
   startAlt: 220,
 };
@@ -31,7 +31,7 @@ function showCard(i) {
   const a = document.createElement("a");
   a.className = `station ${s.side}`; a.href = s.href;
   a.innerHTML = `<span class="num">${s.n}</span><span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
-  center.appendChild(a); requestAnimationFrame(() => a.classList.add("in"));
+  center.appendChild(a); setTimeout(() => a.classList.add("in"), 120);
   st.card = a; stage.classList.add("hold");
 }
 function hideCard() {
