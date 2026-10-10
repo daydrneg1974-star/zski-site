@@ -103,7 +103,6 @@ goBtn.addEventListener("click", () => {
   if (v.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE) tryPlay(); else start();
   setTimeout(() => { if (!st.started) start(); }, 2500);
 });
-v.load();
 requestAnimationFrame(() => { fade.classList.add("out"); setTimeout(() => fade.remove(), 1500); });
 
 /* Клик мимо карточки во время остановки — едем дальше; Esc — на сайт */

@@ -13,8 +13,8 @@
   --radius:22px; --radius-sm:14px;
   --shadow:0 22px 60px rgba(15,27,45,.14);
   --max:1200px;
-  --font:"Manrope","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --display:"Unbounded","Manrope",system-ui,sans-serif;
+  --font:"Manrope","Manrope Fallback",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --display:"Unbounded","Unbounded Fallback",system-ui,sans-serif;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -35,7 +35,7 @@ p{margin:0 0 1em}
 @media(min-width:900px){.section{padding:104px 0}}
 .eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:.9rem}
 .eyebrow::before{content:"";width:22px;height:2px;background:var(--accent)}
-.lead{font-size:1.12rem;color:var(--muted);max-width:62ch}
+.lead{font-size:1.12rem;color:var(--muted);max-width:38.78em}
 
 /* ---------- Кнопки ---------- */
 .btn{display:inline-flex;align-items:center;gap:.55rem;padding:.95rem 1.5rem;border-radius:999px;border:1px solid transparent;font-weight:800;text-decoration:none;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s,border-color .2s;font-size:.98rem;font-family:inherit;letter-spacing:.01em;position:relative;overflow:hidden}
@@ -82,9 +82,9 @@ p{margin:0 0 1em}
 .hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,30,56,.1) 0%,rgba(15,30,56,.3) 40%,rgba(15,30,56,.9) 100%),linear-gradient(90deg,rgba(15,30,56,.5),transparent 60%)}
 .hero .snow{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.7}
 .hero .wrap{position:relative;padding-bottom:64px;padding-top:140px;width:100%}
-.hero h1{max-width:15ch;text-shadow:0 10px 40px rgba(0,0,0,.5)}
+.hero h1{max-width:14.02em;text-shadow:0 10px 40px rgba(0,0,0,.5)}
 .hero h1 em{font-style:normal;color:transparent;background:linear-gradient(90deg,#fff,#7cc8ff);-webkit-background-clip:text;background-clip:text}
-.hero .lead{color:#d9e2f1;max-width:56ch}
+.hero .lead{color:#d9e2f1;max-width:35.03em}
 .hero-actions{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.6rem}
 .hero-badges{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem}
 .badge{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem .85rem;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font-size:.84rem;font-weight:700;backdrop-filter:blur(8px)}
