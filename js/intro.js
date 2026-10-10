@@ -2,7 +2,7 @@
 const CFG = {
   pov: false,
   duration: 15,            // если видео не сообщило длительность
-  stations: [0.21, 0.38, 0.55, 0.71, 0.87],   // доли длительности видео, где останавливаемся
+  stations: [0.16, 0.3, 0.44, 0.58, 0.72],   // доли длительности видео, где останавливаемся (после последней — ещё ~3 с спуска)
   slowBefore: 0.9,         // за сколько секунд до станции начинаем тормозить
   minRate: 0.3,            // минимальная скорость перед остановкой
   hold: 2300,              // пауза на станции, мс
@@ -94,7 +94,7 @@ v.addEventListener("playing", () => { if (!st.started) { st.usingVideo = true; v
 v.addEventListener("ended", () => { if (st.idx >= STATIONS.length) finish(); else { arrive(st.idx); st.holdTimer = setTimeout(() => { hideCard(); finish(); }, CFG.hold + 600); } });
 v.addEventListener("error", () => { if (!st.started) { st.usingVideo = false; start(); } }, { once: true });
 function tryPlay() { const pr = v.play(); if (pr && pr.catch) pr.catch(() => { if (!st.started) playBtn.classList.add("show"); }); }
-playBtn.addEventListener("click", () => { playBtn.classList.remove("show"); startWind(); tryPlay(); setTimeout(() => { if (!st.started) start(); }, 800); });
+playBtn.addEventListener("click", () => { playBtn.classList.remove("show"); startWind(); wind.resumeOnGesture && wind.resumeOnGesture(); tryPlay(); setTimeout(() => { if (!st.started) start(); }, 800); });
 if (v.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE) tryPlay();
 setTimeout(() => { if (!st.started && !playBtn.classList.contains("show")) start(); }, 2500);
 if (reduce) setTimeout(finish, 300);
@@ -119,7 +119,14 @@ function startWind() {
     const gain = ctx.createGain(); gain.gain.value = 0;
     src.connect(filter).connect(gain).connect(ctx.destination); src.start();
     wind.ctx = ctx; wind.filter = filter; wind.gain = gain;
-    const b = $("#mute"); b.hidden = false; b.addEventListener("click", () => { wind.muted = !wind.muted; ctx[wind.muted ? "suspend" : "resume"](); b.textContent = wind.muted ? "🔇" : "🔊"; });
+    const b = $("#mute"); b.hidden = false;
+    const sync = () => { const on = ctx.state === "running" && !wind.muted; b.textContent = on ? "🔊" : "🔇 Включить звук"; b.classList.toggle("attn", !on); };
+    b.addEventListener("click", (e) => { e.stopPropagation(); if (ctx.state !== "running") { wind.muted = false; ctx.resume().then(sync); } else { wind.muted = !wind.muted; ctx[wind.muted ? "suspend" : "resume"]().then(sync); } });
+    ctx.addEventListener("statechange", sync);
+    if (ctx.state !== "running") ctx.resume().catch(() => {}); setTimeout(sync, 300);
+    wind.resumeOnGesture = () => { if (ctx.state !== "running" && !wind.muted) ctx.resume().then(sync); };
   } catch {}
 }
-["pointerdown", "keydown", "touchstart"].forEach((ev) => addEventListener(ev, startWind, { once: true, passive: true }));
+/* Пробуем включить звук сразу (сработает, если браузер уже разрешил автозапуск для сайта), иначе — по первому жесту */
+startWind();
+["pointerdown", "keydown", "touchstart"].forEach((ev) => addEventListener(ev, () => { startWind(); wind.resumeOnGesture && wind.resumeOnGesture(); }, { passive: true }));
