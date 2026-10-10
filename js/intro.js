@@ -16,11 +16,11 @@ const CFG = {
   startAlt: 220,   // м, высота на старте
 };
 const STATIONS = [
-  { n: "01", label: "Прокат",     sub: "Лыжи и сноуборды известных брендов",     href: "index.html#prokat", side: "right" },
-  { n: "02", label: "Цены",       sub: "От 500 ₽ в день, калькулятор комплекта",  href: "prices.html",       side: "left" },
-  { n: "03", label: "SKI-сервис", sub: "Заточка, парафин, ремонт, хранение",      href: "service.html",      side: "right" },
-  { n: "04", label: "Склоны",     sub: "Сорочаны, Волен, Степаново, «Яхрома»",    href: "slopes.html",       side: "left" },
-  { n: "05", label: "Контакты",   sub: "61-й км Дмитровского шоссе, карта, график", href: "contacts.html",   side: "right" },
+  { label: "Прокат",     sub: "Лыжи и сноуборды известных брендов",     href: "index.html#prokat", side: "right" },
+  { label: "Цены",       sub: "От 500 ₽ в день, калькулятор комплекта",  href: "prices.html",       side: "left" },
+  { label: "SKI-сервис", sub: "Заточка, парафин, ремонт, хранение",      href: "service.html",      side: "right" },
+  { label: "Склоны",     sub: "Сорочаны, Волен, Степаново, «Яхрома»",    href: "slopes.html",       side: "left" },
+  { label: "Контакты",   sub: "61-й км Дмитровского шоссе, карта, график", href: "contacts.html",   side: "right" },
 ];
 
 /* Профиль скорости ролика (доля скорости исходника) в момент t, как при монтаже */
@@ -81,7 +81,7 @@ function initIntro(root, opts) {
   function showCard(i) {
     const s = STATIONS[i], a = document.createElement("a");
     a.className = `station ${s.side}`; a.href = s.href;
-    a.innerHTML = `<span class="num">${s.n}</span><span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
+    a.innerHTML = `<span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
     center.appendChild(a); requestAnimationFrame(() => requestAnimationFrame(() => a.classList.add("in")));
     st.card = a;
   }
