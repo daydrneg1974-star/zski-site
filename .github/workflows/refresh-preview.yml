@@ -1,0 +1,31 @@
+name: Refresh experimental build
+on:
+  push:
+    branches:
+      - experiment/ai-design-toolkit-v1
+permissions:
+  contents: write
+jobs:
+  refresh:
+    if: "!startsWith(github.event.head_commit.message, 'chore(preview):')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Rebuild published HTML and cache version
+        run: python3 src/build.py
+      - name: Commit generated files to experiment branch
+        run: |
+          git add index.html prices.html service.html slopes.html contacts.html intro.html sw.js
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(preview): regenerate static site"
+          git push
