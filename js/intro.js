@@ -81,7 +81,7 @@ function initIntro(root, opts) {
   function showCard(i) {
     const s = STATIONS[i], a = document.createElement("a");
     a.className = `station ${s.side}`; a.href = s.href;
-    a.innerHTML = `<span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
+    a.innerHTML = `<span class="station-count">Остановка ${i + 1} из ${STATIONS.length}</span><span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Открыть раздел <i>→</i></span>`;
     center.appendChild(a); requestAnimationFrame(() => requestAnimationFrame(() => a.classList.add("in")));
     // Keep an actionable station visible while someone reads it with pointer or keyboard.
     a.addEventListener("pointerenter", () => clearTimeout(st.holdTimer));
