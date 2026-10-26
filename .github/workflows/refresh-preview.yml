@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - experiment/ai-design-toolkit-v1
+concurrency:
+  group: zski-experiment-refresh
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
