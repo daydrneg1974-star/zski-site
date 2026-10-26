@@ -17,7 +17,7 @@ const CFG = {
 };
 const STATIONS = [
   { label: "Прокат",     sub: "Лыжи и сноуборды известных брендов",     href: "index.html#prokat", side: "right" },
-  { label: "Цены",       sub: "От 500 ₽ в день, калькулятор комплекта",  href: "prices.html",       side: "left" },
+  { label: "Цены",       sub: "Комплект от 2 000 ₽ в день, калькулятор",  href: "prices.html",       side: "left" },
   { label: "SKI-сервис", sub: "Заточка, парафин, ремонт, хранение",      href: "service.html",      side: "right" },
   { label: "Склоны",     sub: "Сорочаны, Волен, Степаново, «Яхрома»",    href: "slopes.html",       side: "left" },
   { label: "Контакты",   sub: "61-й км Дмитровского шоссе, карта, график", href: "contacts.html",   side: "right" },
