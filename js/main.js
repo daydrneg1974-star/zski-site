@@ -49,7 +49,7 @@
       if (event.target.closest("a")) closeMenu();
     });
     window.addEventListener("resize", () => {
-      if (window.innerWidth > 960) closeMenu();
+      if (window.innerWidth >= 960) closeMenu();
     });
   }
   const here = location.pathname.split("/").pop() || "index.html";
