@@ -31,11 +31,23 @@ small{color:#b5c5da} @media(max-width:750px){.grid{grid-template-columns:1fr}}
 <figure><figcaption>Оригинал</figcaption><video id="original" muted playsinline preload="metadata" poster="img/photos/intro-poster.webp"><source src="video/descent.webm" type="video/webm"><source src="video/descent.mp4" type="video/mp4"></video></figure>
 <figure><figcaption>Предварительная цветокоррекция</figcaption><video id="adjusted" class="grade" muted playsinline preload="metadata" poster="img/photos/intro-poster.webp"><source src="video/descent.webm" type="video/webm"><source src="video/descent.mp4" type="video/mp4"></video></figure>
 </div>
-<p><small>Оба изображения воспроизводят одинаковые исходные файлы. Параметры коррекции: контраст +3,5%, насыщенность +7,5%, яркость +0,3%. Визуальная проверка на реальных устройствах ещё требуется.</small></p>
+<p id="variant-note"><small>Пока оба изображения воспроизводят одинаковые исходные файлы; справа применяется CSS-коррекция. Когда появятся проверенные новые видеофайлы, страница автоматически предложит их как отдельный вариант.</small></p>
 </main>
 <script>
 (() => {
 const a=document.querySelector("#original"),b=document.querySelector("#adjusted"),seek=document.querySelector("#seek"),time=document.querySelector("#time");
+(async()=>{
+  try{
+    const response=await fetch("video/cinematic/descent.mp4",{method:"HEAD",cache:"no-store"});
+    if(!response.ok) return;
+    b.pause();
+    b.innerHTML='<source src="video/cinematic/descent.webm" type="video/webm"><source src="video/cinematic/descent.mp4" type="video/mp4">';
+    b.classList.remove("grade");
+    b.load();
+    document.querySelector("#variant-note").textContent="Справа — отдельный обработанный видеоролик (MP4/WebM), слева — оригинал. У обоих сохранены длительность 18 секунд, разрешение и частота кадров. Оцените изображение на своём устройстве.";
+    document.querySelector("figure:nth-child(2) figcaption").textContent="Обработанный ролик";
+  }catch{}
+})();
 let syncing=false;
 function move(t){const v=Math.max(0,Math.min(18,t));a.currentTime=v;b.currentTime=v;seek.value=v;time.textContent=v.toFixed(1).replace(".",",")+" / 18 с";}
 document.querySelector("#play").addEventListener("click",async()=>{try{b.currentTime=a.currentTime;await Promise.all([a.play(),b.play()]);}catch{document.querySelector("#play").textContent="Коснитесь видео для запуска";}});
