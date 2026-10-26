@@ -9,7 +9,7 @@ const TIMELINE = {"duration": 18.0, "cruise": 0.6, "stations": [2.542, 4.898, 7.
 /* TIMELINE:END */
 
 const CFG = {
-  hold: 1800,      // пауза на станции, мс
+  hold: 2400,      // пауза на станции: время прочитать карточку и выбрать раздел
   preroll: 4,      // с: сколько ролика должно быть подгружено перед стартом
   prerollMax: 8000,// мс: дольше не ждём — едем с тем, что есть
   maxSpeed: 68,    // км/ч на спидометре при обычном ходе
@@ -203,7 +203,7 @@ function initIntro(root, opts) {
       src.connect(filter).connect(gain).connect(ctx.destination); src.start();
       wind.ctx = ctx; wind.filter = filter; wind.gain = gain;
       const b = $("#mute"); b.hidden = false;
-      const sync = () => { const on = ctx.state === "running" && !wind.muted; b.textContent = on ? "🔊" : "🔇 Включить звук"; b.classList.toggle("attn", !on && !st.suspended); };
+      const sync = () => { const on = ctx.state === "running" && !wind.muted; b.textContent = on ? "🔊" : "🔇"; b.setAttribute("aria-label", on ? "Выключить звук ветра" : "Включить звук ветра"); b.setAttribute("aria-pressed", String(on)); b.title = on ? "Выключить звук" : "Включить звук"; b.classList.toggle("attn", !on && !st.suspended); };
       b.addEventListener("click", (e) => { e.stopPropagation(); if (ctx.state !== "running") { wind.muted = false; ctx.resume().then(sync); } else { wind.muted = !wind.muted; ctx[wind.muted ? "suspend" : "resume"]().then(sync); } });
       ctx.addEventListener("statechange", sync);
       if (ctx.state !== "running") ctx.resume().catch(() => {});
