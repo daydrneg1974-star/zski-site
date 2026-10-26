@@ -78,13 +78,13 @@ body.pov .lens,.stage.pov .lens{display:block}
 
 /* ---------- Привлечение внимания на остановке ---------- */
 .station::after{content:"";position:absolute;inset:0;border-radius:inherit;border:2px solid rgba(255,255,255,.7);opacity:0;pointer-events:none}
-.station.in::after{animation:cardRing 1.1s ease-out .35s 2}
+.station.in::after{animation:cardRing .85s ease-out .25s 1}
 @keyframes cardRing{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(1.08)}}
-.station.in::before{animation:barBlink .36s steps(2,end) .25s 4}
+.station.in::before{animation:none}
 @keyframes barBlink{50%{opacity:.1}}
-.station.in .go{animation:goPulse 1.1s ease-in-out .5s 2}
+.station.in .go{animation:none}
 @keyframes goPulse{50%{transform:scale(1.08)}}
-.station.in .name{animation:nameFlash .5s ease .3s 2}
+.station.in .name{animation:none}
 @keyframes nameFlash{50%{color:#ffd0ca;text-shadow:0 0 24px rgba(255,120,100,.6)}}
 @media (prefers-reduced-motion: reduce){.station.in::after,.station.in::before,.station.in .go,.station.in .name{animation:none}}
 
