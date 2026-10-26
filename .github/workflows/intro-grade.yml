@@ -27,4 +27,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(video): render separate cinematic intro alternatives"
-          git push
+          # Other workflows may have updated generated HTML while ffmpeg ran.
+          # Integrate those non-overlapping commits; never force-push.
+          for attempt in 1 2 3; do
+            git fetch origin experiment/ai-design-toolkit-v1
+            git rebase origin/experiment/ai-design-toolkit-v1
+            if git push origin HEAD:experiment/ai-design-toolkit-v1; then exit 0; fi
+            sleep 3
+          done
+          echo "Could not publish graded assets after three attempts" >&2
+          exit 1
