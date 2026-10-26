@@ -27,9 +27,29 @@
   /* ---------- Меню ---------- */
   const burger = $(".burger"), drawer = $(".drawer");
   if (burger && drawer) {
+    const closeMenu = (restoreFocus = false) => {
+      if (!drawer.classList.contains("open")) return;
+      drawer.classList.remove("open");
+      burger.setAttribute("aria-expanded", "false");
+      burger.setAttribute("aria-label", "Открыть меню");
+      if (restoreFocus) burger.focus();
+    };
     burger.addEventListener("click", () => {
       const open = drawer.classList.toggle("open");
       burger.setAttribute("aria-expanded", String(open));
+      burger.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню");
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu(true);
+    });
+    document.addEventListener("pointerdown", (event) => {
+      if (!drawer.contains(event.target) && !burger.contains(event.target)) closeMenu();
+    });
+    drawer.addEventListener("click", (event) => {
+      if (event.target.closest("a")) closeMenu();
+    });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 960) closeMenu();
     });
   }
   const here = location.pathname.split("/").pop() || "index.html";
@@ -148,6 +168,9 @@
         : "Здравствуйте! Хочу забронировать инвентарь.";
       book.href = D.whatsapp ? `https://wa.me/${D.whatsapp}?text=${encodeURIComponent(text)}`
         : `mailto:${D.email}?subject=${encodeURIComponent("Бронирование инвентаря ZSKI")}&body=${encodeURIComponent(text)}`;
+      // This opens a messaging app; it does not create a confirmed reservation.
+      book.textContent = D.whatsapp ? "Отправить заявку в WhatsApp" : "Отправить заявку по почте";
+      book.setAttribute("aria-label", "Отправить предварительную заявку на прокат");
     }
     list.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-d]"); if (!b) return;

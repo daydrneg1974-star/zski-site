@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>ZSKI — сравнение видеозаставки</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#0d1729;color:white;padding:clamp(16px,4vw,40px)}
+main{max-width:1250px;margin:auto}h1{font-size:clamp(1.5rem,4vw,2.5rem);margin:14px 0}p{color:#c2cedf;line-height:1.6}
+a{color:#a9d7ff} .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:26px 0}
+figure{margin:0;min-width:0;background:#14243c;border:1px solid #33435b;border-radius:18px;overflow:hidden}
+figcaption{padding:14px 16px;font-weight:700}video{width:100%;aspect-ratio:16/9;object-fit:contain;display:block;background:#000}
+.grade{filter:brightness(1.003) contrast(1.035) saturate(1.075)}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:24px 0}
+button{background:#e3241b;border:0;color:white;border-radius:30px;padding:13px 20px;font-weight:800;cursor:pointer}
+button.secondary{background:#253951}button:focus-visible,a:focus-visible{outline:3px solid #8bcbff;outline-offset:3px}
+label{display:flex;align-items:center;gap:8px}input{accent-color:#e3241b;width:180px}
+small{color:#b5c5da} @media(max-width:750px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<a href="intro.html">← Назад к интро</a>
+<h1>Сравнение видеозаставки ZSKI</h1>
+<p>Слева — оригинал, справа — предварительная цветокоррекция (CSS-фильтры). Это <strong>не</strong> отдельный смонтированный ролик: видеопоток и точки остановок не меняются. Запускайте оба варианта одновременно.</p>
+<div class="controls">
+<button id="play" type="button">▶ Воспроизвести оба</button>
+<button class="secondary" id="pause" type="button">Пауза</button>
+<label>Кадр <input id="seek" type="range" min="0" max="18" step=".05" value="0"></label>
+<small id="time" aria-live="off">0,0 / 18 с</small>
+</div>
+<div class="grid">
+<figure><figcaption>Оригинал</figcaption><video id="original" muted playsinline preload="metadata" poster="img/photos/intro-poster.webp"><source src="video/descent.webm" type="video/webm"><source src="video/descent.mp4" type="video/mp4"></video></figure>
+<figure><figcaption>Предварительная цветокоррекция</figcaption><video id="adjusted" class="grade" muted playsinline preload="metadata" poster="img/photos/intro-poster.webp"><source src="video/descent.webm" type="video/webm"><source src="video/descent.mp4" type="video/mp4"></video></figure>
+</div>
+<p id="variant-note"><small>Пока оба изображения воспроизводят одинаковые исходные файлы; справа применяется CSS-коррекция. Когда появятся проверенные новые видеофайлы, страница автоматически предложит их как отдельный вариант.</small></p>
+</main>
+<script>
+(() => {
+const a=document.querySelector("#original"),b=document.querySelector("#adjusted"),seek=document.querySelector("#seek"),time=document.querySelector("#time");
+(async()=>{
+  try{
+    const response=await fetch("video/cinematic/descent.mp4",{method:"HEAD",cache:"no-store"});
+    if(!response.ok) return;
+    b.pause();
+    b.innerHTML='<source src="video/cinematic/descent.webm" type="video/webm"><source src="video/cinematic/descent.mp4" type="video/mp4">';
+    b.classList.remove("grade");
+    b.load();
+    document.querySelector("#variant-note").textContent="Справа — отдельный обработанный видеоролик (MP4/WebM), слева — оригинал. У обоих сохранены длительность 18 секунд, разрешение и частота кадров. Оцените изображение на своём устройстве.";
+    document.querySelector("figure:nth-child(2) figcaption").textContent="Обработанный ролик";
+  }catch{}
+})();
+let syncing=false;
+function move(t){const v=Math.max(0,Math.min(18,t));a.currentTime=v;b.currentTime=v;seek.value=v;time.textContent=v.toFixed(1).replace(".",",")+" / 18 с";}
+document.querySelector("#play").addEventListener("click",async()=>{try{b.currentTime=a.currentTime;await Promise.all([a.play(),b.play()]);}catch{document.querySelector("#play").textContent="Коснитесь видео для запуска";}});
+document.querySelector("#pause").addEventListener("click",()=>{a.pause();b.pause();});
+seek.addEventListener("input",()=>{a.pause();b.pause();move(Number(seek.value));});
+a.addEventListener("timeupdate",()=>{const t=a.currentTime;seek.value=t;time.textContent=t.toFixed(1).replace(".",",")+" / 18 с";if(!syncing&&Math.abs(b.currentTime-t)>.2){syncing=true;b.currentTime=t;syncing=false;}});
+a.addEventListener("ended",()=>b.pause());b.addEventListener("ended",()=>a.pause());
+})();
+</script></body></html>

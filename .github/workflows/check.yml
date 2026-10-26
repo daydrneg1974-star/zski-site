@@ -12,4 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: python3 src/build.py --check
+      - name: Validate JavaScript syntax
+        run: | 
+          for file in js/*.js; do node --check "$file"; done
+      - name: Verify generated site
+        run: python3 src/build.py --check
