@@ -83,6 +83,13 @@ function initIntro(root, opts) {
     a.className = `station ${s.side}`; a.href = s.href;
     a.innerHTML = `<span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
     center.appendChild(a); requestAnimationFrame(() => requestAnimationFrame(() => a.classList.add("in")));
+    // Keep an actionable station visible while someone reads it with pointer or keyboard.
+    a.addEventListener("pointerenter", () => clearTimeout(st.holdTimer));
+    a.addEventListener("pointerleave", () => { if (st.phase === "hold") armHold(); });
+    a.addEventListener("focusin", () => clearTimeout(st.holdTimer));
+    a.addEventListener("focusout", (event) => {
+      if (!a.contains(event.relatedTarget) && st.phase === "hold") armHold();
+    });
     st.card = a;
   }
   function hideCard() {
