@@ -1,6 +1,6 @@
 ---
 title: Контакты ZSKI — прокат лыж и сноубордов в Яхроме, 61-й км Дмитровского шоссе
-description: Как добраться до проката ZSKI: Яхрома, мкр. Левобережье, 49с1 (61-й км Дмитровского шоссе). Телефон +7 916 171-86-21, z_ski@mail.ru. График: Пн–Чт 10–22, Пт–Сб 9–02, Вс 9–24. Карта и заявка онлайн.
+description: Как добраться до проката ZSKI: Яхрома, мкр. Левобережье, 49с1 (61-й км Дмитровского шоссе). Телефон +7 916 171-86-21, z_ski@mail.ru. График: Пн–Чт 10–22, Пт–Сб 9–02, Вс 9–24. Карта и форма для подготовки письма.
 canonical: https://zski.ru/contacts.html
 schema: yes
 ---
@@ -62,7 +62,7 @@ schema: yes
       </div>
       <form class="cb card" hidden>
         <div><label for="f-name">Имя</label><input id="f-name" name="name" required pattern=".*\S.*" placeholder="Как к вам обращаться"></div>
-        <div><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" required pattern=".*[0-9].*" placeholder="+7 ___ ___-__-__"></div>
+        <div><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" required pattern="\+?(?:[ \(\)\-]*[0-9]){7,15}[ \(\)\-]*" maxlength="30" title="Введите от 7 до 15 цифр. Можно использовать знак +, пробелы, скобки и дефисы." placeholder="+7 ___ ___-__-__"></div>
         <div><label for="f-need">Что нужно</label>
           <select id="f-need" name="need">
             <option>Прокат горных лыж</option><option>Прокат сноуборда</option><option>SKI-сервис</option><option>Хранение / консервация</option><option>Другое</option>

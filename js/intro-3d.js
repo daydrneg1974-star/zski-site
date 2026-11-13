@@ -14,7 +14,7 @@ if (!hasWebGL()) location.replace("index.html");
 /* ---------- Разделы (ворота на трассе) ---------- */
 const GATES = [
   { z: -110, label: "ПРОКАТ",     sub: "лыжи · сноуборды", href: "index.html#prokat" },
-  { z: -230, label: "ЦЕНЫ",       sub: "от 500 ₽ в день",  href: "prices.html" },
+  { z: -230, label: "ЦЕНЫ",       sub: "Комплекты от 2 000 ₽ в день",  href: "prices.html" },
   { z: -350, label: "SKI-СЕРВИС", sub: "заточка · парафин", href: "service.html" },
   { z: -470, label: "СКЛОНЫ",     sub: "Сорочаны · Волен",  href: "slopes.html" },
   { z: -590, label: "КОНТАКТЫ",   sub: "61-й км Дмитровки", href: "contacts.html" },

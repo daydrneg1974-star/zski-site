@@ -293,7 +293,7 @@
         localStorage.setItem(key, JSON.stringify({ t: Date.now(), v: w }));
       }
       const icon = w.code >= 71 && w.code <= 77 ? "🌨" : w.code >= 61 ? "🌧" : w.code >= 45 ? "🌫" : w.code >= 2 ? "⛅" : "☀";
-      el.innerHTML = `${icon} Яхрома сейчас: ${w.t > 0 ? "+" : ""}${w.t}°${w.snow > 0 ? ` · снег ${w.snow} см за день` : ""}`;
+      el.textContent = `${icon} Яхрома сейчас: ${w.t > 0 ? "+" : ""}${w.t}°${w.snow > 0 ? ` · снег ${w.snow} см за день` : ""}`;
       el.hidden = false;
     } catch {}
   })();

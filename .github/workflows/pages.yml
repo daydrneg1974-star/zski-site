@@ -20,11 +20,21 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check generated HTML
+        run: python3 src/build.py --check
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Stage public site files
+        run: |
+          mkdir _site
+          cp .nojekyll index.html prices.html service.html slopes.html contacts.html intro.html intro-3d.html robots.txt sitemap.xml sw.js _site/
+          cp -r css fonts img js video _site/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
