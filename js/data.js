@@ -3,25 +3,26 @@
    цены, контакты и график без правки HTML.
    Цены взяты с zski.ru (страницы «Цены на прокат» и «SKI-сервис»).
    ============================================================ */
+const zskiLat = 56.269875;
+const zskiLng = 37.490032;
+const zskiMarker = `ll=${zskiLng},${zskiLat}&z=18&pt=${zskiLng},${zskiLat},pm2rdm`;
+
 window.ZSKI = {
   brand: "ZSKI",
-  tagline: "Прокат лыж и сноубордов на Дмитровском шоссе",
-  phone: "+7 916 171-86-21",
-  phoneHref: "tel:+79161718621",
+  tagline: "Прокат лыж и сноубордов в районе Яхромы",
+  phone: "+7 (991) 937-77-44",
+  phoneHref: "tel:+79919377744",
   email: "z_ski@mail.ru",
   /* Мессенджеры: оставьте пустую строку, чтобы скрыть кнопку */
-  whatsapp: "",          // например: "79161718621"
+  whatsapp: "",          // номер в международном формате без плюса
   telegram: "",          // например: "zski_prokat"
   address: {
-    short: "Яхрома, 61-й км Дмитровского шоссе",
-    full: "Московская область, Дмитровский район, г. Яхрома, 61-й км Дмитровского шоссе (мкр. Левобережье, 49с1)",
-    hint: "Ориентир — ресторан быстрого питания (бывший «Макдональдс») на 61-м км: наш павильон с вывеской «ПРОКАТ» стоит рядом с ним.",
-    /* Координаты павильона — из карты на оригинальном сайте zski.ru */
-    lat: 56.279712, lng: 37.499885,
-    yandexMaps: "https://yandex.ru/maps/org/zski_prokat_lyzh_i_snoubordov/35493323132/",
-    yandexRoute: "https://yandex.ru/maps/?rtext=~56.279712,37.499885&rtt=auto",
-    gis2: "https://2gis.ru/yahroma/search/Z-Ski",
-    mapEmbed: "https://yandex.ru/map-widget/v1/?ll=37.499885,56.279712&z=16&pt=37.499885,56.279712,pm2rdm"
+    short: "Район Яхромы, рядом с СНТ Каменка",
+    full: "Московская область, Дмитровский муниципальный округ, рядом с СНТ Каменка",
+    lat: zskiLat, lng: zskiLng,
+    yandexMaps: `https://yandex.ru/maps/?${zskiMarker}`,
+    yandexRoute: `https://yandex.ru/maps/?rtext=~${zskiLat},${zskiLng}&rtt=auto`,
+    mapEmbed: `https://yandex.ru/map-widget/v1/?${zskiMarker}`
   },
   /* График работы (московское время). close > 24 означает «после полуночи» */
   hours: [

@@ -6,16 +6,17 @@
   const fmt = (n) => new Intl.NumberFormat("ru-RU").format(n) + " ₽";
 
   /* ---------- Подстановка контактов ---------- */
-  $$("[data-phone]").forEach((el) => { el.textContent = D.phone; if (el.tagName === "A") el.href = D.phoneHref; });
+  $$("[data-phone]").forEach((el) => {
+    if (el.dataset.phone !== "link") el.textContent = D.phone;
+    if (el.tagName === "A") el.href = D.phoneHref;
+  });
   $$("[data-email]").forEach((el) => { el.textContent = D.email; if (el.tagName === "A") el.href = "mailto:" + D.email; });
   $$("[data-address]").forEach((el) => { el.textContent = D.address[el.dataset.address || "short"]; });
   $$("[data-season]").forEach((el) => { el.textContent = D.season; });
   $$("[data-rating]").forEach((el) => { el.textContent = D.rating.value; });
   $$("[data-rating-count]").forEach((el) => { el.textContent = new Intl.NumberFormat("ru-RU").format(D.rating.count); });
   $$("[data-href=yandex]").forEach((a) => (a.href = D.address.yandexMaps));
-  $$("[data-href=gis2]").forEach((a) => (a.href = D.address.gis2));
   $$("[data-href=route]").forEach((a) => (a.href = D.address.yandexRoute));
-  $$("[data-hint]").forEach((el) => (el.textContent = D.address.hint));
   $$("[data-price-season]").forEach((el) => (el.textContent = D.priceSeason));
   $$("[data-messenger]").forEach((a) => {
     const kind = a.dataset.messenger;
@@ -179,18 +180,13 @@
         <svg viewBox="0 0 640 480" aria-hidden="true">
           <defs><linearGradient id="road" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a6fc4"/><stop offset="1" stop-color="#7cc8ff"/></linearGradient></defs>
           <rect width="640" height="480" fill="none"/>
-          <path d="M60 440 C 180 380, 230 300, 330 240 S 520 120, 600 50" fill="none" stroke="url(#road)" stroke-width="12" stroke-linecap="round" opacity=".85"/>
-          <path d="M60 440 C 180 380, 230 300, 330 240 S 520 120, 600 50" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="10 12" opacity=".7"/>
-          <g font-family="Manrope, sans-serif" font-weight="700" font-size="16" fill="currentColor">
-            <circle cx="60" cy="440" r="9" fill="#0f1b2d" stroke="#fff" stroke-width="3"/><text x="80" y="446">МКАД · Дмитровское шоссе</text>
-            <circle cx="260" cy="302" r="7" fill="#0f1b2d" stroke="#fff" stroke-width="3"/><text x="278" y="296">Икша · 30 км</text>
-            <circle cx="600" cy="50" r="7" fill="#0f1b2d" stroke="#fff" stroke-width="3"/><text x="470" y="34">Сорочаны · Волен</text>
-          </g>
-          <g transform="translate(400 190)">
+          <path d="M0 400 C 180 380, 200 280, 260 220 S 450 170, 640 55" fill="none" stroke="url(#road)" stroke-width="12" stroke-linecap="round" opacity=".85"/>
+          <path d="M0 400 C 180 380, 200 280, 260 220 S 450 170, 640 55" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="10 12" opacity=".7"/>
+          <g transform="translate(260 220)">
             <circle r="34" fill="#e3241b" opacity=".18"><animate attributeName="r" values="26;40;26" dur="2.4s" repeatCount="indefinite"/></circle>
             <path d="M0 -26 C -14 -26 -22 -16 -22 -6 C -22 10 0 28 0 28 C 0 28 22 10 22 -6 C 22 -16 14 -26 0 -26 Z" fill="#e3241b" stroke="#fff" stroke-width="3"/><circle cy="-6" r="7" fill="#fff"/>
-            <text x="34" y="-2" font-family="Unbounded, Manrope, sans-serif" font-weight="800" font-size="18" fill="currentColor">ZSKI · 61-й км</text>
-            <text x="34" y="20" font-family="Manrope, sans-serif" font-weight="700" font-size="14" fill="currentColor" opacity=".75">Яхрома, Левобережье</text>
+            <text x="42" y="-2" font-family="Unbounded, Manrope, sans-serif" font-weight="800" font-size="22" fill="currentColor">ZSKI</text>
+            <text x="42" y="25" font-family="Manrope, sans-serif" font-weight="700" font-size="20" fill="currentColor">Рядом с СНТ Каменка</text>
           </g>
         </svg>
         <button type="button" class="btn btn-ghost btn-sm map-load">Открыть карту</button>
@@ -284,7 +280,8 @@
   (async () => {
     const el = $("[data-weather]"); if (!el || !D.address.lat) return;
     try {
-      const key = "zski-weather", cached = JSON.parse(localStorage.getItem(key) || "null");
+      const key = `zski-weather:${D.address.lat},${D.address.lng}`;
+      const cached = JSON.parse(localStorage.getItem(key) || "null");
       let w = cached && Date.now() - cached.t < 3600e3 ? cached.v : null;
       if (!w) {
         const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${D.address.lat}&longitude=${D.address.lng}&current=temperature_2m,snowfall,weather_code&daily=snowfall_sum&timezone=Europe%2FMoscow&forecast_days=1`, { signal: AbortSignal.timeout(4000) });

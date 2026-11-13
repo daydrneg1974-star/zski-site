@@ -17,7 +17,7 @@ const GATES = [
   { z: -230, label: "ЦЕНЫ",       sub: "Комплекты от 2 000 ₽ в день",  href: "prices.html" },
   { z: -350, label: "SKI-СЕРВИС", sub: "заточка · парафин", href: "service.html" },
   { z: -470, label: "СКЛОНЫ",     sub: "Сорочаны · Волен",  href: "slopes.html" },
-  { z: -590, label: "КОНТАКТЫ",   sub: "61-й км Дмитровки", href: "contacts.html" },
+  { z: -590, label: "КОНТАКТЫ",   sub: "Рядом с СНТ Каменка", href: "contacts.html" },
 ];
 const Z_END = -700;
 
@@ -150,7 +150,7 @@ const gateSprites = [];
   /* Финиш: арка и логотип */
   const fy = height(0, Z_END);
   const arch = new THREE.Mesh(new THREE.TorusGeometry(12, 0.5, 10, 40, Math.PI), new THREE.MeshStandardMaterial({ color: 0xe3241b })); arch.position.set(0, fy + 0.5, Z_END - 18); scene.add(arch);
-  const banner = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture("ZSKI · ПРОКАТ", "61-й км Дмитровского шоссе · Яхрома"), transparent: true })); banner.scale.set(28, 7, 1); banner.position.set(0, fy + 14, Z_END - 18); scene.add(banner);
+  const banner = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture("ZSKI · ПРОКАТ", "Район Яхромы · рядом с СНТ Каменка"), transparent: true })); banner.scale.set(28, 7, 1); banner.position.set(0, fy + 14, Z_END - 18); scene.add(banner);
   new THREE.TextureLoader().load("img/logo.png", (t) => { t.colorSpace = THREE.SRGBColorSpace; const l = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true })); l.scale.set(9, 9, 1); l.position.set(0, fy + 22, Z_END - 18); scene.add(l); });
 }
 

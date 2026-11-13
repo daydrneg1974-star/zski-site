@@ -20,7 +20,7 @@ const STATIONS = [
   { label: "Цены",       sub: "Комплекты от 2 000 ₽ в день",  href: "prices.html",       side: "left" },
   { label: "SKI-сервис", sub: "Заточка, парафин, ремонт, хранение",      href: "service.html",      side: "right" },
   { label: "Склоны",     sub: "Сорочаны, Волен, Степаново, «Яхрома»",    href: "slopes.html",       side: "left" },
-  { label: "Контакты",   sub: "61-й км Дмитровского шоссе, карта, график", href: "contacts.html",   side: "right" },
+  { label: "Контакты",   sub: "Рядом с СНТ Каменка, карта, график", href: "contacts.html",   side: "right" },
 ];
 
 /* Профиль скорости ролика (доля скорости исходника) в момент t, как при монтаже */
