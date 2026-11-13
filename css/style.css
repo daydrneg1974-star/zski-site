@@ -246,6 +246,7 @@ details p{padding-bottom:18px;color:var(--muted)}
 .map-ph span{color:var(--ice);font-weight:700}
 .map-links{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:14px}
 form.cb{display:grid;gap:12px}
+form.cb[hidden],.calc[hidden]{display:none}
 form.cb input,form.cb textarea,form.cb select{width:100%;padding:.9rem 1rem;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--text);font:inherit}
 form.cb input:focus,form.cb textarea:focus,form.cb select:focus{outline:none;border-color:var(--ice);box-shadow:0 0 0 3px var(--ice-soft)}
 form.cb textarea{min-height:110px;resize:vertical}

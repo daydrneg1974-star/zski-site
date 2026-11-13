@@ -6,13 +6,13 @@
    заход не ждал его старта.
    Новая версия воркера просто начинает отвечать на следующие запросы — страницу не перезагружаем:
    HTML и так приходит из сети, а у CSS/JS в адресе новая версия сборки.
-   VERSION подставляется при сборке, старые кэши удаляются. */
-const VERSION = "zski-202610101337";
+   VERSION подставляется при сборке, старые кэши ZSKI удаляются. */
+const VERSION = "zski-202611131331";
 const IMMUTABLE = /\.(woff2|webp|jpg|png|svg)$/;
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => {
   e.waitUntil(Promise.all([
-    caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSION).map((k) => caches.delete(k)))),
+    caches.keys().then((ks) => Promise.all(ks.filter((k) => /^zski-\d{12}$/.test(k) && k !== VERSION).map((k) => caches.delete(k)))),
     self.registration.navigationPreload ? self.registration.navigationPreload.enable().catch(() => {}) : null,
   ]).then(() => self.clients.claim()));
 });
