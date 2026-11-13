@@ -57,19 +57,19 @@ schema: yes
     <div class="grid grid-2" style="align-items:start">
       <div>
         <span class="eyebrow">Заявка</span>
-        <h2>Оставьте заявку — перезвоним</h2>
-        <p class="lead">Напишите, что и на какие даты нужно. Форма откроет готовое письмо в вашей почтовой программе — ничего не отправляется без вашего подтверждения.</p>
+        <h2>Напишите в прокат</h2>
+        <p class="lead">Укажите, что вам нужно и на какие даты. Можно <a href="mailto:z_ski@mail.ru">написать напрямую</a> или <a data-phone href="tel:+79161718621">позвонить в прокат</a>.</p>
       </div>
-      <form class="cb card" novalidate>
-        <div><label for="f-name">Имя</label><input id="f-name" name="name" required placeholder="Как к вам обращаться"></div>
-        <div><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" required placeholder="+7 ___ ___-__-__"></div>
+      <form class="cb card" hidden>
+        <div><label for="f-name">Имя</label><input id="f-name" name="name" required pattern=".*\S.*" placeholder="Как к вам обращаться"></div>
+        <div><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" required pattern=".*[0-9].*" placeholder="+7 ___ ___-__-__"></div>
         <div><label for="f-need">Что нужно</label>
           <select id="f-need" name="need">
             <option>Прокат горных лыж</option><option>Прокат сноуборда</option><option>SKI-сервис</option><option>Хранение / консервация</option><option>Другое</option>
           </select></div>
         <div><label for="f-msg">Сообщение</label><textarea id="f-msg" name="msg" placeholder="Даты, количество человек, размеры обуви и рост"></textarea></div>
-        <button class="btn btn-primary" type="submit">Отправить заявку</button>
-        <p class="form-note">Нажимая кнопку, вы соглашаетесь на обработку указанных данных для связи с вами.</p>
+        <button class="btn btn-primary" type="submit">Подготовить письмо</button>
+        <p class="form-note">Форма откроет черновик. Отправьте его из своей почты.</p>
       </form>
     </div>
   </div>

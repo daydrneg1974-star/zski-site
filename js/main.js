@@ -143,11 +143,10 @@
       lines.innerHTML = rows.join("") || `<li class="muted">Добавьте инвентарь, чтобы увидеть расчёт</li>`;
       total.textContent = fmt(sum);
       const text = rows.length
-        ? `Здравствуйте! Хочу забронировать на ${plural(days, "день", "дня", "дней")}: ` +
+        ? `Здравствуйте! Хочу уточнить наличие инвентаря на ${plural(days, "день", "дня", "дней")}: ` +
           items.filter((i) => qty[i.id]).map((i) => `${i.name} × ${qty[i.id]}`).join(", ") + `. Итого ~${fmt(sum)}.`
-        : "Здравствуйте! Хочу забронировать инвентарь.";
-      book.href = D.whatsapp ? `https://wa.me/${D.whatsapp}?text=${encodeURIComponent(text)}`
-        : `mailto:${D.email}?subject=${encodeURIComponent("Бронирование инвентаря ZSKI")}&body=${encodeURIComponent(text)}`;
+        : "Здравствуйте! Хочу уточнить наличие инвентаря.";
+      book.href = `mailto:${D.email}?subject=${encodeURIComponent("Наличие инвентаря ZSKI")}&body=${encodeURIComponent(text)}`;
     }
     list.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-d]"); if (!b) return;
@@ -156,6 +155,7 @@
     });
     range.addEventListener("input", update);
     update();
+    calc.hidden = false;
   }
 
   /* ---------- Видео: ленивая загрузка по клику ---------- */
@@ -201,12 +201,15 @@
   });
 
   /* ---------- Форма: открывает письмо (без бэкенда) ---------- */
-  $$("form.cb").forEach((f) => f.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const d = new FormData(f);
-    const body = `Имя: ${d.get("name")}\nТелефон: ${d.get("phone")}\nЧто нужно: ${d.get("need")}\nСообщение: ${d.get("msg") || "-"}`;
-    location.href = `mailto:${D.email}?subject=${encodeURIComponent("Заявка с сайта ZSKI")}&body=${encodeURIComponent(body)}`;
-  }));
+  $$("form.cb").forEach((f) => {
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const d = new FormData(f);
+      const body = `Имя: ${d.get("name")}\nТелефон: ${d.get("phone")}\nЧто нужно: ${d.get("need")}\nСообщение: ${d.get("msg") || "-"}`;
+      location.href = `mailto:${D.email}?subject=${encodeURIComponent("Заявка с сайта ZSKI")}&body=${encodeURIComponent(body)}`;
+    });
+    f.hidden = false;
+  });
 
 
   /* ---------- Шапка при скролле + параллакс hero ---------- */
