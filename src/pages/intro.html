@@ -15,11 +15,22 @@
 </head>
 <body>
 <div class="stage waiting">
-  <div class="poster" id="poster" style="background-image:url('img/photos/intro-poster.webp')"></div>
-  <video id="v" muted playsinline preload="none" poster="img/photos/intro-poster.webp" aria-label="Видео: горнолыжник спускается по склону">
-    <source src="video/descent.webm" type='video/webm; codecs="vp9"'>
-    <source src="video/descent.mp4" type="video/mp4">
+  <picture class="poster">
+    <source media="(orientation: portrait)" srcset="img/photos/intro-poster-portrait.webp">
+    <img id="poster" src="img/photos/intro-poster.webp" alt="" fetchpriority="high">
+  </picture>
+  <video id="v" muted playsinline preload="none" aria-label="Видео: горнолыжник спускается по склону">
+    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v={{BUILD}}" type='video/webm; codecs="vp9"'>
+    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v={{BUILD}}" type="video/mp4">
+    <source src="video/descent.webm?v={{BUILD}}" type='video/webm; codecs="vp9"'>
+    <source src="video/descent.mp4?v={{BUILD}}" type="video/mp4">
   </video>
+  <div class="arrival" aria-hidden="true">
+    <div class="arrival-scene">
+      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp" alt="" decoding="async">
+      <span class="arrival-sign">Z-SKI</span>
+    </div>
+  </div>
   <div class="shade"></div>
   <div class="lens" aria-hidden="true"></div>
 </div>
@@ -38,6 +49,17 @@
     <div class="meter right"><b id="alt">220</b><span>м · высота</span></div>
   </div>
 </div>
+<nav class="descent-route" id="route" aria-label="Остановки спуска" hidden>
+  <div class="route-elevation" aria-hidden="true"><span>220 м</span><span>0 м</span></div>
+  <ol class="route-stations" id="route-stations"></ol>
+</nav>
+
+<template id="station-template">
+  <div class="station" role="group">
+    <span class="name"></span><span class="sub"></span>
+    <div class="station-actions"><a class="go">Перейти <i aria-hidden="true">→</i></a><button class="station-next" type="button" hidden>Дальше</button></div>
+  </div>
+</template>
 
 <div class="menu" id="menu" role="dialog" aria-label="Разделы сайта">
   <div class="panel">
@@ -52,21 +74,26 @@
       <a href="contacts.html">Контакты<small>карта, график</small></a>
     </div>
     <button class="replay" id="replay" type="button">↺ Проехать ещё раз</button>
-    <p style="margin:14px 0 0;font-size:.72rem;color:#9fb0c7">Видео: нейросетевая генерация для ZSKI</p>
+    <p class="intro-credit">Экипировка лыжника — по авторскому изображению</p>
   </div>
 </div>
 
 <div class="start" id="start">
   <div class="start-inner">
     <img class="start-logo" src="img/logo-240.webp" alt="ZSKI" width="92" height="92">
+    <span class="start-status" data-status="compact" role="status" hidden></span>
     <h1>Ваш спуск к прокату</h1>
     <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
     <button class="btn-start" id="go" type="button" onclick="window.__zskiGo=1"><span>▶</span>Поехали</button>
     <a class="start-skip" href="index.html">Сразу на сайт →</a>
+    {{DRIVE_LINKS}}
   </div>
 </div>
 <div class="fade" id="fade"></div>
 <noscript><div style="position:fixed;inset:0;display:grid;place-items:center;background:#1a2230"><a href="index.html" style="color:#fff">Перейти на сайт →</a></div></noscript>
+<script src="js/data.js?v={{BUILD}}" defer></script>
+<script src="js/hours.js?v={{BUILD}}" defer></script>
+<script src="js/drive-links.js?v={{BUILD}}" defer></script>
 <script src="js/intro.js?v={{BUILD}}"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const fmt = (n) => new Intl.NumberFormat("ru-RU").format(n) + " ₽";
+  const messengerHref = (kind, contact) => kind === "whatsapp" ? `https://wa.me/${contact}` : `https://t.me/${contact}`;
 
   /* ---------- Подстановка контактов ---------- */
   $$("[data-phone]").forEach((el) => {
@@ -16,13 +17,12 @@
   $$("[data-rating]").forEach((el) => { el.textContent = D.rating.value; });
   $$("[data-rating-count]").forEach((el) => { el.textContent = new Intl.NumberFormat("ru-RU").format(D.rating.count); });
   $$("[data-href=yandex]").forEach((a) => (a.href = D.address.yandexMaps));
-  $$("[data-href=route]").forEach((a) => (a.href = D.address.yandexRoute));
   $$("[data-price-season]").forEach((el) => (el.textContent = D.priceSeason));
   $$("[data-messenger]").forEach((a) => {
     const kind = a.dataset.messenger;
     const val = D[kind];
     if (!val) { a.remove(); return; }
-    a.href = kind === "whatsapp" ? `https://wa.me/${val}` : `https://t.me/${val}`;
+    a.href = messengerHref(kind, val);
   });
 
   /* ---------- Меню ---------- */
@@ -46,39 +46,12 @@
     img.addEventListener("error", fail); img.addEventListener("load", ok);
   });
 
-  /* ---------- График и статус «открыто сейчас» ---------- */
+  /* ---------- Дата проката ---------- */
   function mskNow() {
     const now = new Date();
     const utc = now.getTime() + now.getTimezoneOffset() * 60000;
     return new Date(utc + 3 * 3600000); // МСК = UTC+3, без перехода на летнее время
   }
-  function isOpen() {
-    const t = mskNow();
-    const dow = (t.getDay() + 6) % 7; // 0 = Пн
-    const h = t.getHours() + t.getMinutes() / 60;
-    const today = D.hours[dow], prev = D.hours[(dow + 6) % 7];
-    if (h >= today.open && h < today.close) return { open: true, until: today.close };
-    if (prev.close > 24 && h < prev.close - 24) return { open: true, until: prev.close };
-    return { open: false, next: today.open > h ? today.open : D.hours[(dow + 1) % 7].open };
-  }
-  const hh = (x) => String(x % 24).padStart(2, "0") + ":00";
-  $$("[data-hours]").forEach((ul) => {
-    const dow = (mskNow().getDay() + 6) % 7;
-    ul.innerHTML = D.hours.map((d, i) =>
-      `<li class="${i === dow ? "today" : ""}"><span class="d">${d.day}</span><strong>${hh(d.open)} – ${hh(d.close)}</strong></li>`).join("");
-  });
-  const offSeason = (() => {
-    if (!D.seasonStart) return false;
-    const now = mskNow(), start = new Date(D.seasonStart + "T00:00:00+03:00"), end = D.seasonEnd ? new Date(D.seasonEnd + "T23:59:59+03:00") : null;
-    return now < start || (end && now > end);
-  })();
-  $$("[data-status]").forEach((el) => {
-    const s = isOpen();
-    if (offSeason) { el.innerHTML = `<span class="dot closed"></span> Межсезонье · инвентарь принимаем на хранение`; return; }
-    el.innerHTML = s.open
-      ? `<span class="dot"></span> Открыто · до ${hh(s.until)}`
-      : `<span class="dot closed"></span> Сейчас закрыто · откроемся в ${hh(s.next)}`;
-  });
 
   /* ---------- Прайс проката ---------- */
   function renderPriceList(container, group) {
@@ -123,7 +96,19 @@
   if (calc) {
     const items = Object.values(D.rental).flatMap((g) => g.items);
     const list = $(".calc-items", calc), total = $("[data-total]", calc), lines = $("[data-lines]", calc);
-    const range = $("input[type=range]", calc), daysOut = $("[data-days]", calc), book = $("[data-book]", calc);
+    const range = $("input[type=range]", calc), daysOut = $("[data-days]", calc);
+    const booking = $(".calc-booking", calc), date = $("#rental-date", booking), sizes = $("#rental-sizes", booking);
+    const bookingButtons = $$("button[type=submit]", booking);
+    const phone = D.phoneHref.replace(/\D/g, "");
+    const bookingLinks = {
+      whatsapp: messengerHref("whatsapp", D.whatsapp || phone),
+      telegram: messengerHref("telegram", D.telegram || `+${phone}`),
+      max: "https://max.ru/:share"
+    };
+    const today = mskNow();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    date.min = `${today.getFullYear()}-${month}-${day}`;
     const qty = Object.fromEntries(items.map((i) => [i.id, 0]));
     qty["ski-set"] = 1;
     list.innerHTML = items.map((i) => `
@@ -143,11 +128,7 @@
       });
       lines.innerHTML = rows.join("") || `<li class="muted">Добавьте инвентарь, чтобы увидеть расчёт</li>`;
       total.textContent = fmt(sum);
-      const text = rows.length
-        ? `Здравствуйте! Хочу уточнить наличие инвентаря на ${plural(days, "день", "дня", "дней")}: ` +
-          items.filter((i) => qty[i.id]).map((i) => `${i.name} × ${qty[i.id]}`).join(", ") + `. Итого ~${fmt(sum)}.`
-        : "Здравствуйте! Хочу уточнить наличие инвентаря.";
-      book.href = `mailto:${D.email}?subject=${encodeURIComponent("Наличие инвентаря ZSKI")}&body=${encodeURIComponent(text)}`;
+      bookingButtons.forEach((button) => { button.disabled = rows.length === 0; });
     }
     list.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-d]"); if (!b) return;
@@ -155,23 +136,118 @@
       qty[id] = Math.max(0, Math.min(10, qty[id] + +b.dataset.d)); update();
     });
     range.addEventListener("input", update);
+    booking.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const selected = items.filter((i) => qty[i.id]);
+      if (!selected.length) return;
+
+      const kind = e.submitter?.value || "whatsapp";
+      const start = date.value.split("-").reverse().join(".");
+      const message = [
+        "Здравствуйте! Хочу забронировать инвентарь в ZSKI.",
+        `Дата начала проката — ${start}, на ${daysOut.textContent}.`,
+        "",
+        ...selected.map((i) => `• ${i.name} × ${qty[i.id]}`),
+        "",
+        `Ростовки и размеры — ${sizes.value.trim() || "прошу подобрать на месте"}.`,
+        `Предварительная стоимость — ${total.textContent}.`,
+        "Подскажите, пожалуйста, что есть в наличии."
+      ].join("\n");
+      window.open(`${bookingLinks[kind]}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    });
     update();
     calc.hidden = false;
   }
 
-  /* ---------- Видео: ленивая загрузка по клику ---------- */
-  $$("[data-video]").forEach((box) => {
-    const id = box.dataset.video;
-    const thumb = $("img", box);
-    if (thumb) thumb.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-    $(".play", box).addEventListener("click", () => {
-      const f = document.createElement("iframe");
-      f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
-      f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-      f.allowFullscreen = true; f.title = box.dataset.title || "Видео";
-      box.innerHTML = ""; box.appendChild(f);
+  /* ---------- Видео на странице «Склоны рядом» ---------- */
+  const videos = $$("[data-video]").map((box) => ({
+    box, preview: $("[data-video-play]", box), loading: $(".video-loading", box), frame: null, ready: false
+  }));
+  if (videos.length) {
+    const rutube = "https://rutube.ru";
+    let warmed = null, active = null;
+
+    function addPlayer(video, autoplay) {
+      const frame = document.createElement("iframe");
+      frame.title = video.box.dataset.videoTitle;
+      frame.allow = "autoplay; picture-in-picture";
+      frame.allowFullscreen = true;
+      frame.src = `${rutube}/play/embed/${video.box.dataset.video}?autoplay=${autoplay}&q=360`;
+      if (!autoplay) {
+        frame.loading = "lazy";
+        frame.setAttribute("data-video-warmup", "");
+        frame.setAttribute("aria-hidden", "true");
+        frame.tabIndex = -1;
+      }
+      frame.addEventListener("load", () => {
+        frame.dataset.videoLoaded = "";
+        video.loading.hidden = true;
+      }, { once: true });
+      video.frame = frame;
+      video.box.append(frame);
+    }
+
+    const send = (video, type) => video.frame?.contentWindow?.postMessage(JSON.stringify({ type, data: {} }), rutube);
+    window.addEventListener("message", (event) => {
+      if (event.origin !== rutube || !warmed || event.source !== warmed.frame?.contentWindow) return;
+      let message;
+      try { message = typeof event.data === "string" ? JSON.parse(event.data) : event.data; } catch { return; }
+      if (message?.type !== "player:ready") return;
+      warmed.ready = true;
+      if (active === warmed) send(warmed, "player:play");
     });
-  });
+
+    const connection = navigator.connection;
+    const saveData = connection?.saveData || /2g/.test(connection?.effectiveType ?? "");
+    const linkedVideo = videos.find(({ box }) => `#${box.closest("section")?.id}` === location.hash);
+    function warmPlayer(video) {
+      warmed = video;
+      addPlayer(video, false);
+    }
+    if (!saveData && linkedVideo) {
+      warmPlayer(linkedVideo);
+    } else if (!saveData && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const distance = ({ boundingClientRect: rect }) => Math.abs(rect.top + rect.height / 2 - innerHeight / 2);
+        const near = entries.filter((entry) => entry.isIntersecting).sort((a, b) => distance(a) - distance(b));
+        if (!near.length) return;
+        observer.disconnect();
+        if (active) return;
+        warmPlayer(videos.find(({ box }) => box === near[0].target));
+      }, { rootMargin: "720px 0px" });
+      videos.forEach(({ box }) => observer.observe(box));
+    }
+
+    videos.forEach((video) => {
+      const { preview, loading } = video;
+      preview.addEventListener("click", (event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        if (preview.hidden) return;
+
+        const moveFocus = document.activeElement === preview;
+        if (warmed && warmed !== video && !warmed.preview.hidden) {
+          warmed.frame.remove();
+          warmed.frame = null;
+          warmed = null;
+        }
+        if (active) send(active, "player:pause");
+        active = video;
+        if (video.frame) {
+          loading.hidden = video.frame.hasAttribute("data-video-loaded");
+          video.frame.removeAttribute("data-video-warmup");
+          video.frame.removeAttribute("aria-hidden");
+          video.frame.removeAttribute("tabindex");
+          if (video.ready) send(video, "player:play");
+        } else {
+          loading.hidden = false;
+          addPlayer(video, true);
+        }
+        preview.hidden = true;
+        if (moveFocus) video.frame.focus();
+      });
+    });
+  }
 
   /* ---------- Карта ---------- */
   $$("[data-map]").forEach((m) => {
@@ -298,7 +374,7 @@
   /* ---------- Обратный отсчёт до сезона ---------- */
   (() => {
     const box = $("[data-season-stat]"); if (!box || !D.seasonStart) return;
-    const now = mskNow(), start = new Date(D.seasonStart + "T00:00:00+03:00"), end = D.seasonEnd ? new Date(D.seasonEnd + "T23:59:59+03:00") : null;
+    const now = new Date(), start = new Date(D.seasonStart + "T00:00:00+03:00"), end = D.seasonEnd ? new Date(D.seasonEnd + "T23:59:59+03:00") : null;
     if (now < start) { const days = Math.ceil((start - now) / 864e5), m = days % 100, l = days % 10, w = m > 10 && m < 20 ? "дней" : l === 1 ? "день" : l > 1 && l < 5 ? "дня" : "дней"; box.innerHTML = `<b><span data-count="${days}">0</span></b><span>${w} до открытия сезона · 1 декабря</span>`; }
     else if (!end || now <= end) box.innerHTML = `<b>Сезон открыт</b><span>катаемся — приезжайте за инвентарём</span>`;
   })();
