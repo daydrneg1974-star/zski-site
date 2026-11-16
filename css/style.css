@@ -92,7 +92,7 @@ p{margin:0 0 1em}
 .drive-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
 .drive-links .btn{min-height:44px;justify-content:center;padding-inline:12px;text-align:center}
 .drive-landmark{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-size:.875rem;font-weight:700;text-underline-offset:.2em}
-#drive,#drive-2gis,#approach{scroll-margin-top:86px}
+#drive,#drive-2gis,#approach,#hours{scroll-margin-top:86px}
 .drive-help{max-width:38rem;margin-top:8px}
 .drive-help:not(:target){display:none}
 .drive-help h2{font-size:1.3rem}
@@ -144,6 +144,7 @@ img.failed{visibility:hidden}
 .tab{padding:.65rem 1.2rem;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--muted);font-weight:800;cursor:pointer;font-family:inherit;font-size:.92rem;transition:all .25s}
 .tab[aria-selected="true"]{background:var(--text);color:#fff;border-color:var(--text)}
 .price-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.price-list[hidden]{display:none}
 .price-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);transition:border-color .25s,background .25s,transform .25s}
 .price-row:hover{border-color:var(--line-2);box-shadow:var(--shadow);transform:translateX(4px)}
 .price-row .name{font-weight:800}
