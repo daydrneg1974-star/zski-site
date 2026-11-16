@@ -1,5 +1,4 @@
-// Предрендер прайса проката и таблицы SKI-сервиса из js/data.js.
-// Вызывается из build.py; печатает JSON { pricelist: {ski, snowboard, extras}, service }.
+// Передаёт в build.py разметку прайса и данные для ссылок на маршрут из js/data.js.
 // Разметка должна совпадать с renderPriceList и [data-service] в js/main.js —
 // main.js потом перерисовывает те же блоки теми же данными.
 import { readFileSync } from "node:fs";
@@ -29,4 +28,5 @@ const service = tight(D.service.map((g) => `
       </div>`).join(""));
 
 const pricelist = Object.fromEntries(Object.entries(D.rental).map(([k, g]) => [k, priceList(g)]));
-process.stdout.write(JSON.stringify({ pricelist, service }));
+const { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } = D.address;
+process.stdout.write(JSON.stringify({ pricelist, service, driveLinks: { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } }));

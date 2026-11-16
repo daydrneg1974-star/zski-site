@@ -4,7 +4,7 @@
 window.__zskiIntro={show:show,restore:show&&type==="back_forward"?s.p:null};
 /* Скрипт интро не загрузился или упал — сразу показываем сайт */
 window.__zskiIntroFail=function(){var h=document.querySelector(".intro-host");if(h)h.hidden=true;d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))};
-var l=document.createElement("link");l.rel="preload";l.as="image";l.type="image/webp";l.href=show?"img/photos/intro-poster.webp":"img/photos/hero-freeride.webp";l.setAttribute("fetchpriority","high");document.head.appendChild(l);
+var l=document.createElement("link");l.rel="preload";l.as="image";l.type="image/webp";l.href=show?(matchMedia("(orientation: portrait)").matches?"img/photos/intro-poster-portrait.webp":"img/photos/intro-poster.webp"):"img/photos/hero-freeride.webp";l.setAttribute("fetchpriority","high");document.head.appendChild(l);
 if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v={{BUILD}}";document.head.appendChild(j)}
 if(show){d.classList.add("intro-open");setTimeout(function(){if(!(window.__zskiIntro&&window.__zskiIntro.booted)){d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))}},8000)}})();
 </script>

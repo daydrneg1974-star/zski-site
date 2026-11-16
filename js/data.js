@@ -6,6 +6,9 @@
 const zskiLat = 56.269875;
 const zskiLng = 37.490032;
 const zskiMarker = `ll=${zskiLng},${zskiLat}&z=18&pt=${zskiLng},${zskiLat},pm2rdm`;
+// Конец автомобильного подъезда у павильона: OpenStreetMap, дорога 1288098917.
+const zskiDriveLat = 56.270071;
+const zskiDriveLng = 37.48997;
 
 window.ZSKI = {
   brand: "ZSKI",
@@ -21,7 +24,10 @@ window.ZSKI = {
     full: "Московская область, Дмитровский муниципальный округ, рядом с СНТ Каменка",
     lat: zskiLat, lng: zskiLng,
     yandexMaps: `https://yandex.ru/maps/?${zskiMarker}`,
-    yandexRoute: `https://yandex.ru/maps/?rtext=~${zskiLat},${zskiLng}&rtt=auto`,
+    yandexRoute: `https://yandex.ru/maps/?rtext=~${zskiDriveLat},${zskiDriveLng}&rtt=auto`,
+    yandexNavigator: `yandexnavi://build_route_on_map?lat_to=${zskiDriveLat}&lon_to=${zskiDriveLng}`,
+    twoGisRoute: `dgis://2gis.ru/routeSearch/rsType/car/to/${zskiDriveLng},${zskiDriveLat}`,
+    driveCoordinates: `${zskiDriveLat}, ${zskiDriveLng}`,
     mapEmbed: `https://yandex.ru/map-widget/v1/?${zskiMarker}`
   },
   /* График работы (московское время). close > 24 означает «после полуночи» */
@@ -77,6 +83,7 @@ window.ZSKI = {
       { name: "Установка креплений — детские лыжи (до 140 см)",      ski: "от 400", sb: "—" },
       { name: "Установка креплений — беговые лыжи",                  ski: "от 300", sb: "—" },
       { name: "Установка креплений на сноуборд",                     ski: "—",      sb: "от 300" },
+      { name: "Установка платформы",                                 ski: "по запросу", sb: "по запросу" },
       { name: "Регулировка креплений",                               ski: "от 100", sb: "от 200" },
       { name: "Демонтаж — монтаж креплений",                         ski: "от 200", sb: "от 200" }
     ]},

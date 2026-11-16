@@ -1,16 +1,15 @@
 /* ZSKI — видео-интро «спуск к прокату».
    Ролик проигрывается всегда на скорости 1: плавные торможения перед станциями уже смонтированы
-   в нём (tools/retime_intro.py). Скрипт только ставит паузу в момент станции, показывает карточку
-   раздела и через CFG.hold продолжает спуск. Скорость на спидометре и громкость ветра берутся из
-   того же профиля скорости, что и монтаж. */
+   в нём. Скрипт управляет остановками, шкалой маршрута и переходом к павильону.
+   Спидометр и звук используют тот же профиль скорости, что и монтаж. */
 
 /* TIMELINE:BEGIN — генерируется tools/retime_intro.py, не править руками */
 const TIMELINE = {"duration": 18.0, "cruise": 0.6, "stations": [2.542, 4.898, 7.255, 9.612, 11.968], "segments": [[0.0, 1.0, 0.15, 0.6], [1.0, 1.642, 0.6, 0.6], [1.642, 2.542, 0.6, 0.2], [2.542, 3.242, 0.2, 0.6], [3.242, 3.998, 0.6, 0.6], [3.998, 4.898, 0.6, 0.2], [4.898, 5.598, 0.2, 0.6], [5.598, 6.355, 0.6, 0.6], [6.355, 7.255, 0.6, 0.2], [7.255, 7.955, 0.2, 0.6], [7.955, 8.712, 0.6, 0.6], [8.712, 9.612, 0.6, 0.2], [9.612, 10.312, 0.2, 0.6], [10.312, 11.068, 0.6, 0.6], [11.068, 11.968, 0.6, 0.2], [11.968, 12.768, 0.2, 0.42], [12.768, 17.025, 0.42, 0.42], [17.025, 18.025, 0.42, 0.35]]};
 /* TIMELINE:END */
 
 const CFG = {
-  hold: 1800,      // пауза на станции, мс
-  preroll: 4,      // с: сколько ролика должно быть подгружено перед стартом
+  hold: 3000,      // пауза на станции, мс
+  preroll: 5.5,    // с: запас видео до второй остановки и разгона после неё
   prerollMax: 8000,// мс: дольше не ждём — едем с тем, что есть
   maxSpeed: 68,    // км/ч на спидометре при обычном ходе
   startAlt: 220,   // м, высота на старте
@@ -38,20 +37,79 @@ function initIntro(root, opts) {
   const $ = (s) => root.querySelector(s);
   const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"), stage = $(".stage"),
         speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), startScreen = $("#start"), goBtn = $("#go"), hint = $("#hint");
+  const route = $("#route"), routeList = $("#route-stations"), arrivalPhoto = $("#arrival-photo");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const st = { phase: "start", idx: 0, card: null, holdTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, windK: -1, suspended: false, buffering: false, loadTimer: 0 };
+  const st = { phase: "start", idx: 0, card: null, holdTimer: 0, finishTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, soundLevel: -1, routeStep: "", hovered: false, focused: false, pinned: false, suspended: false, buffering: false, loadTimer: 0 };
+  const wind = {};
+
+  const routePoints = STATIONS.map((station, index) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "route-point";
+    button.textContent = station.label;
+    button.setAttribute("aria-label", `Перемотать к остановке «${station.label}»`);
+    button.disabled = true;
+    button.addEventListener("click", () => seekStation(index));
+    item.appendChild(button);
+    routeList.appendChild(item);
+    return button;
+  });
+  function canSeekTo(index) {
+    const time = TIMELINE.stations[index];
+    if (v.readyState < HTMLMediaElement.HAVE_METADATA) return false;
+    for (let i = 0; i < v.seekable.length; i++) {
+      if (v.seekable.start(i) <= time && time <= v.seekable.end(i)) return true;
+    }
+    return false;
+  }
+  function setRouteAvailability() {
+    routePoints.forEach((button, index) => { button.disabled = !canSeekTo(index); });
+  }
+  function showRoute(visible) {
+    route.hidden = !visible;
+    stage.classList.toggle("route-on", visible);
+  }
+  ["loadedmetadata", "progress", "canplay", "emptied"].forEach((event) => v.addEventListener(event, setRouteAvailability));
+  setRouteAvailability();
+
+  function updateRoute(t) {
+    if (route.hidden) return;
+    const n = STATIONS.length, i = st.idx;
+    const start = TIMELINE.stations[i - 1] ?? 0, end = TIMELINE.stations[i] ?? TIMELINE.duration;
+    const left = i === 0 ? 0 : (i - 0.5) / n, right = i === n ? 1 : (i + 0.5) / n;
+    const fraction = Math.max(0, Math.min(1, (t - start) / (end - start)));
+    routeList.style.setProperty("--route-progress", `${((left + (right - left) * fraction) * 100).toFixed(1)}%`);
+    const active = st.phase === "hold" ? i : -1, step = `${i}/${active}`;
+    if (step === st.routeStep) return;
+    st.routeStep = step;
+    routePoints.forEach((button, index) => {
+      button.classList.toggle("passed", index < i);
+      if (index === active) button.setAttribute("aria-current", "step");
+      else button.removeAttribute("aria-current");
+    });
+  }
+
+  function loadArrival() {
+    if (!arrivalPhoto.hasAttribute("src")) arrivalPhoto.src = arrivalPhoto.dataset.src;
+  }
+  function updateArrival(t) {
+    if (t >= TIMELINE.stations[1]) loadArrival();
+    const nearFinish = st.phase === "run" && t >= TIMELINE.duration - 1.05;
+    stage.classList.toggle("arrival-on", Boolean(arrivalPhoto.naturalWidth && (nearFinish || st.phase === "end")));
+  }
+  arrivalPhoto.addEventListener("load", () => updateArrival(v.currentTime));
 
   /* ---------- Спидометр и высота ---------- */
   function hud(t) {
-    const k = st.phase === "run" && !st.buffering ? speedAt(t) / TIMELINE.cruise : 0;
-    const sp = Math.round(CFG.maxSpeed * Math.min(1, k));
+    const k = st.phase === "run" && !st.buffering && !st.suspended ? Math.min(1, speedAt(t) / TIMELINE.cruise) : 0;
+    const sp = Math.round(CFG.maxSpeed * k);
     const alt = Math.max(0, Math.round(CFG.startAlt * (1 - t / TIMELINE.duration)));
     if (sp !== st.shownSpeed) { speedEl.textContent = sp; st.shownSpeed = sp; }
     if (alt !== st.shownAlt) { altEl.textContent = alt; st.shownAlt = alt; }
-    if (wind.gain && Math.abs(k - st.windK) > 0.03) {
-      st.windK = k; const now = wind.ctx.currentTime;
-      wind.gain.gain.setTargetAtTime(0.4 * k, now, 0.2); wind.filter.frequency.setTargetAtTime(160 + 800 * k, now, 0.2);
-    }
+    updateRoute(t);
+    updateArrival(t);
+    syncSound(k);
   }
 
   /* ---------- Слежение за роликом: по кадрам видео (rVFC), запасной путь — rAF ---------- */
@@ -79,22 +137,81 @@ function initIntro(root, opts) {
 
   /* ---------- Станции ---------- */
   function showCard(i) {
-    const s = STATIONS[i], a = document.createElement("a");
-    a.className = `station ${s.side}`; a.href = s.href;
-    a.innerHTML = `<span class="name">${s.label}</span><span class="sub">${s.sub}</span><span class="go">Перейти <i>→</i></span>`;
-    center.appendChild(a); requestAnimationFrame(() => requestAnimationFrame(() => a.classList.add("in")));
-    st.card = a;
+    const s = STATIONS[i], card = $("#station-template").content.firstElementChild.cloneNode(true);
+    card.classList.add(s.side);
+    card.setAttribute("aria-label", s.label);
+    card.querySelector(".name").textContent = s.label;
+    card.querySelector(".sub").textContent = s.sub;
+    const link = card.querySelector(".go"), next = card.querySelector(".station-next");
+    link.href = s.href;
+    link.setAttribute("aria-label", `Перейти в раздел «${s.label}»`);
+    let touchPress = false;
+    card.addEventListener("pointermove", (e) => {
+      // Карточка может сама появиться под неподвижным курсором.
+      if (st.card !== card || st.hovered || (e.pointerType !== "mouse" && e.pointerType !== "pen")) return;
+      st.hovered = true; armHold();
+    });
+    card.addEventListener("pointerleave", () => {
+      if (st.card !== card || !st.hovered) return;
+      st.hovered = false; armHold();
+    });
+    card.addEventListener("focusin", (e) => {
+      if (st.card !== card || !e.target.matches(":focus-visible")) return;
+      st.focused = true; armHold();
+    });
+    card.addEventListener("focusout", (e) => {
+      if (st.card !== card || !st.focused || card.contains(e.relatedTarget)) return;
+      st.focused = false; armHold();
+    });
+    card.addEventListener("pointerdown", (e) => {
+      touchPress = e.pointerType === "touch";
+      if (st.card !== card || !touchPress) return;
+      st.pinned = true; next.hidden = false; armHold();
+    });
+    card.addEventListener("click", (e) => {
+      if (st.card !== card || touchPress || e.target.closest("a,button")) return;
+      link.click();
+    });
+    next.addEventListener("click", resume);
+    st.card = card;
+    card.classList.add("in");
+    center.appendChild(card);
+  }
+  function resetCardHold() {
+    st.hovered = st.focused = st.pinned = false;
+    if (st.card) st.card.querySelector(".station-next").hidden = true;
   }
   function hideCard() {
-    const a = st.card; if (!a) return; st.card = null;
-    a.classList.remove("in"); a.classList.add("out"); setTimeout(() => a.remove(), 500);
+    const card = st.card;
+    resetCardHold();
+    if (!card) return;
+    st.card = null;
+    card.inert = true;
+    card.classList.remove("in"); card.classList.add("out"); setTimeout(() => card.remove(), 200);
   }
   function arrive() {
     unwatch(); v.pause(); st.phase = "hold";
     title.classList.remove("show"); stage.classList.add("hold"); hud(v.currentTime);
     showCard(st.idx); armHold();
   }
-  function armHold() { clearTimeout(st.holdTimer); st.holdTimer = setTimeout(resume, CFG.hold); }
+  function armHold() {
+    clearTimeout(st.holdTimer);
+    if (st.phase !== "hold" || st.suspended || st.hovered || st.focused || st.pinned || v.seeking) return;
+    st.holdTimer = setTimeout(resume, CFG.hold);
+  }
+  v.addEventListener("seeked", armHold);
+  function seekStation(i) {
+    if (route.hidden || st.suspended || !canSeekTo(i)) return;
+    if (st.phase === "hold" && st.idx === i) { armHold(); return; }
+    clearTimeout(st.loadTimer);
+    hideCard();
+    st.idx = i;
+    st.buffering = false;
+    stage.classList.remove("buffering");
+    hint.classList.remove("show");
+    v.currentTime = TIMELINE.stations[i];
+    arrive();
+  }
   function resume() {
     if (st.phase !== "hold") return;
     clearTimeout(st.holdTimer); hideCard(); stage.classList.remove("hold");
@@ -102,11 +219,13 @@ function initIntro(root, opts) {
   }
   function play() {
     if (!st.buffering) hint.classList.remove("show");
+    hud(v.currentTime);
     const p = v.play();
     if (p && p.catch) p.catch((err) => {
       if (st.suspended || st.phase !== "run" || !err || err.name !== "NotAllowedError") return;
       unwatch(); st.phase = "blocked";               // браузер требует касания — просим и ждём
       hint.textContent = "Коснитесь экрана, чтобы продолжить спуск"; hint.classList.add("show");
+      hud(v.currentTime);
     });
     watch();
   }
@@ -118,13 +237,19 @@ function initIntro(root, opts) {
      скорость на спидометре, пока видео само не продолжит (playing). */
   const bufferedAhead = (t) => { const b = v.buffered; for (let i = 0; i < b.length; i++) if (b.start(i) <= t + 0.1 && b.end(i) > t) return b.end(i) - t; return 0; };
   const ready = () => v.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA || bufferedAhead(0) >= Math.min(CFG.preroll, TIMELINE.duration - 0.5);
+  function startPlayback() {
+    st.phase = "run";
+    title.classList.add("show");
+    setTimeout(() => title.classList.remove("show"), 1500);
+    play();
+  }
   function waitForVideo() {
     st.phase = "loading"; const t0 = performance.now();
     const show = () => { const pct = Math.min(99, Math.round(bufferedAhead(0) / Math.min(CFG.preroll, TIMELINE.duration) * 100)); hint.textContent = `Готовим спуск… ${pct}%`; hint.classList.add("show"); };
     const tick = () => {
       if (st.phase !== "loading") return;
       if (st.noVideo || noVideoNow()) { finish(); return; }
-      if (ready() || performance.now() - t0 > CFG.prerollMax) { hint.classList.remove("show"); st.phase = "run"; play(); return; }
+      if (ready() || performance.now() - t0 > CFG.prerollMax) { startPlayback(); return; }
       show(); st.loadTimer = setTimeout(tick, 200);
     };
     tick();
@@ -134,9 +259,12 @@ function initIntro(root, opts) {
   function finish() {
     if (st.phase === "end") return;
     unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer); hideCard(); stage.classList.remove("hold"); stage.classList.remove("buffering"); st.buffering = false; hint.classList.remove("show");
+    showRoute(false);
+    loadArrival();
     st.phase = "end"; hud(TIMELINE.duration);
-    menu.classList.add("show");
-    if (wind.gain) wind.gain.gain.setTargetAtTime(0, wind.ctx.currentTime, 0.4);
+    const showMenu = () => menu.classList.add("show");
+    if (!reduce && v.ended && arrivalPhoto.naturalWidth) st.finishTimer = setTimeout(showMenu, 850);
+    else showMenu();
   }
   v.addEventListener("ended", () => { if (st.phase === "run") finish(); });
   const lastSource = v.querySelector("source:last-of-type");
@@ -156,20 +284,19 @@ function initIntro(root, opts) {
     startScreen.classList.add("off"); stage.classList.remove("waiting");
     startWind();
     if (reduce) { finish(); return; }
-    title.classList.add("show"); setTimeout(() => title.classList.remove("show"), 2200);
     if (st.noVideo) { finish(); return; }
     st.idx = 0;
+    showRoute(true);
     if (v.preload !== "auto") { v.preload = "auto"; v.load(); }
-    /* play() внутри жеста: после этого iOS разрешает запускать ролик и из таймеров (ожидание буфера, «Назад») */
-    const pr = v.play(); if (pr && pr.catch) pr.catch(() => {});
-    if (ready()) { st.phase = "run"; watch(); } else { v.pause(); waitForVideo(); }
+    if (ready()) startPlayback();
+    else waitForVideo();
     setTimeout(() => { if ((st.phase === "run" || st.phase === "loading") && st.idx === 0 && v.currentTime === 0 && noVideoNow()) finish(); }, 2500);
   });
 
   /* Клик мимо карточки во время остановки — едем дальше; пробел/Enter — тоже; Esc — на сайт */
   root.addEventListener("click", (e) => {
     if (st.phase === "blocked") { if (!e.target.closest("a")) { e.preventDefault(); unblock(); } return; }
-    if (e.target.closest("a,button")) return;
+    if (e.target.closest("a,button,.station,.descent-route")) return;
     if (st.phase === "hold") resume();
   });
   const onKey = (e) => {
@@ -189,8 +316,17 @@ function initIntro(root, opts) {
   /* Нажали «Поехали» раньше, чем загрузился этот скрипт, — стартуем сейчас */
   if (window.__zskiGo) { window.__zskiGo = 0; setTimeout(() => goBtn.click(), 0); }
 
-  /* ---------- Ветер (Web Audio, шум через фильтр) ---------- */
-  const wind = {};
+  /* ---------- Ветер и шорох кантов (две полосы шума) ---------- */
+  function syncSound(speed) {
+    if (!wind.gain || speed === st.soundLevel) return;
+    if (speed !== 0 && Math.abs(speed - st.soundLevel) < 0.025) return;
+    st.soundLevel = speed;
+    const now = wind.ctx.currentTime, ramp = speed === 0 ? 0.055 : 0.14;
+    wind.gain.gain.setTargetAtTime(0.33 * speed ** 1.4, now, ramp);
+    wind.filter.frequency.setTargetAtTime(180 + 1100 * speed, now, ramp);
+    wind.edges.gain.setTargetAtTime(0.11 * speed ** 2.2, now, ramp);
+    wind.edgeFilter.frequency.setTargetAtTime(750 + 1350 * speed, now, ramp);
+  }
   function startWind() {
     if (wind.ctx || reduce) return;
     try {
@@ -200,15 +336,30 @@ function initIntro(root, opts) {
       const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
       const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 300;
       const gain = ctx.createGain(); gain.gain.value = 0;
-      src.connect(filter).connect(gain).connect(ctx.destination); src.start();
-      wind.ctx = ctx; wind.filter = filter; wind.gain = gain;
+      const edgeFilter = ctx.createBiquadFilter(); edgeFilter.type = "bandpass"; edgeFilter.Q.value = 0.8;
+      const edges = ctx.createGain(); edges.gain.value = 0;
+      src.connect(filter).connect(gain).connect(ctx.destination);
+      src.connect(edgeFilter).connect(edges).connect(ctx.destination);
+      src.start();
+      Object.assign(wind, { ctx, filter, gain, edgeFilter, edges });
       const b = $("#mute"); b.hidden = false;
-      const sync = () => { const on = ctx.state === "running" && !wind.muted; b.textContent = on ? "🔊" : "🔇 Включить звук"; b.classList.toggle("attn", !on && !st.suspended); };
-      b.addEventListener("click", (e) => { e.stopPropagation(); if (ctx.state !== "running") { wind.muted = false; ctx.resume().then(sync); } else { wind.muted = !wind.muted; ctx[wind.muted ? "suspend" : "resume"]().then(sync); } });
+      const sync = () => {
+        const on = ctx.state === "running" && !wind.muted;
+        b.textContent = on ? "🔊" : "🔇 Включить звук";
+        b.setAttribute("aria-label", on ? "Выключить звук" : "Включить звук");
+        b.setAttribute("aria-pressed", String(on));
+        b.classList.toggle("attn", !on && !st.suspended);
+      };
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        wind.muted = ctx.state === "running" && !wind.muted;
+        (wind.muted ? ctx.suspend() : ctx.resume()).then(sync).catch(() => {});
+      });
       ctx.addEventListener("statechange", sync);
       if (ctx.state !== "running") ctx.resume().catch(() => {});
-      setTimeout(sync, 300);
-      wind.wake = () => { if (ctx.state !== "running" && !wind.muted) ctx.resume().then(sync).catch(() => {}); };
+      sync();
+      wind.wake = () => { if (ctx.state !== "running" && !wind.muted && !st.suspended) ctx.resume().then(sync).catch(() => {}); };
+      hud(v.currentTime);
     } catch {}
   }
   /* Браузер мог не дать включить звук без жеста — включаем при любом касании после старта */
@@ -220,6 +371,7 @@ function initIntro(root, opts) {
     /* Слой спрятан (переход на главную): всё останавливаем, место спуска запоминаем */
     suspend() {
       st.suspended = true; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
+      resetCardHold(); syncSound(0);
       try {
         v.pause();
         /* Слой скрыт — закачку ролика останавливаем, чтобы на слабом канале она не мешала странице.
@@ -235,6 +387,7 @@ function initIntro(root, opts) {
     /* Слой снова показан (кнопка «Назад»): продолжаем с того же места */
     wake() {
       st.suspended = false;
+      resetCardHold();
       const go = () => {
         if (st.phase === "hold") armHold();
         else if (st.phase === "run" || st.phase === "blocked") { st.phase = "run"; play(); }
@@ -252,7 +405,9 @@ function initIntro(root, opts) {
     restore(p) {
       if (!p || p.phase === "start") return;
       startScreen.classList.add("off"); stage.classList.remove("waiting");
+      loadArrival();
       if (p.phase === "end") { finish(); return; }
+      showRoute(true);
       st.idx = Math.min(p.idx, STATIONS.length);
       const go = () => {
         if (!st.restoring && st.phase === "end") return;
@@ -266,7 +421,7 @@ function initIntro(root, opts) {
       else { st.restoring = true; v.addEventListener("loadedmetadata", go, { once: true }); }
     },
     stop() {
-      st.suspended = true; st.phase = "end"; unwatch(); clearTimeout(st.holdTimer);
+      st.suspended = true; st.phase = "end"; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer); clearTimeout(st.finishTimer);
       removeEventListener("keydown", onKey);
       try { v.pause(); v.removeAttribute("src"); v.load(); } catch {}
       if (wind.ctx) wind.ctx.close().catch(() => {});
@@ -335,6 +490,7 @@ function initIntro(root, opts) {
     html.classList.add("intro-open");
     host.hidden = false; host.classList.remove("closing");
     ctl.wake();
+    dispatchEvent(new Event("zski:intro-opened"));
   }
   function hide(push, hash) {
     if (!ctl || host.hidden) return;

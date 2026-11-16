@@ -36,7 +36,7 @@ canonical: https://zski.ru/prices.html
   <div class="wrap">
     <span class="eyebrow">Калькулятор</span>
     <h2>Сколько будет стоить ваш комплект</h2>
-    <p class="lead">Выберите инвентарь и количество дней. Калькулятор покажет предварительную стоимость и добавит список в черновик письма.</p>
+    <p class="lead">Выберите инвентарь и срок проката. Укажите дату, чтобы отправить запрос на бронь в WhatsApp, Telegram или MAX.</p>
     <noscript><p>Для расчёта включите JavaScript или воспользуйтесь прайсом выше.</p></noscript>
     <div class="calc" data-calc hidden style="margin-top:26px">
       <div class="calc-items"></div>
@@ -45,11 +45,25 @@ canonical: https://zski.ru/prices.html
         <div class="total" data-total>0 ₽</div>
         <div class="days"><label for="days">Дней:</label><input id="days" type="range" min="1" max="14" value="1"><strong data-days>1 день</strong></div>
         <ul data-lines></ul>
-        <a class="btn btn-primary" data-book href="mailto:z_ski@mail.ru">Подготовить письмо</a>
-        <p class="fineprint" style="margin:12px 0 0">Отправьте письмо из своей почты. Наличие и окончательную стоимость уточнит прокат.</p>
+        <form class="calc-booking">
+          <div>
+            <label for="rental-date">Дата начала проката</label>
+            <input id="rental-date" type="date" required>
+          </div>
+          <div>
+            <label for="rental-sizes">Ростовки и размеры</label>
+            <input id="rental-sizes" type="text" maxlength="180" placeholder="Лыжи 155 см, ботинки 39" aria-describedby="rental-sizes-help">
+            <p class="fineprint" id="rental-sizes-help">Если не знаете ростовку, укажите рост или оставьте поле пустым для подбора на месте.</p>
+          </div>
+          <button class="btn btn-primary" type="submit" value="whatsapp">Забронировать в WhatsApp</button>
+          <button class="btn btn-ghost" type="submit" value="telegram">Забронировать в Telegram</button>
+          <button class="btn btn-ghost" type="submit" value="max" aria-describedby="max-booking-help">Забронировать в MAX</button>
+          <p class="fineprint" id="max-booking-help">В MAX выберите чат проката. Номер для поиска в MAX — <span data-phone>+7 (991) 937-77-44</span>.</p>
+          <p class="fineprint">Отправьте готовое сообщение в чате. Прокат подтвердит наличие и стоимость.</p>
+        </form>
       </div>
     </div>
-    <p class="fineprint">Уточнить наличие можно <a data-phone="link" href="tel:+79919377744">по телефону</a> или <a href="mailto:z_ski@mail.ru">по почте</a>.</p>
+    <p class="fineprint">Уточнить наличие можно <a data-phone="link" href="tel:+79919377744">по телефону</a>.</p>
   </div>
 </section>
 

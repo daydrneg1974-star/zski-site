@@ -23,6 +23,7 @@
 """
 import argparse, json, re, subprocess, sys
 from datetime import datetime, timezone
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -79,14 +80,14 @@ def intro_host() -> str:
     early = ("<script>/* Ролик начинает грузиться, как только показан постер (не отнимая у него канал); на медленной сети — версия 540p */"
              "(function(){var h=document.querySelector('.intro-host'),r=h&&h.shadowRoot,v=r&&r.getElementById('v');if(!v)return;"
              "var c=navigator.connection||{},slow=!!c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||'')||(c.downlink>0&&c.downlink<2.5);"
-             "if(slow){r.querySelectorAll('source').forEach(function(s){s.setAttribute('src',s.getAttribute('src').replace('descent.','descent-540.'))});v.dataset.quality='540'}"
+             "if(slow){v.querySelectorAll('source').forEach(function(s){s.setAttribute('src',s.getAttribute('src').replace('descent.','descent-540.'))});v.dataset.quality='540'}"
              "if(document.documentElement.classList.contains('intro-open')){var go=function(){if(v.preload!=='auto'){v.preload='auto';v.load()}};"
-             "var im=new Image();im.onload=im.onerror=go;im.src=r.getElementById('poster').style.backgroundImage.slice(5,-2);setTimeout(go,1500)}})();</script>")
+             "var im=r.getElementById('poster');if(im.complete){go()}else{im.addEventListener('load',go,{once:true});im.addEventListener('error',go,{once:true});setTimeout(go,1500)}}})();</script>")
     return ('<div class="intro-host" hidden role="dialog" aria-label="Видео-интро: спуск к прокату">'
             '<template shadowrootmode="open"><style>' + css + '</style>\n' + intro_markup() + '\n</template></div>\n' + early)
 
 
-def build_page(name: str, layout: dict, data, build: str) -> str:
+def build_page(name: str, layout: dict, data) -> str:
     meta, body = front_matter(read(SRC / "pages" / f"{name}.html"))
     for k in ("title", "description", "canonical"):
         if k not in meta:
@@ -107,8 +108,7 @@ def build_page(name: str, layout: dict, data, build: str) -> str:
                             "<style>" + fonts_css.strip() + "\n" + read(ROOT / "css" / "style.css").strip() + "</style>")
         header = header.replace("<body>\n", "<body>\n" + intro_host() + "\n", 1)
     html = head + header + body.rstrip("\n") + "\n" + layout["footer"]
-    html = fill_data(html, data)
-    return html.replace("{{BUILD}}", build)
+    return fill_data(html, data)
 
 
 def main():
@@ -119,6 +119,13 @@ def main():
 
     layout = {k: read(SRC / "layout" / f"{k}.html") for k in ("head", "header", "footer", "schema")}
     data = prerender()
+    drive_links = data["driveLinks"]
+    layout["drive-web-route"] = escape(drive_links["yandexRoute"], quote=True)
+    layout["drive-coordinates"] = escape(drive_links["driveCoordinates"])
+    layout["drive-links"] = (read(SRC / "layout" / "drive-links.html").strip()
+                             .replace("{{YANDEX_NAVIGATOR}}", escape(drive_links["yandexNavigator"], quote=True))
+                             .replace("{{TWO_GIS_ROUTE}}", escape(drive_links["twoGisRoute"], quote=True))
+                             .replace("{{YANDEX_WEB_ROUTE}}", layout["drive-web-route"]))
     sw = read(ROOT / "sw.js")
     current = re.search(r'const VERSION = "zski-(\d{12})"', sw)
     if args.check:
@@ -126,9 +133,15 @@ def main():
     else:
         build = args.build or datetime.now(timezone.utc).strftime("%Y%m%d%H%M")
 
-    outputs = {f"{n}.html": build_page(n, layout, data, build) for n in PAGES}
-    for n in RAW:
-        outputs[f"{n}.html"] = read(SRC / "pages" / f"{n}.html").replace("{{BUILD}}", build)
+    pages = {f"{n}.html": build_page(n, layout, data) for n in PAGES}
+    pages.update({f"{n}.html": read(SRC / "pages" / f"{n}.html") for n in RAW})
+    outputs = {
+        name: (html.replace("{{DRIVE_LINKS}}", layout["drive-links"])
+                   .replace("{{YANDEX_WEB_ROUTE}}", layout["drive-web-route"])
+                   .replace("{{DRIVE_COORDINATES}}", layout["drive-coordinates"])
+                   .replace("{{BUILD}}", build))
+        for name, html in pages.items()
+    }
     outputs["sw.js"] = re.sub(r'const VERSION = "zski-\d{12}"', f'const VERSION = "zski-{build}"', sw)
 
     stale = [f for f, text in outputs.items() if not (ROOT / f).exists() or read(ROOT / f) != text]

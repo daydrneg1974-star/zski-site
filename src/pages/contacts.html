@@ -9,6 +9,15 @@ schema: yes
   <span class="eyebrow">Контакты</span>
   <h1>Наши контакты</h1>
   <p class="lead">Звоните, пишите или приезжайте. Мы в районе Яхромы, рядом с СНТ Каменка.</p>
+  <div id="drive">
+    {{DRIVE_LINKS}}
+    <a class="drive-landmark" href="#approach">Фото и ориентиры</a>
+    <section class="card drive-help" id="drive-2gis" aria-labelledby="drive-2gis-title">
+      <h2 id="drive-2gis-title">Маршрут в 2ГИС</h2>
+      <p>Для запуска в один клик откройте сайт на телефоне с установленным 2ГИС. Координаты подъезда для поиска в 2ГИС — <strong>{{DRIVE_COORDINATES}}</strong>.</p>
+      <a class="btn btn-ghost btn-sm" href="{{YANDEX_WEB_ROUTE}}" target="_blank" rel="noopener">Маршрут в браузере</a>
+    </section>
+  </div>
 </div></section>
 
 <section class="section" style="padding-top:10px">
@@ -22,7 +31,6 @@ schema: yes
           <li><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><strong>Сейчас</strong><br><span class="status" data-status></span><br><span class="muted" data-season></span></div></li>
         </ul>
         <div class="map-links">
-          <a class="btn btn-primary btn-sm" data-href="route" href="https://yandex.ru/maps/?rtext=~56.269875,37.490032&amp;rtt=auto" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg> Построить маршрут</a>
           <a class="btn btn-ghost btn-sm" data-href="yandex" href="https://yandex.ru/maps/?ll=37.490032,56.269875&amp;z=18&amp;pt=37.490032,56.269875,pm2rdm" target="_blank" rel="noopener">Открыть в Яндекс Картах</a>
           <a class="btn btn-ghost btn-sm" data-messenger="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
           <a class="btn btn-ghost btn-sm" data-messenger="telegram" href="#" target="_blank" rel="noopener">Telegram</a>
@@ -37,10 +45,19 @@ schema: yes
         <div class="card" style="margin-top:18px">
           <h2 style="font-size:1.3rem">Как добраться</h2>
           <ol class="steps">
-            <li><strong>На машине</strong><span class="muted">Нажмите «Построить маршрут» и укажите, откуда едете. Конечная точка уже задана.</span></li>
+            <li><strong>На машине</strong><span class="muted">Выберите навигатор вверху страницы. С дороги 46Н‑01057 сверните на подъезд рядом с жёлтым щитом «Внимание! На дороге пешеходы».</span></li>
             <li><strong>От станции Яхрома</strong><span class="muted">Для поездки на такси укажите точку на карте или координаты 56.269875, 37.490032.</span></li>
           </ol>
         </div>
+        <section class="card approach" id="approach" aria-labelledby="approach-title">
+          <h2 id="approach-title">Фото и ориентиры</h2>
+          <div class="approach-links">
+            <a class="drive-landmark" href="https://yandex.com/maps/?l=pht&amp;ll=37.489554%2C56.270594&amp;photos%5Bid%5D=n432ipHMT6ny2vnRhTP4dw&amp;photos%5Boid%5D=img_47616497%3A6999&amp;photos%5Bpoint%5D=37.489265%2C56.270986&amp;z=19" target="_blank" rel="noopener">Зимнее фото развилки на Животино</a>
+            <p class="muted">Соседняя развилка на дороге к прокату.</p>
+            <a class="drive-landmark" href="https://yandex.com/maps/-/CXSZr4K3" target="_blank" rel="noopener">Панорама поворота к прокату</a>
+            <p class="muted">Съезд с дороги 46Н‑01057 · 56.270594, 37.489554. Летняя съёмка 2025 года.</p>
+          </div>
+        </section>
       </div>
     </div>
   </div>
