@@ -7,7 +7,7 @@ intro: yes
 ---
 
 <section class="hero" id="drive">
-  <div class="hero-media" data-ph><picture><source srcset="img/photos/hero-freeride.webp" type="image/webp"><img src="img/photos/hero-freeride.jpg" alt="Фрирайд: лыжник в прыжке над заснеженным склоном" fetchpriority="high" loading="lazy" decoding="async" data-fallback></picture></div>
+  <div class="hero-media" data-ph><picture><source srcset="img/photos/hero-freeride.webp" type="image/webp"><img src="img/photos/hero-freeride.jpg" alt="Фрирайд: лыжник в прыжке над заснеженным склоном" fetchpriority="high" loading="eager" fetchpriority="low" decoding="async" data-fallback></picture></div>
   <canvas class="snow" aria-hidden="true"></canvas>
   <div class="wrap">
     <span class="eyebrow">Яхрома · рядом с СНТ Каменка</span>
@@ -106,7 +106,7 @@ intro: yes
 <section class="section" style="padding-top:0">
   <div class="wrap">
     <div class="about">
-      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v={{BUILD}}" type="image/webp"><img src="img/photos/shop-exterior.jpg?v={{BUILD}}" alt="Павильон проката ZSKI" loading="lazy" decoding="async" data-fallback ></picture></div>
+      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v={{BUILD}}" type="image/webp"><img src="img/photos/shop-exterior.jpg?v={{BUILD}}" alt="Павильон проката ZSKI" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture></div>
       <div>
         <span class="eyebrow">О нашем клубе</span>
         <h2>Более 5 лет в прокате и сервисе</h2>
@@ -126,12 +126,12 @@ intro: yes
     <span class="eyebrow">Фотоальбом</span>
     <h2 id="rental-album-title">Как выглядит прокат изнутри</h2>
     <div class="album" style="margin-top:22px">
-      <figure data-ph><picture><source srcset="img/photos/counter.webp" type="image/webp"><img src="img/photos/counter.jpg" alt="Стойка выдачи инвентаря" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Стойка выдачи инвентаря</figcaption></figure>
-      <figure data-ph><picture><source srcset="img/photos/snowboards.webp" type="image/webp"><img src="img/photos/snowboards.jpg" alt="Сноуборды с креплениями" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Сноуборды с креплениями</figcaption></figure>
-      <figure data-ph><picture><source srcset="img/photos/ski-racks-2.webp" type="image/webp"><img src="img/photos/ski-racks-2.jpg" alt="Стеллажи с горными лыжами" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Стеллажи с горными лыжами</figcaption></figure>
-      <figure data-ph><picture><source srcset="img/photos/boots-shelf.webp" type="image/webp"><img src="img/photos/boots-shelf.jpg" alt="Ботинки по размерам" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Ботинки по размерам</figcaption></figure>
-      <figure data-ph><picture><source srcset="img/photos/helmet-skis.webp" type="image/webp"><img src="img/photos/helmet-skis.jpg" alt="Шлемы и лыжи" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Шлемы и лыжи</figcaption></figure>
-      <figure data-ph><picture><source srcset="img/photos/service-machine.webp" type="image/webp"><img src="img/photos/service-machine.jpg" alt="Станок SKI-сервиса" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Станок SKI-сервиса</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/counter.webp" type="image/webp"><img src="img/photos/counter.jpg" alt="Стойка выдачи инвентаря" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Стойка выдачи инвентаря</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/snowboards.webp" type="image/webp"><img src="img/photos/snowboards.jpg" alt="Сноуборды с креплениями" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Сноуборды с креплениями</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/ski-racks-2.webp" type="image/webp"><img src="img/photos/ski-racks-2.jpg" alt="Стеллажи с горными лыжами" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Стеллажи с горными лыжами</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/boots-shelf.webp" type="image/webp"><img src="img/photos/boots-shelf.jpg" alt="Ботинки по размерам" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Ботинки по размерам</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/helmet-skis.webp" type="image/webp"><img src="img/photos/helmet-skis.jpg" alt="Шлемы и лыжи" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Шлемы и лыжи</figcaption></figure>
+      <figure data-ph><picture><source srcset="img/photos/service-machine.webp" type="image/webp"><img src="img/photos/service-machine.jpg" alt="Станок SKI-сервиса" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Станок SKI-сервиса</figcaption></figure>
     </div>
   </div>
 </section>
@@ -172,10 +172,10 @@ intro: yes
         </ol>
       </div>
       <div class="gallery even" style="grid-template-columns:1fr 1fr">
-        <figure data-ph><picture><source srcset="img/photos/fitting-boots.webp" type="image/webp"><img src="img/photos/fitting-boots.jpg" alt="Подбираем ботинки по ноге" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Подбираем ботинки по ноге</figcaption></figure>
-        <figure data-ph><picture><source srcset="img/photos/ski-racks.webp" type="image/webp"><img src="img/photos/ski-racks.jpg" alt="Горные лыжи всех ростовок" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Горные лыжи всех ростовок</figcaption></figure>
-        <figure data-ph><picture><source srcset="img/photos/helmets.webp" type="image/webp"><img src="img/photos/helmets.jpg" alt="Шлемы и маски" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Шлемы и маски</figcaption></figure>
-        <figure data-ph><picture><source srcset="img/photos/technician.webp" type="image/webp"><img src="img/photos/technician.jpg" alt="Мастер SKI-сервиса за работой" loading="lazy" decoding="async" data-fallback ></picture><figcaption>Мастер SKI-сервиса за работой</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/fitting-boots.webp" type="image/webp"><img src="img/photos/fitting-boots.jpg" alt="Подбираем ботинки по ноге" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Подбираем ботинки по ноге</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/ski-racks.webp" type="image/webp"><img src="img/photos/ski-racks.jpg" alt="Горные лыжи всех ростовок" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Горные лыжи всех ростовок</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/helmets.webp" type="image/webp"><img src="img/photos/helmets.jpg" alt="Шлемы и маски" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Шлемы и маски</figcaption></figure>
+        <figure data-ph><picture><source srcset="img/photos/technician.webp" type="image/webp"><img src="img/photos/technician.jpg" alt="Мастер SKI-сервиса за работой" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture><figcaption>Мастер SKI-сервиса за работой</figcaption></figure>
       </div>
     </div>
   </div>
@@ -186,7 +186,7 @@ intro: yes
     <div class="banner">
       <picture>
         <source srcset="img/photos/technician-2.webp" type="image/webp">
-        <img src="img/photos/technician-2.jpg" alt="Мастер ZSKI настраивает крепления на лыжах" width="1400" height="933" loading="lazy" decoding="async">
+        <img src="img/photos/technician-2.jpg" alt="Мастер ZSKI настраивает крепления на лыжах" width="1400" height="933" loading="eager" fetchpriority="low" decoding="async">
       </picture>
       <div class="inner">
         <span class="eyebrow">SKI-сервис</span>
@@ -221,7 +221,7 @@ intro: yes
         <p><a class="btn btn-ghost" href="https://rutube.ru/video/468dfba538f8ed7c71147efa5ba4580a/" target="_blank" rel="noopener">Открыть на RUTUBE →</a></p>
       </div>
       <div class="video">
-        <iframe src="https://rutube.ru/play/embed/468dfba538f8ed7c71147efa5ba4580a" title="Сорочаны: вечерние склоны с высоты" loading="lazy" allow="autoplay; picture-in-picture" allowfullscreen></iframe>
+        <iframe src="https://rutube.ru/play/embed/468dfba538f8ed7c71147efa5ba4580a" title="Сорочаны: вечерние склоны с высоты" loading="eager" allow="autoplay; picture-in-picture" allowfullscreen></iframe>
       </div>
     </div>
   </div>

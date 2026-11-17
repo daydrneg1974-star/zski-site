@@ -165,7 +165,7 @@
   }));
   if (videos.length) {
     const rutube = "https://rutube.ru";
-    let warmed = null, active = null;
+    let active = null;
 
     function addPlayer(video, autoplay) {
       const frame = document.createElement("iframe");
@@ -174,7 +174,7 @@
       frame.allowFullscreen = true;
       frame.src = `${rutube}/play/embed/${video.box.dataset.video}?autoplay=${autoplay}&q=360`;
       if (!autoplay) {
-        frame.loading = "lazy";
+        frame.loading = "eager";
         frame.setAttribute("data-video-warmup", "");
         frame.setAttribute("aria-hidden", "true");
         frame.tabIndex = -1;
@@ -189,34 +189,19 @@
 
     const send = (video, type) => video.frame?.contentWindow?.postMessage(JSON.stringify({ type, data: {} }), rutube);
     window.addEventListener("message", (event) => {
-      if (event.origin !== rutube || !warmed || event.source !== warmed.frame?.contentWindow) return;
+      if (event.origin !== rutube) return;
+      const video = videos.find(({ frame }) => event.source === frame?.contentWindow);
+      if (!video) return;
       let message;
       try { message = typeof event.data === "string" ? JSON.parse(event.data) : event.data; } catch { return; }
       if (message?.type !== "player:ready") return;
-      warmed.ready = true;
-      if (active === warmed) send(warmed, "player:play");
+      video.ready = true;
+      if (active === video) send(video, "player:play");
     });
 
     const connection = navigator.connection;
     const saveData = connection?.saveData || /2g/.test(connection?.effectiveType ?? "");
-    const linkedVideo = videos.find(({ box }) => `#${box.closest("section")?.id}` === location.hash);
-    function warmPlayer(video) {
-      warmed = video;
-      addPlayer(video, false);
-    }
-    if (!saveData && linkedVideo) {
-      warmPlayer(linkedVideo);
-    } else if (!saveData && "IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => {
-        const distance = ({ boundingClientRect: rect }) => Math.abs(rect.top + rect.height / 2 - innerHeight / 2);
-        const near = entries.filter((entry) => entry.isIntersecting).sort((a, b) => distance(a) - distance(b));
-        if (!near.length) return;
-        observer.disconnect();
-        if (active) return;
-        warmPlayer(videos.find(({ box }) => box === near[0].target));
-      }, { rootMargin: "720px 0px" });
-      videos.forEach(({ box }) => observer.observe(box));
-    }
+    if (!saveData) videos.forEach((video) => addPlayer(video, false));
 
     videos.forEach((video) => {
       const { preview, loading } = video;
@@ -226,11 +211,6 @@
         if (preview.hidden) return;
 
         const moveFocus = document.activeElement === preview;
-        if (warmed && warmed !== video && !warmed.preview.hidden) {
-          warmed.frame.remove();
-          warmed.frame = null;
-          warmed = null;
-        }
         if (active) send(active, "player:pause");
         active = video;
         if (video.frame) {
@@ -299,7 +279,8 @@
   addEventListener("scroll", onScroll, { passive: true }); onScroll();
 
   /* ---------- Появление при скролле ---------- */
-  const targets = $$(".section .card, .price-row, .album figure, .gallery figure, .resort, .steps li, details, .section h2, .section .lead, .cta-band, .about .photo, .stat, .hours li, .contact-list li, .video, .map, .banner, .notice, .calc-item, .calc-summary, [data-service] > div");
+  const targets = $$(".section .card, .price-row, .album figure, .gallery figure, .resort, .steps li, details, .section h2, .section .lead, .cta-band, .about .photo, .stat, .hours li, .contact-list li, .video, .map, .banner, .notice, .calc-item, .calc-summary, [data-service] > div")
+    .filter((el) => !el.matches(".video, [data-ph]") && !el.querySelector("img, iframe"));
   targets.forEach((el) => {
     el.classList.add("reveal");
     const sib = Array.from(el.parentElement.children).filter((c) => c.classList.contains("reveal"));

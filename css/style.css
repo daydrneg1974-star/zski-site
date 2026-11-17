@@ -370,8 +370,6 @@ section.band-navy{padding:72px 0}
 
 /* ---------- Картинки: плавное проявление, ленивые секции ---------- */
 picture{display:contents}
-img[data-fallback]{opacity:0;transition:opacity .5s}
-img[data-fallback].ok,img[data-fallback].failed{opacity:1}
 
 /* ---------- Квиз ---------- */
 .quiz{position:relative;overflow:hidden;min-height:300px}
