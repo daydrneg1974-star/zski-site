@@ -12,7 +12,7 @@ const zskiDriveLng = 37.48997;
 
 window.ZSKI = {
   brand: "ZSKI",
-  tagline: "Прокат лыж и сноубордов в районе Яхромы",
+  tagline: "Прокат лыж и сноубордов в Яхроме",
   phone: "+7 (991) 937-77-44",
   phoneHref: "tel:+79919377744",
   email: "z_ski@mail.ru",
@@ -20,8 +20,8 @@ window.ZSKI = {
   whatsapp: "",          // номер в международном формате без плюса
   telegram: "",          // например: "zski_prokat"
   address: {
-    short: "Район Яхромы, рядом с СНТ Каменка",
-    full: "Московская область, Дмитровский муниципальный округ, рядом с СНТ Каменка",
+    short: "Яхрома, рядом с СНТ Каменка",
+    full: "Московская область, Дмитровский муниципальный округ, Яхрома, рядом с СНТ Каменка",
     lat: zskiLat, lng: zskiLng,
     yandexMaps: `https://yandex.ru/maps/?${zskiMarker}`,
     yandexRoute: `https://yandex.ru/maps/?rtext=~${zskiDriveLat},${zskiDriveLng}&rtt=auto`,
