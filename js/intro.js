@@ -38,6 +38,7 @@ function initIntro(root, opts) {
   const v = $("#v"), fade = $("#fade"), title = $("#title"), center = $("#center"), stage = $(".stage"),
         speedEl = $("#speed"), altEl = $("#alt"), menu = $("#menu"), startScreen = $("#start"), goBtn = $("#go"), hint = $("#hint");
   const route = $("#route"), routeList = $("#route-stations"), arrivalPhoto = $("#arrival-photo");
+  const hudPanel = $(".hud");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const st = { phase: "start", idx: 0, card: null, holdTimer: 0, finishTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, soundLevel: -1, routeStep: "", hovered: false, focused: false, pinned: false, suspended: false, buffering: false, loadTimer: 0 };
   const wind = {};
@@ -262,7 +263,10 @@ function initIntro(root, opts) {
     showRoute(false);
     loadArrival();
     st.phase = "end"; hud(TIMELINE.duration);
-    const showMenu = () => menu.classList.add("show");
+    const showMenu = () => {
+      hudPanel.hidden = true;
+      menu.classList.add("show");
+    };
     if (!reduce && v.ended && arrivalPhoto.naturalWidth) st.finishTimer = setTimeout(showMenu, 850);
     else showMenu();
   }

@@ -26,6 +26,7 @@ html,body{margin:0;height:100%;background:#1a2230;color:#fff;font-family:var(--f
 body.pov .lens,.stage.pov .lens{display:block}
 @media(max-aspect-ratio:3/4){.lens{left:5%;top:14%;width:90%;height:72%;border-radius:46%/30%}}
 .hud{position:fixed;inset:0;padding:22px;display:grid;grid-template-rows:auto 1fr auto;pointer-events:none}
+.hud[hidden]{display:none}
 .hud > *{pointer-events:auto}
 .hud-top{display:flex;justify-content:space-between;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;letter-spacing:.1em;text-decoration:none;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.6)}
