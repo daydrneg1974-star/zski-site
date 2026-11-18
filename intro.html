@@ -10,8 +10,8 @@
 <link rel="icon" href="img/favicon-64.png" type="image/png">
 <link rel="preload" href="fonts/unbounded-800-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/manrope-700-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="fonts/fonts.css?v=202611171720">
-<link rel="stylesheet" href="css/intro.css?v=202611171720">
+<link rel="stylesheet" href="fonts/fonts.css?v=202611180517">
+<link rel="stylesheet" href="css/intro.css?v=202611180517">
 </head>
 <body>
 <div class="stage waiting">
@@ -20,14 +20,14 @@
     <img id="poster" src="img/photos/intro-poster.webp" alt="" fetchpriority="high">
   </picture>
   <video id="v" muted playsinline preload="none" aria-label="Видео: горнолыжник спускается по склону">
-    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v=202611171720" type='video/webm; codecs="vp9"'>
-    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v=202611171720" type="video/mp4">
-    <source src="video/descent.webm?v=202611171720" type='video/webm; codecs="vp9"'>
-    <source src="video/descent.mp4?v=202611171720" type="video/mp4">
+    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v=202611180517" type='video/webm; codecs="vp9"'>
+    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v=202611180517" type="video/mp4">
+    <source src="video/descent.webm?v=202611180517" type='video/webm; codecs="vp9"'>
+    <source src="video/descent.mp4?v=202611180517" type="video/mp4">
   </video>
   <div class="arrival" aria-hidden="true">
     <div class="arrival-scene">
-      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611171720" alt="" decoding="async">
+      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611180517" alt="" decoding="async">
       <span class="arrival-sign">Z-SKI</span>
     </div>
   </div>
@@ -84,8 +84,10 @@
     <span class="start-status" data-status="compact" role="status" hidden></span>
     <h1>Ваш спуск к прокату</h1>
     <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
-    <button class="btn-start" id="go" type="button" onclick="window.__zskiGo=1"><span>▶</span>Поехали</button>
-    <a class="start-skip" href="index.html">Сразу на сайт →</a>
+    <div class="start-actions">
+      <button class="btn-start" id="go" type="button" onclick="window.__zskiGo=1"><span>▶</span>Поехали</button>
+      <a class="start-skip" href="index.html#main">Перейти на сайт →</a>
+    </div>
     <nav class="drive-links" aria-label="Маршрут на машине">
   <a class="btn btn-ghost btn-sm" href="https://yandex.ru/maps/?rtext=~56.270071,37.48997&amp;rtt=auto" data-route-app="yandexnavi://build_route_on_map?lat_to=56.270071&amp;lon_to=37.48997" data-route-package="ru.yandex.yandexnavi" target="_blank" rel="noopener">Открыть в Яндекс Навигаторе</a>
   <a class="btn btn-ghost btn-sm" href="contacts.html#drive-2gis" data-route-app="dgis://2gis.ru/routeSearch/rsType/car/to/37.48997,56.270071" data-route-package="ru.dublgis.dgismobile">Открыть в 2ГИС</a>
@@ -95,9 +97,9 @@
 </div>
 <div class="fade" id="fade"></div>
 <noscript><div style="position:fixed;inset:0;display:grid;place-items:center;background:#1a2230"><a href="index.html" style="color:#fff">Перейти на сайт →</a></div></noscript>
-<script src="js/data.js?v=202611171720" defer></script>
-<script src="js/hours.js?v=202611171720" defer></script>
-<script src="js/drive-links.js?v=202611171720" defer></script>
-<script src="js/intro.js?v=202611171720"></script>
+<script src="js/data.js?v=202611180517" defer></script>
+<script src="js/hours.js?v=202611180517" defer></script>
+<script src="js/drive-links.js?v=202611180517" defer></script>
+<script src="js/intro.js?v=202611180517"></script>
 </body>
 </html>

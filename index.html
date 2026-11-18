@@ -280,6 +280,11 @@ p{margin:0 0 1em}
 .drawer.open{display:block;animation:fade .25s}
 .drawer a{display:block;padding:14px 4px;text-decoration:none;font-weight:700;border-bottom:1px solid var(--line);font-size:1.05rem}
 .drawer .btn{margin-top:16px;width:100%;justify-content:center}
+.page-controls{display:flex;padding-bottom:8px}
+.page-back{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:7px 16px;border:1px solid var(--line-2);border-radius:999px;background:var(--card);color:var(--text);font-size:.95rem;font-weight:800;text-decoration:none}
+.page-back:hover{border-color:var(--ice);color:var(--ice)}
+.page-back:focus-visible{outline:3px solid var(--ice);outline-offset:3px}
+html{scroll-padding-top:136px}
 @keyframes fade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
 /* ---------- Hero ---------- */
@@ -296,7 +301,7 @@ p{margin:0 0 1em}
 .drive-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
 .drive-links .btn{min-height:44px;justify-content:center;padding-inline:12px;text-align:center}
 .drive-landmark{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-size:.875rem;font-weight:700;text-underline-offset:.2em}
-#drive,#drive-2gis,#approach,#hours{scroll-margin-top:86px}
+#drive,#drive-2gis,#approach,#hours{scroll-margin-top:0}
 .drive-help{max-width:38rem;margin-top:8px}
 .drive-help:not(:target){display:none}
 .drive-help h2{font-size:1.3rem}
@@ -526,9 +531,9 @@ footer .copy{border-top-color:rgba(255,255,255,.1)}
 :focus-visible{outline:3px solid var(--ice);outline-offset:2px}
 .about{display:grid;gap:26px;align-items:center}
 @media(min-width:900px){.about{grid-template-columns:1.1fr 1fr;gap:48px}}
-.about .photo{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;box-shadow:var(--shadow);position:relative}
+.about .photo{border-radius:var(--radius);overflow:hidden;aspect-ratio:1200/799;box-shadow:var(--shadow);position:relative}
 .about .photo::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(20,34,64,.08);border-radius:inherit}
-.about .photo img{width:100%;height:100%;object-fit:cover}
+.about .photo img{width:100%;height:100%;object-fit:contain}
 .stat-row{display:flex;flex-wrap:wrap;gap:26px;margin-top:22px}
 .stat{min-width:120px}
 .stat b{display:block;font-family:var(--display);font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--accent)}
@@ -608,7 +613,7 @@ picture{display:contents}
   "url": "https://zski.ru/",
   "telephone": "+79919377744",
   "email": "z_ski@mail.ru",
-  "image": "https://daydrneg1974-star.github.io/zski-site/img/photos/shop-exterior.jpg?v=202611171720",
+  "image": "https://daydrneg1974-star.github.io/zski-site/img/photos/shop-exterior.jpg?v=202611180517",
   "priceRange": "Аксессуары от 500 ₽/день, комплекты от 2000 ₽/день",
   "address": {"@type": "PostalAddress","addressRegion": "Московская область","addressLocality": "Яхрома","addressCountry": "RU"},
   "description": "Московская область, Дмитровский муниципальный округ, Яхрома, рядом с СНТ Каменка.",
@@ -643,7 +648,7 @@ window.__zskiIntro={show:show,restore:show&&type==="back_forward"?s.p:null};
 /* Скрипт интро не загрузился или упал — сразу показываем сайт */
 window.__zskiIntroFail=function(){var h=document.querySelector(".intro-host");if(h)h.hidden=true;d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))};
 var l=document.createElement("link");l.rel="preload";l.as="image";l.type="image/webp";l.href=show?(matchMedia("(orientation: portrait)").matches?"img/photos/intro-poster-portrait.webp":"img/photos/intro-poster.webp"):"img/photos/hero-freeride.webp";l.setAttribute("fetchpriority","high");document.head.appendChild(l);
-if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v=202611171720";document.head.appendChild(j)}
+if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v=202611180517";document.head.appendChild(j)}
 if(show){d.classList.add("intro-open");setTimeout(function(){if(!(window.__zskiIntro&&window.__zskiIntro.booted)){d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))}},8000)}})();
 </script>
 <style>html.intro-open,html.intro-open body{background:#1a2230;overflow:hidden}html.intro-open body>:not(.intro-host){display:none!important}.intro-host{position:fixed;inset:0;z-index:5000;transition:opacity .4s ease}.intro-host[hidden]{display:none}html.intro-open .intro-host[hidden]{display:block}.intro-host.closing{opacity:0;pointer-events:none}</style>
@@ -670,7 +675,12 @@ html,body{margin:0;height:100%;background:#1a2230;color:#fff;font-family:var(--f
 .arrival-sign{position:absolute;z-index:2;bottom:65.5%;left:54.5%;transform:translateX(-50%) rotate(1deg);padding:.18em .48em;border:1px solid rgba(255,255,255,.5);border-radius:.15em;background:#cf211b;color:#fff;font-family:var(--display);font-size:clamp(1.55rem,min(5vw,8.2vh),3.5rem);font-weight:800;letter-spacing:.05em;white-space:nowrap;box-shadow:0 8px 24px rgba(27,11,16,.32)}
 .arrival-sign::before,.arrival-sign::after{content:"";position:absolute;top:100%;width:.085em;height:.36em;background:#3e3e44}
 .arrival-sign::before{left:11%}.arrival-sign::after{right:11%}
-@media(orientation:portrait){.arrival-scene{left:calc(50% - 10vh)}}
+@media(orientation:portrait){
+  .stage.arrival-on video,.stage.arrival-on .poster{opacity:0}
+  .arrival-scene{top:56px;left:50%;width:100%;transform:translateX(-50%)}
+  .stage.arrival-on .arrival-scene{transform:translateX(-50%)}
+  .arrival-sign{font-size:clamp(.7rem,4.2vw,1.6rem)}
+}
 .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,22,.35),rgba(10,14,22,0) 35%,rgba(10,14,22,0) 60%,rgba(10,14,22,.65));pointer-events:none}
 /* Маска-очки: включается классом body.pov */
 .lens{position:absolute;left:4%;top:15%;width:92%;height:72%;border-radius:50%;pointer-events:none;display:none;box-shadow:0 0 0 4000px #1b1f26,inset 0 0 0 12px #2a2f38,inset 0 0 120px rgba(0,0,0,.45),inset 0 0 40px rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,196,138,.14),rgba(255,255,255,0) 45%,rgba(124,200,255,.12))}
@@ -769,13 +779,16 @@ body.pov .lens,.stage.pov .lens{display:block}
 @media(max-width:479px){.start-inner{gap:10px}}
 .start h1{margin:6px 0 0;font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,4rem);line-height:1.02;letter-spacing:-.02em;text-shadow:0 6px 30px rgba(0,0,0,.5)}
 .start p{margin:0;font-size:clamp(.95rem,1.6vw,1.15rem);color:rgba(255,255,255,.82);max-width:28.78em}
-.btn-start{margin-top:14px;display:inline-flex;align-items:center;gap:14px;padding:12px 30px 12px 12px;border:0;border-radius:999px;cursor:pointer;color:#fff;font-family:var(--display);font-weight:800;font-size:1.15rem;background:linear-gradient(135deg,#ff4b3e,var(--accent));box-shadow:0 14px 40px rgba(227,36,27,.45);position:relative;transition:transform .2s}
+.start-actions{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:12px;width:100%;margin-top:10px}
+.btn-start{display:inline-flex;align-items:center;gap:14px;padding:12px 30px 12px 12px;border:0;border-radius:999px;cursor:pointer;color:#fff;font-family:var(--display);font-weight:800;font-size:1.15rem;background:linear-gradient(135deg,#ff4b3e,var(--accent));box-shadow:0 14px 40px rgba(227,36,27,.45);position:relative;transition:transform .2s}
 .btn-start::after{content:"";position:absolute;inset:-10px;border-radius:inherit;box-shadow:0 0 0 10px rgba(227,36,27,.14),0 14px 56px rgba(227,36,27,.45);opacity:0;animation:startPulse 2.2s ease-in-out infinite;pointer-events:none}
 .btn-start:hover{transform:translateY(-2px) scale(1.03)}
 .btn-start span{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:1.3rem;padding-left:4px}
 @keyframes startPulse{0%,100%{opacity:0}50%{opacity:1}}
-.start-skip{color:rgba(255,255,255,.7);font-size:.9rem;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:2px}
-.start-skip:hover{color:#fff}
+.start-skip{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:14px 22px;border:2px solid #fff;border-radius:999px;background:#fff;color:#142238;font-size:1rem;font-weight:800;text-decoration:none}
+.start-skip:hover{background:#e3f2ff;border-color:#b4dfff}
+.start-skip:focus-visible,.btn-start:focus-visible{outline:3px solid var(--ice);outline-offset:5px}
+@media(max-width:479px){.start-actions{flex-direction:column;max-width:310px;margin-top:4px;gap:10px}.btn-start{justify-content:center;padding:8px 22px;font-size:1rem}.btn-start span{width:38px;height:38px}.start-skip{min-height:54px}}
 .start .drive-links{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px}
 .start .drive-links .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 14px;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:rgba(10,16,28,.72);color:#fff;font-size:.875rem;font-weight:800;text-decoration:none}
 .start .drive-links .btn:hover{background:#223555}
@@ -788,7 +801,8 @@ body.pov .lens,.stage.pov .lens{display:block}
   .start-logo{width:54px;height:54px}
   .start h1{font-size:clamp(1.5rem,5vw,2.2rem)}
   .start p{font-size:.88rem}
-  .btn-start{margin-top:6px;font-size:1rem;padding:8px 24px 8px 8px}
+  .start-actions{margin-top:4px}
+  .btn-start{font-size:1rem;padding:8px 24px 8px 8px}
   .btn-start span{width:40px;height:40px;font-size:1.05rem}
   .menu{padding:14px 20px}
   .panel h2{font-size:1.4rem}
@@ -797,9 +811,9 @@ body.pov .lens,.stage.pov .lens{display:block}
   .links a{padding:10px 8px;border-radius:14px}
   .replay{margin-top:10px}
 }
-@media (max-width:700px) and (orientation:portrait){
-  .stage.arrival-on ~ .menu{padding:12px 12px 18px}
-  .stage.arrival-on ~ .menu .panel{margin:auto auto 0;padding:13px 11px 10px;border:1px solid rgba(255,255,255,.24);border-radius:17px;background:rgba(12,21,34,.82)}
+@media (orientation:portrait){
+  .stage.arrival-on ~ .menu{padding:calc(56px + 100vw * 933 / 1400) 12px 18px;flex-direction:column;background:linear-gradient(180deg,transparent,rgba(20,27,40,.3))}
+  .stage.arrival-on ~ .menu .panel{flex:none;margin:auto auto 0;padding:13px 11px 10px;border:1px solid rgba(255,255,255,.24);border-radius:17px;background:rgba(12,21,34,.82)}
   .stage.arrival-on ~ .menu .panel h2{font-size:1.12rem}
   .stage.arrival-on ~ .menu .panel p{margin-bottom:.5rem;font-size:.78rem;line-height:1.3}
   .stage.arrival-on ~ .menu .links{gap:6px}
@@ -814,14 +828,14 @@ body.pov .lens,.stage.pov .lens{display:block}
     <img id="poster" src="img/photos/intro-poster.webp" alt="" fetchpriority="high">
   </picture>
   <video id="v" muted playsinline preload="none" aria-label="Видео: горнолыжник спускается по склону">
-    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v=202611171720" type='video/webm; codecs="vp9"'>
-    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v=202611171720" type="video/mp4">
-    <source src="video/descent.webm?v=202611171720" type='video/webm; codecs="vp9"'>
-    <source src="video/descent.mp4?v=202611171720" type="video/mp4">
+    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v=202611180517" type='video/webm; codecs="vp9"'>
+    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v=202611180517" type="video/mp4">
+    <source src="video/descent.webm?v=202611180517" type='video/webm; codecs="vp9"'>
+    <source src="video/descent.mp4?v=202611180517" type="video/mp4">
   </video>
   <div class="arrival" aria-hidden="true">
     <div class="arrival-scene">
-      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611171720" alt="" decoding="async">
+      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611180517" alt="" decoding="async">
       <span class="arrival-sign">Z-SKI</span>
     </div>
   </div>
@@ -878,8 +892,10 @@ body.pov .lens,.stage.pov .lens{display:block}
     <span class="start-status" data-status="compact" role="status" hidden></span>
     <h1>Ваш спуск к прокату</h1>
     <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
-    <button class="btn-start" id="go" type="button" onclick="window.__zskiGo=1"><span>▶</span>Поехали</button>
-    <a class="start-skip" href="index.html">Сразу на сайт →</a>
+    <div class="start-actions">
+      <button class="btn-start" id="go" type="button" onclick="window.__zskiGo=1"><span>▶</span>Поехали</button>
+      <a class="start-skip" href="index.html#main">Перейти на сайт →</a>
+    </div>
     <nav class="drive-links" aria-label="Маршрут на машине">
   <a class="btn btn-ghost btn-sm" href="https://yandex.ru/maps/?rtext=~56.270071,37.48997&amp;rtt=auto" data-route-app="yandexnavi://build_route_on_map?lat_to=56.270071&amp;lon_to=37.48997" data-route-package="ru.yandex.yandexnavi" target="_blank" rel="noopener">Открыть в Яндекс Навигаторе</a>
   <a class="btn btn-ghost btn-sm" href="contacts.html#drive-2gis" data-route-app="dgis://2gis.ru/routeSearch/rsType/car/to/37.48997,56.270071" data-route-package="ru.dublgis.dgismobile">Открыть в 2ГИС</a>
@@ -907,6 +923,9 @@ body.pov .lens,.stage.pov .lens{display:block}
       <a class="btn btn-primary" data-phone="link" href="tel:+79919377744"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
     </div>
   </div>
+  <nav class="page-controls wrap" aria-label="Возврат по сайту">
+    <a class="page-back" href="index.html#main" data-back><span aria-hidden="true">←</span> Назад</a>
+  </nav>
 </header>
 <main id="main">
 
@@ -1014,7 +1033,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 <section class="section" style="padding-top:0">
   <div class="wrap">
     <div class="about">
-      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v=202611171720" type="image/webp"><img src="img/photos/shop-exterior.jpg?v=202611171720" alt="Павильон проката ZSKI" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture></div>
+      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v=202611180517" type="image/webp"><img src="img/photos/shop-exterior.jpg?v=202611180517" alt="Павильон проката ZSKI" loading="eager" fetchpriority="low" decoding="async" data-fallback ></picture></div>
       <div>
         <span class="eyebrow">О нашем клубе</span>
         <h2>Более 5 лет в прокате и сервисе</h2>
@@ -1189,7 +1208,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 
 
 <!-- Слой интро «спуск к прокату» вставляется сборкой в начало <body> (intro: yes), см. js/intro.js -->
-<script src="js/intro.js?v=202611171720" defer onerror="window.__zskiIntroFail&&__zskiIntroFail()"></script>
+<script src="js/intro.js?v=202611180517" defer onerror="window.__zskiIntroFail&&__zskiIntroFail()"></script>
 
 </main>
 <footer>
@@ -1221,10 +1240,10 @@ body.pov .lens,.stage.pov .lens{display:block}
   <a class="btn btn-primary" data-phone="link" href="tel:+79919377744"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
   <a class="btn btn-ghost" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать</a>
 </div>
-<script src="js/data.js?v=202611171720" defer></script>
-<script src="js/hours.js?v=202611171720" defer></script>
-<script src="js/drive-links.js?v=202611171720" defer></script>
-<script src="js/main.js?v=202611171720" defer></script>
+<script src="js/data.js?v=202611180517" defer></script>
+<script src="js/hours.js?v=202611180517" defer></script>
+<script src="js/drive-links.js?v=202611180517" defer></script>
+<script src="js/main.js?v=202611180517" defer></script>
 <script>if("serviceWorker"in navigator)addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").then((r)=>r.update()).catch(()=>{});});</script>
 </body>
 </html>
