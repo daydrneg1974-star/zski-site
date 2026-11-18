@@ -22,4 +22,4 @@ var l=document.createElement("link");l.rel="preload";l.as="image";l.type="image/
 if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v={{BUILD}}";document.head.appendChild(j)}
 if(show){d.classList.add("intro-open");setTimeout(function(){if(!(window.__zskiIntro&&window.__zskiIntro.booted)){d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))}},8000)}})();
 </script>
-<style>html.intro-open,html.intro-open body{background:#1a2230;overflow:hidden}html.intro-open body>:not(.intro-host){display:none!important}.intro-host{position:fixed;inset:0;z-index:5000;transition:opacity .4s ease}.intro-host[hidden]{display:none}html.intro-open .intro-host[hidden]{display:block}.intro-host.closing{opacity:0;pointer-events:none}</style>
+<style>html.intro-open,html.intro-open body{background:#1a2230;overflow:hidden}html.intro-open body>:not(.intro-host){display:none!important}.intro-host{position:fixed;inset:0;z-index:5000}.intro-host[hidden]{display:none}html.intro-open .intro-host[hidden]{display:block}</style>

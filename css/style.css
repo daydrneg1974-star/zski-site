@@ -26,6 +26,7 @@ img{max-width:100%;display:block}
 a{color:inherit}
 h1,h2,h3{font-family:var(--display);line-height:1.08;margin:0 0 .5em;font-weight:700;letter-spacing:-.01em}
 h1{font-size:clamp(2.1rem,5.6vw,4.2rem);font-weight:800}
+@media(max-width:479px){h1{font-size:clamp(1.65rem,7.5vw,2.1rem);overflow-wrap:anywhere}}
 h2{font-size:clamp(1.5rem,3.4vw,2.5rem)}
 h3{font-size:1.05rem;line-height:1.3}
 p{margin:0 0 1em}
@@ -73,7 +74,7 @@ p{margin:0 0 1em}
 @media(min-width:960px){.menu,.nav-cta{display:flex}.burger{display:none}.nav-status{white-space:nowrap}}
 @media(max-width:479px){.topbar>.wrap{padding-inline:12px}.nav{gap:8px}.nav .logo{gap:5px;flex:none;font-size:1rem}.nav .logo img{width:34px;height:34px}.nav .logo small{display:none}.nav .nav-status{gap:5px;padding-inline:6px}.burger{flex:none}}
 .drawer{display:none;border-top:1px solid var(--line);padding:12px 0 20px}
-.drawer.open{display:block;animation:fade .25s}
+.drawer.open{display:block}
 .drawer a{display:block;padding:14px 4px;text-decoration:none;font-weight:700;border-bottom:1px solid var(--line);font-size:1.05rem}
 .drawer .btn{margin-top:16px;width:100%;justify-content:center}
 .page-controls{display:flex;padding-bottom:8px}
@@ -81,7 +82,6 @@ p{margin:0 0 1em}
 .page-back:hover{border-color:var(--ice);color:var(--ice)}
 .page-back:focus-visible{outline:3px solid var(--ice);outline-offset:3px}
 html{scroll-padding-top:136px}
-@keyframes fade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
 /* ---------- Hero ---------- */
 .hero{position:relative;min-height:min(100svh,900px);display:flex;align-items:flex-end;overflow:hidden;color:#fff;isolation:isolate;background:var(--navy)}
@@ -126,11 +126,6 @@ img.failed{visibility:hidden}
 .marquee .track{display:inline-flex;gap:3rem;animation:marq 40s linear infinite;padding-left:3rem;will-change:transform}
 .marquee span::before{content:"✦";margin-right:3rem;opacity:.7}
 @keyframes marq{to{transform:translateX(-50%)}}
-
-/* ---------- Появление при скролле ---------- */
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0ms)}
-.reveal.in{opacity:1;transform:none}
-.reveal.now{transition:none}
 
 /* ---------- Карточки ---------- */
 .grid{display:grid;gap:18px}
@@ -178,7 +173,7 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .qty button{width:40px;height:40px;border:0;background:transparent;color:var(--text);font-size:1.25rem;cursor:pointer;font-family:inherit}
 .qty button:hover{background:var(--ice-soft);color:var(--ice)}
 .qty output{min-width:34px;text-align:center;font-weight:800}
-.calc-summary{position:sticky;top:96px;background:linear-gradient(160deg,#ffffff,#f4f7fb)}
+.calc-summary{position:sticky;top:144px;background:linear-gradient(160deg,#ffffff,#f4f7fb)}
 .calc-summary .total{font-family:var(--display);font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1}
 .days{display:flex;align-items:center;gap:12px;margin:18px 0}
 .days input[type=range]{flex:1;min-width:0;accent-color:var(--accent)}
@@ -216,10 +211,10 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .video-play{display:grid;place-items:center;position:relative;width:56px;height:56px;border-radius:16px;background:#007fa9;color:#fff;box-shadow:0 5px 24px rgba(0,0,0,.38)}
 .video-play::before{content:"";border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid currentColor;margin-left:4px}
 .video-preview:hover .video-play,.video-preview:focus-visible .video-play{background:#00678d}
-.video-loading{z-index:1;background:rgba(15,30,56,.94);pointer-events:none;font-size:.9rem;font-weight:700;text-align:center}
+.video-loading{z-index:1;inset:auto 0 0;padding:12px;background:rgba(15,30,56,.94);pointer-events:none;font-size:.85rem;font-weight:700;text-align:center}
 
 /* ---------- Лайтбокс ---------- */
-.lightbox{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .2s}
+.lightbox{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px}
 .lightbox[hidden]{display:none}
 .lightbox img{max-width:min(96vw,1400px);max-height:84vh;border-radius:14px;box-shadow:0 40px 100px rgba(0,0,0,.6)}
 .lightbox .cap{position:absolute;left:0;right:0;bottom:22px;text-align:center;color:#cfd8e6;font-size:.95rem;font-weight:600}
@@ -345,7 +340,7 @@ footer .copy{border-top-color:rgba(255,255,255,.1)}
 .hero .btn-ghost{color:#fff;border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.08)}
 .hero .btn-ghost:hover{border-color:#fff;color:#fff}
 ::selection{background:var(--accent);color:#fff}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}.hero-media img{transform:none}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}.hero-media img{transform:none}}
 
 /* ---------- Тёмно-синие полосы (band-navy): компоненты внутри переключаются на светлый текст ---------- */
 .band-navy{background:linear-gradient(160deg,var(--navy),var(--navy-2));color:#eef3fb;--text:#eef3fb;--muted:#a9b7cc;--card:rgba(255,255,255,.06);--card-solid:#162a4d;--line:rgba(255,255,255,.12);--line-2:rgba(255,255,255,.24);--bg:#162a4d;--bg-3:#1a315a;--ice:#7cc8ff;--ice-soft:rgba(124,200,255,.14);--accent-soft:rgba(255,75,62,.18);--shadow:0 22px 60px rgba(0,0,0,.35);position:relative;isolation:isolate}
@@ -365,14 +360,6 @@ footer .copy{border-top-color:rgba(255,255,255,.1)}
 section.band-navy{padding:72px 0}
 @media(min-width:900px){section.band-navy{padding:104px 0}}
 
-/* ---------- Плавные переходы между страницами (View Transitions) ---------- */
-@view-transition{navigation:auto}
-::view-transition-old(root){animation:vt-out .22s ease-in}
-::view-transition-new(root){animation:vt-in .32s ease-out}
-@keyframes vt-out{to{opacity:0;transform:translateY(-8px)}}
-@keyframes vt-in{from{opacity:0;transform:translateY(10px)}}
-.topbar{view-transition-name:topbar}
-
 /* ---------- Картинки: плавное проявление, ленивые секции ---------- */
 picture{display:contents}
 
@@ -384,7 +371,6 @@ picture{display:contents}
 .quiz .opts button:hover{transform:translateX(4px);border-color:#7cc8ff;background:rgba(124,200,255,.12)}
 .quiz-progress{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.1)}
 .quiz-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));transition:width .4s}
-.quiz-step,.quiz-result{animation:fade .35s}
 .quiz .res-title{font-family:var(--display);font-weight:800;font-size:1.2rem;margin-bottom:10px}
 .quiz .res-list{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:6px}
 .quiz .res-list li{display:flex;justify-content:space-between;gap:1rem;padding:8px 0;border-bottom:1px solid var(--line)}

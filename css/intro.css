@@ -11,7 +11,7 @@ html,body{margin:0;height:100%;background:#1a2230;color:#fff;font-family:var(--f
 .stage::after{content:"";position:absolute;inset:0;background:rgba(10,14,22,.34);opacity:0;transition:opacity .45s ease;pointer-events:none}
 .stage.hold::after,.stage.buffering::after{opacity:1}
 .stage video.on{opacity:1}
-.arrival{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .95s ease;pointer-events:none}
+.arrival{position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none}
 .stage.arrival-on .arrival{opacity:1}
 .arrival-scene{position:absolute;top:50%;left:50%;width:max(100vw,150.1vh);aspect-ratio:1400/933;transform:translate(-50%,-50%) scale(1.06);transition:transform 2.4s ease-out}
 .stage.arrival-on .arrival-scene{transform:translate(-50%,-50%) scale(1.13)}
@@ -61,7 +61,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 .title p{margin:0;font-weight:700;opacity:.9;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .hint{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;font-weight:800;opacity:.75;text-shadow:0 2px 12px rgba(0,0,0,.6);animation:pulse 2s infinite;white-space:nowrap}
 @keyframes pulse{50%{opacity:.3}}
-.menu{position:fixed;inset:0;display:flex;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:24px;background:radial-gradient(ellipse at 50% 60%,rgba(20,27,40,.3),rgba(20,27,40,.73));opacity:0;visibility:hidden;pointer-events:none;transition:opacity .8s}
+.menu{position:fixed;inset:0;display:flex;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:24px;background:radial-gradient(ellipse at 50% 60%,rgba(20,27,40,.3),rgba(20,27,40,.73));opacity:0;visibility:hidden;pointer-events:none}
 .menu.show{opacity:1;visibility:visible;pointer-events:auto}
 .panel{max-width:860px;width:100%;margin:auto;text-align:center}
 .panel h2{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,4.5vw,3rem);margin:0 0 .4rem;text-shadow:0 6px 30px rgba(0,0,0,.6)}
