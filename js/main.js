@@ -38,6 +38,22 @@
     if ((a.getAttribute("href") || "").split("#")[0] === here) a.setAttribute("aria-current", "page");
   });
 
+  /* Назад — только к предыдущему экрану нашего сайта; прямой вход ведёт на главную. */
+  const back = $("[data-back]");
+  if (back) back.addEventListener("click", (e) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const ref = document.referrer ? new URL(document.referrer) : null;
+    const pages = ["index.html", "intro.html", "prices.html", "service.html", "slopes.html", "contacts.html"];
+    const internal = ref && ref.origin === location.origin &&
+      new URL("./", ref).pathname === new URL("./", location.href).pathname &&
+      pages.includes(ref.pathname.split("/").pop() || "index.html");
+    const fromIntro = history.state && history.state.zskiIntro === "closed";
+    if (history.length > 1 && (internal || fromIntro)) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+
   /* ---------- Запасной фон для фото ---------- */
   $$("img[data-fallback]").forEach((img) => {
     const fail = () => { img.classList.add("failed"); (img.closest("[data-ph]") || img.closest("figure") || img.parentElement).classList.add("ph"); };

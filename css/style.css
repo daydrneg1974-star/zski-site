@@ -76,6 +76,11 @@ p{margin:0 0 1em}
 .drawer.open{display:block;animation:fade .25s}
 .drawer a{display:block;padding:14px 4px;text-decoration:none;font-weight:700;border-bottom:1px solid var(--line);font-size:1.05rem}
 .drawer .btn{margin-top:16px;width:100%;justify-content:center}
+.page-controls{display:flex;padding-bottom:8px}
+.page-back{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:7px 16px;border:1px solid var(--line-2);border-radius:999px;background:var(--card);color:var(--text);font-size:.95rem;font-weight:800;text-decoration:none}
+.page-back:hover{border-color:var(--ice);color:var(--ice)}
+.page-back:focus-visible{outline:3px solid var(--ice);outline-offset:3px}
+html{scroll-padding-top:136px}
 @keyframes fade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
 /* ---------- Hero ---------- */
@@ -92,7 +97,7 @@ p{margin:0 0 1em}
 .drive-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
 .drive-links .btn{min-height:44px;justify-content:center;padding-inline:12px;text-align:center}
 .drive-landmark{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-size:.875rem;font-weight:700;text-underline-offset:.2em}
-#drive,#drive-2gis,#approach,#hours{scroll-margin-top:86px}
+#drive,#drive-2gis,#approach,#hours{scroll-margin-top:0}
 .drive-help{max-width:38rem;margin-top:8px}
 .drive-help:not(:target){display:none}
 .drive-help h2{font-size:1.3rem}
@@ -322,9 +327,9 @@ footer .copy{border-top-color:rgba(255,255,255,.1)}
 :focus-visible{outline:3px solid var(--ice);outline-offset:2px}
 .about{display:grid;gap:26px;align-items:center}
 @media(min-width:900px){.about{grid-template-columns:1.1fr 1fr;gap:48px}}
-.about .photo{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;box-shadow:var(--shadow);position:relative}
+.about .photo{border-radius:var(--radius);overflow:hidden;aspect-ratio:1200/799;box-shadow:var(--shadow);position:relative}
 .about .photo::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(20,34,64,.08);border-radius:inherit}
-.about .photo img{width:100%;height:100%;object-fit:cover}
+.about .photo img{width:100%;height:100%;object-fit:contain}
 .stat-row{display:flex;flex-wrap:wrap;gap:26px;margin-top:22px}
 .stat{min-width:120px}
 .stat b{display:block;font-family:var(--display);font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--accent)}
