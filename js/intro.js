@@ -40,7 +40,7 @@ function initIntro(root, opts) {
   const route = $("#route"), routeList = $("#route-stations"), arrivalPhoto = $("#arrival-photo");
   const hudPanel = $(".hud");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const st = { phase: "start", idx: 0, card: null, holdTimer: 0, finishTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, soundLevel: -1, routeStep: "", hovered: false, focused: false, pinned: false, suspended: false, buffering: false, loadTimer: 0 };
+  const st = { phase: "start", idx: 0, card: null, holdTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, soundLevel: -1, routeStep: "", hovered: false, focused: false, pinned: false, suspended: false, buffering: false, loadTimer: 0 };
   const wind = {};
 
   const routePoints = STATIONS.map((station, index) => {
@@ -96,8 +96,7 @@ function initIntro(root, opts) {
   }
   function updateArrival(t) {
     if (t >= TIMELINE.stations[1]) loadArrival();
-    const nearFinish = st.phase === "run" && t >= TIMELINE.duration - 1.05;
-    stage.classList.toggle("arrival-on", Boolean(arrivalPhoto.naturalWidth && (nearFinish || st.phase === "end")));
+    stage.classList.toggle("arrival-on", Boolean(arrivalPhoto.naturalWidth && st.phase === "end"));
   }
   arrivalPhoto.addEventListener("load", () => updateArrival(v.currentTime));
 
@@ -263,12 +262,9 @@ function initIntro(root, opts) {
     showRoute(false);
     loadArrival();
     st.phase = "end"; hud(TIMELINE.duration);
-    const showMenu = () => {
-      hudPanel.hidden = true;
-      menu.classList.add("show");
-    };
-    if (!reduce && v.ended && arrivalPhoto.naturalWidth) st.finishTimer = setTimeout(showMenu, 850);
-    else showMenu();
+    // Фото и меню появляются в одном кадре, сразу после окончания ролика.
+    hudPanel.hidden = true;
+    menu.classList.add("show");
   }
   v.addEventListener("ended", () => { if (st.phase === "run") finish(); });
   const lastSource = v.querySelector("source:last-of-type");
@@ -381,7 +377,7 @@ function initIntro(root, opts) {
         /* Слой скрыт — закачку ролика останавливаем, чтобы на слабом канале она не мешала странице.
            Место запоминаем; при возврате («Назад») докачаем с него. */
         const b = v.buffered, whole = b.length && b.end(b.length - 1) >= (v.duration || TIMELINE.duration) - 0.5;
-        if (st.phase !== "start" && st.phase !== "end" && !whole) {
+        if (st.phase !== "end" && !whole) {
           st.resumeT = v.currentTime; st.aborted = true;
           st.sources = Array.from(v.querySelectorAll("source")); st.sources.forEach((el) => el.remove()); v.load(); // без источников закачка прекращается
         }
@@ -425,7 +421,7 @@ function initIntro(root, opts) {
       else { st.restoring = true; v.addEventListener("loadedmetadata", go, { once: true }); }
     },
     stop() {
-      st.suspended = true; st.phase = "end"; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer); clearTimeout(st.finishTimer);
+      st.suspended = true; st.phase = "end"; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
       removeEventListener("keydown", onKey);
       try { v.pause(); v.removeAttribute("src"); v.load(); } catch {}
       if (wind.ctx) wind.ctx.close().catch(() => {});
@@ -460,7 +456,7 @@ function initIntro(root, opts) {
     return h.shadowRoot;
   };
   const pristine = rootOf(host).innerHTML; // исходная разметка — для «Проехать ещё раз»
-  let ctl = null, hideTimer = 0;
+  let ctl = null;
   const setState = (extra, push, url) => {
     const s = Object.assign({}, history.state || {}, extra);
     try { push ? history.pushState(s, "", url) : history.replaceState(s, "", url); } catch {}
@@ -490,9 +486,8 @@ function initIntro(root, opts) {
     host.dataset.ready = "1";
   }
   function show() {
-    clearTimeout(hideTimer);
     html.classList.add("intro-open");
-    host.hidden = false; host.classList.remove("closing");
+    host.hidden = false;
     ctl.wake();
     dispatchEvent(new Event("zski:intro-opened"));
   }
@@ -500,13 +495,12 @@ function initIntro(root, opts) {
     if (!ctl || host.hidden) return;
     ctl.suspend();
     if (push) setState({ [KEY]: "closed", p: null }, true, hash || location.pathname + location.search);
-    html.classList.remove("intro-open");          // главная строится под ещё видимым слоем…
+    host.hidden = true;
+    html.classList.remove("intro-open");
     dispatchEvent(new Event("zski:intro-closed"));
     requestAnimationFrame(() => {
-      host.classList.add("closing");              // …а слой плавно растворяется
       if (hash) { const el = document.getElementById(hash.slice(1)); if (el) el.scrollIntoView({ block: "start" }); }
       else if (push) scrollTo(0, 0);
-      hideTimer = setTimeout(() => { host.hidden = true; }, 400);
     });
   }
 

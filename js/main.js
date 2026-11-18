@@ -175,72 +175,99 @@
     calc.hidden = false;
   }
 
-  /* ---------- Видео на странице «Склоны рядом» ---------- */
+  /* ---------- Видео: обложка сразу, плеер готовится перед появлением блока ---------- */
   const videos = $$("[data-video]").map((box) => ({
-    box, preview: $("[data-video-play]", box), loading: $(".video-loading", box), frame: null, ready: false
+    box, preview: $("[data-video-play]", box), loading: $(".video-loading", box), frame: null, ready: false,
+    requested: false, moveFocus: false, timer: 0
   }));
   if (videos.length) {
     const rutube = "https://rutube.ru";
     let active = null;
 
     function addPlayer(video, autoplay) {
+      if (video.frame) return;
       const frame = document.createElement("iframe");
       frame.title = video.box.dataset.videoTitle;
       frame.allow = "autoplay; picture-in-picture";
       frame.allowFullscreen = true;
       frame.src = `${rutube}/play/embed/${video.box.dataset.video}?autoplay=${autoplay}&q=360`;
-      if (!autoplay) {
-        frame.loading = "eager";
-        frame.setAttribute("data-video-warmup", "");
-        frame.setAttribute("aria-hidden", "true");
-        frame.tabIndex = -1;
-      }
-      frame.addEventListener("load", () => {
-        frame.dataset.videoLoaded = "";
-        video.loading.hidden = true;
-      }, { once: true });
+      frame.loading = "eager";
+      frame.setAttribute("data-video-warmup", "");
+      frame.setAttribute("aria-hidden", "true");
+      frame.tabIndex = -1;
       video.frame = frame;
       video.box.append(frame);
     }
 
     const send = (video, type) => video.frame?.contentWindow?.postMessage(JSON.stringify({ type, data: {} }), rutube);
+    const showPlayer = (video) => {
+      clearTimeout(video.timer);
+      video.preview.hidden = true;
+      video.preview.removeAttribute("aria-busy");
+      video.loading.hidden = true;
+      video.frame.removeAttribute("data-video-warmup");
+      video.frame.removeAttribute("aria-hidden");
+      video.frame.removeAttribute("tabindex");
+      if (video.moveFocus) video.frame.focus();
+      send(video, "player:play");
+    };
     window.addEventListener("message", (event) => {
       if (event.origin !== rutube) return;
       const video = videos.find(({ frame }) => event.source === frame?.contentWindow);
       if (!video) return;
       let message;
       try { message = typeof event.data === "string" ? JSON.parse(event.data) : event.data; } catch { return; }
+      if (message?.type === "player:changeState" && message.data?.state === "playing") {
+        videos.filter((other) => other !== video).forEach((other) => send(other, "player:pause"));
+        active = video;
+      }
       if (message?.type !== "player:ready") return;
       video.ready = true;
-      if (active === video) send(video, "player:play");
+      if (video.requested && active === video) showPlayer(video);
     });
 
     const connection = navigator.connection;
     const saveData = connection?.saveData || /2g/.test(connection?.effectiveType ?? "");
-    if (!saveData) videos.forEach((video) => addPlayer(video, false));
+    // Пока открыто интро, внешние плееры не конкурируют со спуском за сеть и процессор.
+    const warmup = (video) => {
+      if (!saveData && !document.documentElement.classList.contains("intro-open")) addPlayer(video, false);
+    };
+    if (!saveData && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const video = videos.find(({ box }) => box === entry.target);
+        warmup(video);
+        if (video.frame) observer.unobserve(entry.target);
+      }), { rootMargin: "1200px 0px" });
+      videos.forEach(({ box }) => observer.observe(box));
+    }
 
     videos.forEach((video) => {
       const { preview, loading } = video;
+      preview.addEventListener("pointerenter", () => warmup(video), { once: true });
+      preview.addEventListener("focus", () => warmup(video), { once: true });
       preview.addEventListener("click", (event) => {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
-        if (preview.hidden) return;
+        if (preview.hidden || (video.requested && active === video)) return;
 
-        const moveFocus = document.activeElement === preview;
-        if (active) send(active, "player:pause");
-        active = video;
-        if (video.frame) {
-          loading.hidden = video.frame.hasAttribute("data-video-loaded");
-          video.frame.removeAttribute("data-video-warmup");
-          video.frame.removeAttribute("aria-hidden");
-          video.frame.removeAttribute("tabindex");
-          if (video.ready) send(video, "player:play");
-        } else {
-          loading.hidden = false;
-          addPlayer(video, true);
+        video.moveFocus = document.activeElement === preview;
+        if (active && active !== video) {
+          send(active, "player:pause");
+          clearTimeout(active.timer);
+          active.requested = false;
+          active.preview.removeAttribute("aria-busy");
+          active.loading.hidden = true;
         }
-        preview.hidden = true;
-        if (moveFocus) video.frame.focus();
+        active = video;
+        video.requested = true;
+        if (video.ready) { showPlayer(video); return; }
+        preview.setAttribute("aria-busy", "true");
+        loading.hidden = false;
+        addPlayer(video, true);
+        video.timer = setTimeout(() => {
+          loading.textContent = "Видео ещё загружается. Можно открыть его на RUTUBE по ссылке рядом.";
+        }, 8000);
       });
     });
   }
@@ -294,43 +321,29 @@
   };
   addEventListener("scroll", onScroll, { passive: true }); onScroll();
 
-  /* ---------- Появление при скролле ---------- */
-  const targets = $$(".section .card, .price-row, .album figure, .gallery figure, .resort, .steps li, details, .section h2, .section .lead, .cta-band, .about .photo, .stat, .hours li, .contact-list li, .video, .map, .banner, .notice, .calc-item, .calc-summary, [data-service] > div")
-    .filter((el) => !el.matches(".video, [data-ph]") && !el.querySelector("img, iframe"));
-  targets.forEach((el) => {
-    el.classList.add("reveal");
-    const sib = Array.from(el.parentElement.children).filter((c) => c.classList.contains("reveal"));
-    el.style.setProperty("--d", `${Math.min(sib.indexOf(el), 8) * 70}ms`);
-  });
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
-    targets.forEach((el) => io.observe(el));
-  } else targets.forEach((el) => el.classList.add("in"));
-  const revealAll = () => setTimeout(() => targets.forEach((el) => {   // страховка: всё видно даже без скролла
-    if (el.classList.contains("in")) return;
-    const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight * 1.3) el.classList.add("now"); // вне экрана — без анимации
-    el.classList.add("in");
-  }), 3500);
-  if (document.documentElement.classList.contains("intro-open")) addEventListener("zski:intro-closed", revealAll, { once: true }); else revealAll();
-
-  /* ---------- Счётчики ---------- */
-  const countUp = (el) => {
-    const end = +el.dataset.count, suffix = el.dataset.suffix || "", dur = 1400;
-    const run = () => { const t0 = performance.now(); const step = (t) => { const k = Math.min(1, (t - t0) / dur); const v = Math.round(end * (1 - Math.pow(1 - k, 3))); el.textContent = new Intl.NumberFormat("ru-RU").format(v) + suffix; if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
-    if ("IntersectionObserver" in window) { const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { run(); io.disconnect(); } }); io.observe(el); } else run();
-  };
-  setTimeout(() => $$("[data-count]").forEach(countUp), 0);
-
   /* ---------- Снег в первом экране (лёгкий) ---------- */
   const snow = $(".hero .snow");
   if (snow && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const ctx = snow.getContext("2d"); let W, H, flakes = [];
-    const size = () => { if (!snow.offsetWidth) return; W = snow.width = snow.offsetWidth; H = snow.height = snow.offsetHeight; flakes = Array.from({ length: Math.round(W / 22) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 2.2, s: 0.25 + Math.random() * 0.7, o: 0.25 + Math.random() * 0.5, w: Math.random() * 6.28 })); };
+    let frame = 0, inView = true;
+    const visible = () => !document.hidden && inView && !document.documentElement.classList.contains("intro-open");
+    const sync = () => {
+      if (visible() && W && !frame) frame = requestAnimationFrame(draw);
+      else if (!visible()) { cancelAnimationFrame(frame); frame = 0; }
+    };
+    function draw() {
+      frame = 0;
+      if (!visible() || !W) return;
+      ctx.clearRect(0, 0, W, H);
+      flakes.forEach((f) => { f.y += f.s; f.w += 0.01; f.x += Math.sin(f.w) * 0.3; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fillStyle = `rgba(255,255,255,${f.o})`; ctx.fill(); });
+      frame = requestAnimationFrame(draw);
+    }
+    const size = () => { if (!snow.offsetWidth) return; W = snow.width = snow.offsetWidth; H = snow.height = snow.offsetHeight; flakes = Array.from({ length: Math.round(W / 22) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: 0.8 + Math.random() * 2.2, s: 0.25 + Math.random() * 0.7, o: 0.25 + Math.random() * 0.5, w: Math.random() * 6.28 })); sync(); };
     size(); addEventListener("zski:intro-closed", () => requestAnimationFrame(size));
+    addEventListener("zski:intro-opened", sync);
     addEventListener("resize", () => { if (snow.offsetWidth && snow.offsetWidth !== W) size(); }); // на телефоне высота меняется при прокрутке — не пересоздаём
-    let paused = false, inView = true; document.addEventListener("visibilitychange", () => (paused = document.hidden));
-    if ("IntersectionObserver" in window) new IntersectionObserver((es) => (inView = es[0].isIntersecting)).observe(snow);
-    (function draw() { if (!paused && inView && W && !document.documentElement.classList.contains("intro-open")) { ctx.clearRect(0, 0, W, H); flakes.forEach((f) => { f.y += f.s; f.w += 0.01; f.x += Math.sin(f.w) * 0.3; if (f.y > H) { f.y = -4; f.x = Math.random() * W; } ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fillStyle = `rgba(255,255,255,${f.o})`; ctx.fill(); }); } requestAnimationFrame(draw); })();
+    document.addEventListener("visibilitychange", sync);
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => { inView = es[0].isIntersecting; sync(); }).observe(snow);
   }
 
   /* ---------- Лайтбокс для фото ---------- */
@@ -340,7 +353,7 @@
     lb.innerHTML = `<button class="close" aria-label="Закрыть">✕</button><button class="prev" aria-label="Предыдущее">‹</button><img alt=""><button class="next" aria-label="Следующее">›</button><div class="cap"></div>`;
     document.body.appendChild(lb);
     const img = $("img", lb), cap = $(".cap", lb); let i = 0;
-    const show = (n) => { i = (n + figs.length) % figs.length; const f = $("img", figs[i]); img.src = f.src; img.alt = f.alt; cap.textContent = f.alt; lb.hidden = false; document.body.style.overflow = "hidden"; };
+    const show = (n) => { i = (n + figs.length) % figs.length; const f = $("img", figs[i]); img.src = f.currentSrc || f.src; img.alt = f.alt; cap.textContent = f.alt; lb.hidden = false; document.body.style.overflow = "hidden"; };
     const hide = () => { lb.hidden = true; document.body.style.overflow = ""; };
     figs.forEach((f, n) => { f.setAttribute("tabindex", "0"); f.setAttribute("role", "button"); f.addEventListener("click", () => show(n)); f.addEventListener("keydown", (e) => { if (e.key === "Enter") show(n); }); });
     $(".close", lb).addEventListener("click", hide); $(".prev", lb).addEventListener("click", () => show(i - 1)); $(".next", lb).addEventListener("click", () => show(i + 1));
@@ -375,6 +388,12 @@
     if (now < start) { const days = Math.ceil((start - now) / 864e5), m = days % 100, l = days % 10, w = m > 10 && m < 20 ? "дней" : l === 1 ? "день" : l > 1 && l < 5 ? "дня" : "дней"; box.innerHTML = `<b><span data-count="${days}">0</span></b><span>${w} до открытия сезона · 1 декабря</span>`; }
     else if (!end || now <= end) box.innerHTML = `<b>Сезон открыт</b><span>катаемся — приезжайте за инвентарём</span>`;
   })();
+
+  /* ---------- Показатели без анимации ---------- */
+  // Значения сразу окончательные: не заставляем ждать прокрутки счётчика от нуля.
+  $$("[data-count]").forEach((el) => {
+    el.textContent = new Intl.NumberFormat("ru-RU").format(+el.dataset.count) + (el.dataset.suffix || "");
+  });
 
   /* ---------- Квиз «Какой комплект вам нужен» ---------- */
   $$("[data-quiz]").forEach((q) => {
