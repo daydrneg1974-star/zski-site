@@ -219,14 +219,13 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .video{position:relative;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;background:#000;border:1px solid var(--line);box-shadow:var(--shadow)}
 .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .video iframe[data-video-warmup]{opacity:0;pointer-events:none}
-.video-preview,.video-loading{position:absolute;inset:0;display:grid;place-items:center;margin:0;background:var(--navy);color:#fff}
-.video-preview[hidden],.video-loading[hidden]{display:none}
+.video-preview{position:absolute;inset:0;display:grid;place-items:center;margin:0;background:var(--navy);color:#fff}
+.video-preview[hidden]{display:none}
 .video-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .video-preview:focus-visible{outline:3px solid #7cc8ff;outline-offset:-5px}
 .video-play{display:grid;place-items:center;position:relative;width:56px;height:56px;border-radius:16px;background:#007fa9;color:#fff;box-shadow:0 5px 24px rgba(0,0,0,.38)}
 .video-play::before{content:"";border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid currentColor;margin-left:4px}
 .video-preview:hover .video-play,.video-preview:focus-visible .video-play{background:#00678d}
-.video-loading{z-index:1;inset:auto 0 0;padding:12px;background:rgba(15,30,56,.94);pointer-events:none;font-size:.85rem;font-weight:700;text-align:center}
 
 /* ---------- Лайтбокс ---------- */
 .lightbox{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px}
