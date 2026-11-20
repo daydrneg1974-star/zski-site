@@ -16,7 +16,7 @@ const GATES = [
   { z: -110, label: "ПРОКАТ",     sub: "лыжи · сноуборды", href: "index.html#prokat" },
   { z: -230, label: "ЦЕНЫ",       sub: "Комплекты от 2 000 ₽ в день",  href: "prices.html" },
   { z: -350, label: "SKI-СЕРВИС", sub: "заточка · парафин", href: "service.html" },
-  { z: -470, label: "СКЛОНЫ",     sub: "Сорочаны · Волен",  href: "slopes.html" },
+  { z: -470, label: "СКЛОНЫ",     sub: "Волен · Степаново · Яхрома",  href: "slopes.html" },
   { z: -590, label: "КОНТАКТЫ",   sub: "Яхрома, рядом с СНТ Каменка", href: "contacts.html" },
 ];
 const Z_END = -700;
