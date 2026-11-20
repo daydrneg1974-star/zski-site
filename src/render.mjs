@@ -1,4 +1,4 @@
-// Передаёт в build.py разметку прайса и данные для ссылок на маршрут из js/data.js.
+// Передаёт в build.py прайс, рейтинг, ссылки на маршруты и мессенджеры из js/data.js.
 // Разметка должна совпадать с renderPriceList и [data-service] в js/main.js —
 // main.js потом перерисовывает те же блоки теми же данными.
 import { readFileSync } from "node:fs";
@@ -29,4 +29,10 @@ const service = tight(D.service.map((g) => `
 
 const pricelist = Object.fromEntries(Object.entries(D.rental).map(([k, g]) => [k, priceList(g)]));
 const { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } = D.address;
-process.stdout.write(JSON.stringify({ pricelist, service, driveLinks: { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } }));
+const rating = { value: D.rating.value, count: new Intl.NumberFormat("ru-RU").format(D.rating.count) };
+const phone = D.phoneHref.replace(/\D/g, "");
+const messengerLinks = {
+  whatsapp: `https://wa.me/${D.whatsapp || phone}`,
+  telegram: `https://t.me/${D.telegram || `+${phone}`}`
+};
+process.stdout.write(JSON.stringify({ pricelist, service, rating, messengerLinks, driveLinks: { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } }));
