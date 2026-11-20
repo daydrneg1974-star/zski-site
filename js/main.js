@@ -139,91 +139,36 @@
     calc.hidden = false;
   }
 
-  /* ---------- Видео: обложка сразу, плеер готовится перед появлением блока ---------- */
-  const videos = $$("[data-video]").map((box) => ({
-    box, preview: $("[data-video-play]", box), frame: null, ready: false, requested: false
-  }));
+  /* ---------- Видео: свои MP4, без внешнего плеера ---------- */
+  const videos = $$("video[data-video]");
   if (videos.length) {
-    const rutube = "https://rutube.ru";
-    let active = null;
+    const connection = navigator.connection;
+    const saveData = !!connection?.saveData;
+    const lite = saveData || matchMedia("(max-width: 767px)").matches ||
+      /(^|-)(2g|3g)$/.test(connection?.effectiveType ?? "") ||
+      (connection?.downlink > 0 && connection.downlink < 2.5);
 
-    function addPlayer(video, autoplay) {
-      if (video.frame) return;
-      const frame = document.createElement("iframe");
-      frame.title = video.box.dataset.videoTitle;
-      frame.allow = "autoplay; picture-in-picture";
-      frame.allowFullscreen = true;
-      frame.src = `${rutube}/play/embed/${video.box.dataset.video}?autoplay=${autoplay}&q=360`;
-      frame.loading = "eager";
-      frame.setAttribute("data-video-warmup", "");
-      frame.setAttribute("aria-hidden", "true");
-      frame.tabIndex = -1;
-      video.frame = frame;
-      video.box.append(frame);
-    }
-
-    const send = (video, type) => video.frame?.contentWindow?.postMessage(JSON.stringify({ type, data: {} }), rutube);
-    const showPlayer = (video, moveFocus) => {
-      // Управление доступно сразу после нажатия, даже если сообщение player:ready не пришло.
-      video.preview.hidden = true;
-      video.frame.removeAttribute("data-video-warmup");
-      video.frame.removeAttribute("aria-hidden");
-      video.frame.removeAttribute("tabindex");
-      if (moveFocus) video.frame.focus();
-      if (video.ready) send(video, "player:play");
-    };
-    window.addEventListener("message", (event) => {
-      if (event.origin !== rutube) return;
-      const video = videos.find(({ frame }) => event.source === frame?.contentWindow);
-      if (!video) return;
-      let message;
-      try { message = typeof event.data === "string" ? JSON.parse(event.data) : event.data; } catch { return; }
-      if (message?.type === "player:changeState" && message.data?.state === "playing") {
-        videos.filter((other) => other !== video).forEach((other) => send(other, "player:pause"));
-        active = video;
-      }
-      if (message?.type !== "player:ready") return;
-      video.ready = true;
-      if (video.requested && active === video) send(video, "player:play");
+    videos.forEach((video) => {
+      if (lite && video.dataset.videoLite) video.src = video.dataset.videoLite;
+      video.addEventListener("play", () => {
+        videos.forEach((other) => { if (other !== video) other.pause(); });
+      });
+      // Касание/наведение разрешает браузеру подготовить первые кадры до нажатия Play.
+      const prepare = () => { video.preload = "auto"; };
+      video.addEventListener("pointerenter", prepare, { once: true });
+      video.addEventListener("pointerdown", prepare, { once: true });
+      video.addEventListener("focus", prepare, { once: true });
     });
 
-    const connection = navigator.connection;
-    const saveData = connection?.saveData || /2g/.test(connection?.effectiveType ?? "");
-    // Пока открыто интро, внешние плееры не конкурируют со спуском за сеть и процессор.
-    const warmup = (video) => {
-      if (!saveData && !document.documentElement.classList.contains("intro-open")) addPlayer(video, false);
-    };
+    // Первые кадры готовятся рядом с экраном, не мешая началу страницы.
     if (!saveData && "IntersectionObserver" in window) {
       const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        const video = videos.find(({ box }) => box === entry.target);
-        warmup(video);
-        if (video.frame) observer.unobserve(entry.target);
-      }), { rootMargin: "1200px 0px" });
-      videos.forEach(({ box }) => observer.observe(box));
+        if (entry.target.preload === "none") entry.target.preload = "auto";
+        observer.unobserve(entry.target);
+      }), { rootMargin: "1000px 0px" });
+      videos.forEach((video) => observer.observe(video));
     }
-
-    videos.forEach((video) => {
-      const { preview } = video;
-      preview.addEventListener("pointerenter", () => warmup(video), { once: true });
-      preview.addEventListener("pointerdown", () => warmup(video), { once: true });
-      preview.addEventListener("focus", () => warmup(video), { once: true });
-      preview.addEventListener("click", (event) => {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-        event.preventDefault();
-        if (preview.hidden || (video.requested && active === video)) return;
-
-        const moveFocus = document.activeElement === preview;
-        if (active && active !== video) {
-          send(active, "player:pause");
-          active.requested = false;
-        }
-        active = video;
-        video.requested = true;
-        addPlayer(video, true);
-        showPlayer(video, moveFocus);
-      });
-    });
   }
 
   /* ---------- Карта ---------- */
