@@ -180,7 +180,7 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .calc-summary ul{list-style:none;padding:0;margin:14px 0;display:grid;gap:6px;color:var(--muted);font-size:.95rem}
 .calc-summary li{display:flex;justify-content:space-between;gap:1rem}
 .calc-booking{display:grid;gap:10px}
-.calc-booking input{min-width:0;color-scheme:dark}
+.calc-booking input{min-width:0}
 .calc-booking .btn{width:100%;justify-content:center;text-align:center;padding-inline:1rem}
 .calc-booking .btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
 .calc-booking .fineprint{margin:4px 0 0}
@@ -268,6 +268,8 @@ details p{padding-bottom:18px;color:var(--muted)}
 .map-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-decoration:none;text-align:center;padding:20px;background:radial-gradient(600px 300px at 50% 40%,rgba(28,127,209,.14),transparent 70%),var(--bg-3)}
 .map-ph span{color:var(--ice);font-weight:700}
 .map-links{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:14px}
+.messenger-links{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-top:14px}
+.messenger-links .btn{text-align:center;justify-content:center}
 .approach{margin-top:18px}
 .approach h2{font-size:1.3rem;margin:0}
 .approach-links p{margin:0 0 8px;font-size:.875rem}
@@ -275,6 +277,7 @@ details p{padding-bottom:18px;color:var(--muted)}
 form.cb{display:grid;gap:12px}
 form.cb[hidden],.calc[hidden]{display:none}
 :is(form.cb,.calc-booking) :is(input,textarea,select){width:100%;padding:.9rem 1rem;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--text);font:inherit}
+.band-navy :is(form.cb,.calc-booking) :is(input,textarea,select){color-scheme:dark}
 :is(form.cb,.calc-booking) :is(input,textarea,select):focus{outline:none;border-color:var(--ice);box-shadow:0 0 0 3px var(--ice-soft)}
 form.cb textarea{min-height:110px;resize:vertical}
 :is(form.cb,.calc-booking) label{font-size:.82rem;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}

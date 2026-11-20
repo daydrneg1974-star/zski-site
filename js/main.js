@@ -4,14 +4,19 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const fmt = (n) => new Intl.NumberFormat("ru-RU").format(n) + " ₽";
-  const messengerHref = (kind, contact) => kind === "whatsapp" ? `https://wa.me/${contact}` : `https://t.me/${contact}`;
+  const phone = D.phoneHref.replace(/\D/g, "");
+  const messengerLinks = {
+    whatsapp: `https://wa.me/${D.whatsapp || phone}`,
+    telegram: `https://t.me/${D.telegram || `+${phone}`}`,
+    max: "https://max.ru/:share"
+  };
 
   /* ---------- Подстановка контактов ---------- */
   $$("[data-phone]").forEach((el) => {
     if (el.dataset.phone !== "link") el.textContent = D.phone;
     if (el.tagName === "A") el.href = D.phoneHref;
   });
-  $$("[data-email]").forEach((el) => { el.textContent = D.email; if (el.tagName === "A") el.href = "mailto:" + D.email; });
+  $$("[data-email]").forEach((el) => { if (el.dataset.email !== "link") el.textContent = D.email; if (el.tagName === "A") el.href = "mailto:" + D.email; });
   $$("[data-address]").forEach((el) => { el.textContent = D.address[el.dataset.address || "short"]; });
   $$("[data-season]").forEach((el) => { el.textContent = D.season; });
   $$("[data-rating]").forEach((el) => { el.textContent = D.rating.value; });
@@ -20,9 +25,7 @@
   $$("[data-price-season]").forEach((el) => (el.textContent = D.priceSeason));
   $$("[data-messenger]").forEach((a) => {
     const kind = a.dataset.messenger;
-    const val = D[kind];
-    if (!val) { a.remove(); return; }
-    a.href = messengerHref(kind, val);
+    if (messengerLinks[kind]) a.href = messengerLinks[kind];
   });
 
   /* ---------- Меню ---------- */
@@ -115,12 +118,6 @@
     const range = $("input[type=range]", calc), daysOut = $("[data-days]", calc);
     const booking = $(".calc-booking", calc), date = $("#rental-date", booking), sizes = $("#rental-sizes", booking);
     const bookingButtons = $$("button[type=submit]", booking);
-    const phone = D.phoneHref.replace(/\D/g, "");
-    const bookingLinks = {
-      whatsapp: messengerHref("whatsapp", D.whatsapp || phone),
-      telegram: messengerHref("telegram", D.telegram || `+${phone}`),
-      max: "https://max.ru/:share"
-    };
     const today = mskNow();
     const month = String(today.getMonth() + 1).padStart(2, "0");
     const day = String(today.getDate()).padStart(2, "0");
@@ -169,7 +166,7 @@
         `Предварительная стоимость — ${total.textContent}.`,
         "Подскажите, пожалуйста, что есть в наличии."
       ].join("\n");
-      window.open(`${bookingLinks[kind]}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+      window.open(`${messengerLinks[kind]}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
     });
     update();
     calc.hidden = false;
@@ -304,6 +301,8 @@
       location.href = `mailto:${D.email}?subject=${encodeURIComponent("Заявка с сайта ZSKI")}&body=${encodeURIComponent(body)}`;
     });
     f.hidden = false;
+    const fallback = $("[data-contact-fallback]", f.parentElement);
+    if (fallback) fallback.hidden = true;
   });
 
 
@@ -385,7 +384,7 @@
   (() => {
     const box = $("[data-season-stat]"); if (!box || !D.seasonStart) return;
     const now = new Date(), start = new Date(D.seasonStart + "T00:00:00+03:00"), end = D.seasonEnd ? new Date(D.seasonEnd + "T23:59:59+03:00") : null;
-    if (now < start) { const days = Math.ceil((start - now) / 864e5), m = days % 100, l = days % 10, w = m > 10 && m < 20 ? "дней" : l === 1 ? "день" : l > 1 && l < 5 ? "дня" : "дней"; box.innerHTML = `<b><span data-count="${days}">0</span></b><span>${w} до открытия сезона · 1 декабря</span>`; }
+    if (now < start) { const days = Math.ceil((start - now) / 864e5), m = days % 100, l = days % 10, w = m > 10 && m < 20 ? "дней" : l === 1 ? "день" : l > 1 && l < 5 ? "дня" : "дней"; box.innerHTML = `<b><span data-count="${days}">${days}</span></b><span>${w} до открытия сезона · 1 декабря</span>`; }
     else if (!end || now <= end) box.innerHTML = `<b>Сезон открыт</b><span>катаемся — приезжайте за инвентарём</span>`;
   })();
 
@@ -408,6 +407,16 @@
       $(".res-title", q).textContent = `${set.name} + защита · ${ans.level === "new" ? "новичок" : ans.level === "mid" ? "уверенный" : "опытный"}`;
       $(".res-list", q).innerHTML = items.map((i) => `<li><span>${i.name}</span><b>${new Intl.NumberFormat("ru-RU").format(i.price)} ₽</b></li>`).join("") + `<li class="tip">${tips[ans.level]}</li>`;
       $(".res-total", q).innerHTML = `<small>${plural(days, "день", "дня", "дней")}${days >= 3 ? " и больше" : ""}</small> ${new Intl.NumberFormat("ru-RU").format(perDay * days)} ₽${days >= 3 ? " <small>от</small>" : ""}`;
+      const message = [
+        "Здравствуйте! Подобрал комплект на сайте ZSKI.",
+        ...items.map((i) => `• ${i.name}`),
+        `Срок — ${plural(days, "день", "дня", "дней")}${days >= 3 ? " и больше" : ""}.`,
+        `Предварительная стоимость — ${days >= 3 ? "от " : ""}${fmt(perDay * days)}.`,
+        "Подскажите, пожалуйста, что есть в наличии."
+      ].join("\n");
+      $$("[data-messenger]", res).forEach((a) => {
+        a.href = `${messengerLinks[a.dataset.messenger]}?text=${encodeURIComponent(message)}`;
+      });
     };
     const plural = (n, a, b, c) => { const m = n % 100, l = n % 10; return n + " " + (m > 10 && m < 20 ? c : l === 1 ? a : l > 1 && l < 5 ? b : c); };
     q.addEventListener("click", (e) => {

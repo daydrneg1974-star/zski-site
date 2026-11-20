@@ -9,7 +9,8 @@
   * из src/layout/*.html (шапка <head>, меню, подвал) и src/pages/*.html (содержимое <main>
     с заголовком-описанием в начале файла) собирает index.html, prices.html, service.html,
     slopes.html, contacts.html в корне;
-  * прайс проката и таблицу SKI-сервиса предрендерит из js/data.js (src/render.mjs, нужен node);
+  * прайс, таблицу SKI-сервиса, рейтинг и ссылки на мессенджеры предрендерит
+    из js/data.js (src/render.mjs, нужен node);
   * проставляет штамп сборки BUILD (ГГГГММДДЧЧММ, UTC) в ?v=BUILD у css/js/шрифтов и
     в VERSION сервис-воркера sw.js — так браузеры и сервис-воркер не держат старые файлы;
   * src/pages/intro.html копируется в intro.html как есть, только с подстановкой BUILD;
@@ -64,6 +65,11 @@ def fill_data(html: str, data) -> str:
     html = re.sub(r'(<ul[^>]*data-pricelist="([a-z]+)"[^>]*>)(.*?)(</ul>)', ul, html, flags=re.S)
     html = re.sub(r'(<div[^>]*\bdata-service\b[^>]*>)(.*?)(</div>)(?=\n)',
                   lambda m: m.group(1) + data["service"] + m.group(3), html, flags=re.S)
+    for attr, value in (("data-rating", data["rating"]["value"]), ("data-rating-count", data["rating"]["count"])):
+        html = re.sub(r'(<span\b[^>]*\b' + attr + r'(?=[\s>])[^>]*>).*?(</span>)',
+                      lambda m: m.group(1) + escape(value) + m.group(2), html, flags=re.S)
+    for kind, url in data["messengerLinks"].items():
+        html = html.replace("{{" + kind.upper() + "_URL}}", escape(url, quote=True))
     return html
 
 
