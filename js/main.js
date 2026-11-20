@@ -141,8 +141,7 @@
 
   /* ---------- Видео: обложка сразу, плеер готовится перед появлением блока ---------- */
   const videos = $$("[data-video]").map((box) => ({
-    box, preview: $("[data-video-play]", box), loading: $(".video-loading", box), frame: null, ready: false,
-    requested: false, moveFocus: false, timer: 0
+    box, preview: $("[data-video-play]", box), frame: null, ready: false, requested: false
   }));
   if (videos.length) {
     const rutube = "https://rutube.ru";
@@ -164,16 +163,14 @@
     }
 
     const send = (video, type) => video.frame?.contentWindow?.postMessage(JSON.stringify({ type, data: {} }), rutube);
-    const showPlayer = (video) => {
-      clearTimeout(video.timer);
+    const showPlayer = (video, moveFocus) => {
+      // Управление доступно сразу после нажатия, даже если сообщение player:ready не пришло.
       video.preview.hidden = true;
-      video.preview.removeAttribute("aria-busy");
-      video.loading.hidden = true;
       video.frame.removeAttribute("data-video-warmup");
       video.frame.removeAttribute("aria-hidden");
       video.frame.removeAttribute("tabindex");
-      if (video.moveFocus) video.frame.focus();
-      send(video, "player:play");
+      if (moveFocus) video.frame.focus();
+      if (video.ready) send(video, "player:play");
     };
     window.addEventListener("message", (event) => {
       if (event.origin !== rutube) return;
@@ -187,7 +184,7 @@
       }
       if (message?.type !== "player:ready") return;
       video.ready = true;
-      if (video.requested && active === video) showPlayer(video);
+      if (video.requested && active === video) send(video, "player:play");
     });
 
     const connection = navigator.connection;
@@ -207,31 +204,24 @@
     }
 
     videos.forEach((video) => {
-      const { preview, loading } = video;
+      const { preview } = video;
       preview.addEventListener("pointerenter", () => warmup(video), { once: true });
+      preview.addEventListener("pointerdown", () => warmup(video), { once: true });
       preview.addEventListener("focus", () => warmup(video), { once: true });
       preview.addEventListener("click", (event) => {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
         if (preview.hidden || (video.requested && active === video)) return;
 
-        video.moveFocus = document.activeElement === preview;
+        const moveFocus = document.activeElement === preview;
         if (active && active !== video) {
           send(active, "player:pause");
-          clearTimeout(active.timer);
           active.requested = false;
-          active.preview.removeAttribute("aria-busy");
-          active.loading.hidden = true;
         }
         active = video;
         video.requested = true;
-        if (video.ready) { showPlayer(video); return; }
-        preview.setAttribute("aria-busy", "true");
-        loading.hidden = false;
         addPlayer(video, true);
-        video.timer = setTimeout(() => {
-          loading.textContent = "Видео ещё загружается. Можно открыть его на RUTUBE по ссылке рядом.";
-        }, 8000);
+        showPlayer(video, moveFocus);
       });
     });
   }
