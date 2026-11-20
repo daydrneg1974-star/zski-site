@@ -69,6 +69,12 @@ window.ZSKI = {
         { id: "sb-boots", name: "Сноубордические ботинки",  note: "отдельно",        price: 1000 }
       ]
     },
+    kids: {
+      title: "Детское оборудование",
+      items: [
+        { id: "kids-equipment", name: "Детское оборудование", note: "", price: 1500 }
+      ]
+    },
     extras: {
       title: "Защита и аксессуары",
       items: [

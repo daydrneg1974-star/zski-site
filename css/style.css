@@ -26,7 +26,7 @@ img{max-width:100%;display:block}
 a{color:inherit}
 h1,h2,h3{font-family:var(--display);line-height:1.08;margin:0 0 .5em;font-weight:700;letter-spacing:-.01em}
 h1{font-size:clamp(2.1rem,5.6vw,4.2rem);font-weight:800}
-@media(max-width:479px){h1{font-size:clamp(1.65rem,7.5vw,2.1rem);overflow-wrap:anywhere}}
+@media(max-width:479px){h1{font-size:clamp(1.65rem,7.5vw,2.1rem)}}
 h2{font-size:clamp(1.5rem,3.4vw,2.5rem)}
 h3{font-size:1.05rem;line-height:1.3}
 p{margin:0 0 1em}
@@ -145,13 +145,16 @@ img.failed{visibility:hidden}
 .tab[aria-selected="true"]{background:var(--text);color:#fff;border-color:var(--text)}
 .price-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .price-list[hidden]{display:none}
-.price-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);transition:border-color .25s,background .25s,transform .25s}
+.price-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 1rem;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);transition:border-color .25s,background .25s,transform .25s}
+/* В узкой карточке цена занимает следующую строку, название сохраняет целые слова. */
+.price-row > :first-child{flex:1 1 14rem}
+.price-row > .price{flex:0 0 auto;margin-left:auto}
 .price-row:hover{border-color:var(--line-2);box-shadow:var(--shadow);transform:translateX(4px)}
 .price-row .name{font-weight:800}
 .price-row .note{display:block;font-size:.84rem;color:var(--muted);font-weight:500}
 .price{font-family:var(--display);font-weight:800;font-size:1.15rem;white-space:nowrap;letter-spacing:-.01em}
 .price small{font-family:var(--font);font-size:.72rem;color:var(--muted);font-weight:600}
-.pill{font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;background:var(--accent-soft);color:var(--accent);padding:.28rem .6rem;border-radius:999px;margin-left:.55rem;font-weight:800;vertical-align:middle;border:1px solid rgba(227,36,27,.3)}
+.pill{display:inline-block;white-space:nowrap;font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;background:var(--accent-soft);color:var(--accent);padding:.28rem .6rem;border-radius:999px;margin-left:.55rem;font-weight:800;vertical-align:middle;border:1px solid rgba(227,36,27,.3)}
 table.price-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
 .price-table th,.price-table td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line)}
 .price-table th{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -160,32 +163,49 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .price-table td:last-child{text-align:right;font-weight:800;white-space:nowrap}
 .price-table.service th:nth-child(n+2),.price-table.service td:nth-child(n+2){text-align:right;white-space:nowrap;font-weight:800}
 .price-table.service td:nth-child(n+2){width:92px}
+[data-service]{grid-template-columns:minmax(0,1fr)}
 [data-service] > div{min-width:0;overflow-x:auto}
+@media(min-width:960px){[data-service]{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.price-table th,.price-table td{padding:10px 10px;font-size:.9rem}.price-table.service td:nth-child(n+2){width:64px}}
+/* На телефоне описание услуги расположено над двумя подписанными ценами. */
+@media(max-width:640px){
+  .price-table.service{display:block;border:0;background:none;overflow:visible}
+  .price-table.service thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .price-table.service tbody{display:grid;gap:10px}
+  .price-table.service tbody tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
+  .price-table.service td{border:0}
+  .price-table.service td:first-child{grid-column:1/-1;font-weight:700}
+  .price-table.service td:nth-child(n+2){width:auto;text-align:left;white-space:normal;padding-top:0}
+  .price-table.service td:nth-child(n+2)::before{display:block;margin-bottom:3px;font-size:.72rem;font-weight:500;color:var(--muted)}
+  .price-table.service td:nth-child(2)::before{content:"Лыжи"}
+  .price-table.service td:nth-child(3)::before{content:"Сноуборд"}
+}
 
 /* ---------- Калькулятор ---------- */
-.calc{display:grid;gap:22px}
-@media(min-width:960px){.calc{grid-template-columns:1.4fr 1fr;align-items:start}}
-.calc-items{display:grid;gap:10px}
-.calc-item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm)}
+.calc{display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+@media(min-width:960px){.calc{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start}}
+.calc-items{display:grid;gap:10px;min-width:0}
+.calc-item{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm)}
+.calc-item > :first-child{flex:1 1 14rem}
 .calc-item .name{font-weight:800}
-.qty{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--bg)}
+.qty{display:inline-flex;flex:0 0 auto;margin-left:auto;align-items:center;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--bg)}
 .qty button{width:40px;height:40px;border:0;background:transparent;color:var(--text);font-size:1.25rem;cursor:pointer;font-family:inherit}
 .qty button:hover{background:var(--ice-soft);color:var(--ice)}
 .qty output{min-width:34px;text-align:center;font-weight:800}
-.calc-summary{position:sticky;top:144px;background:linear-gradient(160deg,#ffffff,#f4f7fb)}
-.calc-summary .total{font-family:var(--display);font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.calc-summary{position:sticky;top:144px;min-width:0;background:linear-gradient(160deg,#ffffff,#f4f7fb)}
+.calc-summary .total{font-family:var(--display);font-size:clamp(1.7rem,8vw,2.4rem);font-weight:800;letter-spacing:-.03em;line-height:1;white-space:nowrap}
 .days{display:flex;align-items:center;gap:12px;margin:18px 0}
 .days input[type=range]{flex:1;min-width:0;accent-color:var(--accent)}
 .calc-summary ul{list-style:none;padding:0;margin:14px 0;display:grid;gap:6px;color:var(--muted);font-size:.95rem}
-.calc-summary li{display:flex;justify-content:space-between;gap:1rem}
+.calc-summary li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 1rem}
+.calc-summary li > span:first-child{flex:1 1 12rem}
+.calc-summary li > span:last-child{margin-left:auto;white-space:nowrap}
 .calc-booking{display:grid;gap:10px}
 .calc-booking input{min-width:0}
 .calc-booking .btn{width:100%;justify-content:center;text-align:center;padding-inline:1rem}
 .calc-booking .btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
 .calc-booking .fineprint{margin:4px 0 0}
 .fineprint{font-size:.8rem;color:var(--muted)}
-@media(max-width:360px){.price-row > :first-child,.calc-item .name{overflow-wrap:anywhere}}
 
 /* ---------- Галерея / альбом / медиа ---------- */
 .gallery{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
@@ -309,6 +329,7 @@ footer .copy{border-top-color:rgba(255,255,255,.1)}
 /* ---------- Мобильная панель действий ---------- */
 .actionbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(15,27,45,.08)}
 .actionbar .btn{justify-content:center;width:100%}
+@media(max-width:359px){.actionbar .btn{padding-inline:10px;font-size:.9rem;gap:6px}.actionbar .btn svg{flex:0 0 16px;width:16px}}
 @media(min-width:960px){.actionbar{display:none}}
 
 /* ---------- Прочее ---------- */
@@ -376,7 +397,9 @@ picture{display:contents}
 .quiz-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));transition:width .4s}
 .quiz .res-title{font-family:var(--display);font-weight:800;font-size:1.2rem;margin-bottom:10px}
 .quiz .res-list{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:6px}
-.quiz .res-list li{display:flex;justify-content:space-between;gap:1rem;padding:8px 0;border-bottom:1px solid var(--line)}
+.quiz .res-list li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 1rem;padding:8px 0;border-bottom:1px solid var(--line)}
+.quiz .res-list li > span{flex:1 1 14rem}
+.quiz .res-list li > b{margin-left:auto;white-space:nowrap}
 .quiz .res-list li.tip{display:block;font-size:.9rem;color:var(--muted);border:0;padding-top:10px}
 .quiz .res-total{font-family:var(--display);font-weight:800;font-size:1.9rem;letter-spacing:-.02em}
 .quiz .res-total small{font-family:var(--font);font-size:.8rem;color:var(--muted);font-weight:700;margin-right:6px}
