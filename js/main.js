@@ -406,7 +406,7 @@
       const tips = { new: "Для первого раза берите шлем и маску: падать будет мягче, а солнце не помешает. Попросите мастера выставить мягкие настройки креплений.", mid: "Подберём ростовку под уверенное катание и настроим крепления под ваш вес.", pro: "Есть модели для жёстких трасс и свежего снега — скажите, где катаетесь, подберём под склон." };
       $(".res-title", q).textContent = `${set.name} + защита · ${ans.level === "new" ? "новичок" : ans.level === "mid" ? "уверенный" : "опытный"}`;
       $(".res-list", q).innerHTML = items.map((i) => `<li><span>${i.name}</span><b>${new Intl.NumberFormat("ru-RU").format(i.price)} ₽</b></li>`).join("") + `<li class="tip">${tips[ans.level]}</li>`;
-      $(".res-total", q).innerHTML = `<small>${plural(days, "день", "дня", "дней")}${days >= 3 ? " и больше" : ""}</small> ${new Intl.NumberFormat("ru-RU").format(perDay * days)} ₽${days >= 3 ? " <small>от</small>" : ""}`;
+      $(".res-total", q).innerHTML = `<small>${plural(days, "день", "дня", "дней")}${days >= 3 ? " и больше" : ""}</small> ${new Intl.NumberFormat("ru-RU").format(perDay * days)}&nbsp;₽${days >= 3 ? " <small>от</small>" : ""}`;
       const message = [
         "Здравствуйте! Подобрал комплект на сайте ZSKI.",
         ...items.map((i) => `• ${i.name}`),

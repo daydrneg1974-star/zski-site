@@ -230,7 +230,7 @@ img{max-width:100%;display:block}
 a{color:inherit}
 h1,h2,h3{font-family:var(--display);line-height:1.08;margin:0 0 .5em;font-weight:700;letter-spacing:-.01em}
 h1{font-size:clamp(2.1rem,5.6vw,4.2rem);font-weight:800}
-@media(max-width:479px){h1{font-size:clamp(1.65rem,7.5vw,2.1rem);overflow-wrap:anywhere}}
+@media(max-width:479px){h1{font-size:clamp(1.65rem,7.5vw,2.1rem)}}
 h2{font-size:clamp(1.5rem,3.4vw,2.5rem)}
 h3{font-size:1.05rem;line-height:1.3}
 p{margin:0 0 1em}
@@ -349,13 +349,16 @@ img.failed{visibility:hidden}
 .tab[aria-selected="true"]{background:var(--text);color:#fff;border-color:var(--text)}
 .price-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .price-list[hidden]{display:none}
-.price-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);transition:border-color .25s,background .25s,transform .25s}
+.price-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 1rem;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);transition:border-color .25s,background .25s,transform .25s}
+/* В узкой карточке цена занимает следующую строку, название сохраняет целые слова. */
+.price-row > :first-child{flex:1 1 14rem}
+.price-row > .price{flex:0 0 auto;margin-left:auto}
 .price-row:hover{border-color:var(--line-2);box-shadow:var(--shadow);transform:translateX(4px)}
 .price-row .name{font-weight:800}
 .price-row .note{display:block;font-size:.84rem;color:var(--muted);font-weight:500}
 .price{font-family:var(--display);font-weight:800;font-size:1.15rem;white-space:nowrap;letter-spacing:-.01em}
 .price small{font-family:var(--font);font-size:.72rem;color:var(--muted);font-weight:600}
-.pill{font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;background:var(--accent-soft);color:var(--accent);padding:.28rem .6rem;border-radius:999px;margin-left:.55rem;font-weight:800;vertical-align:middle;border:1px solid rgba(227,36,27,.3)}
+.pill{display:inline-block;white-space:nowrap;font-size:.66rem;text-transform:uppercase;letter-spacing:.14em;background:var(--accent-soft);color:var(--accent);padding:.28rem .6rem;border-radius:999px;margin-left:.55rem;font-weight:800;vertical-align:middle;border:1px solid rgba(227,36,27,.3)}
 table.price-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
 .price-table th,.price-table td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line)}
 .price-table th{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -364,32 +367,49 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .price-table td:last-child{text-align:right;font-weight:800;white-space:nowrap}
 .price-table.service th:nth-child(n+2),.price-table.service td:nth-child(n+2){text-align:right;white-space:nowrap;font-weight:800}
 .price-table.service td:nth-child(n+2){width:92px}
+[data-service]{grid-template-columns:minmax(0,1fr)}
 [data-service] > div{min-width:0;overflow-x:auto}
+@media(min-width:960px){[data-service]{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.price-table th,.price-table td{padding:10px 10px;font-size:.9rem}.price-table.service td:nth-child(n+2){width:64px}}
+/* На телефоне описание услуги расположено над двумя подписанными ценами. */
+@media(max-width:640px){
+  .price-table.service{display:block;border:0;background:none;overflow:visible}
+  .price-table.service thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .price-table.service tbody{display:grid;gap:10px}
+  .price-table.service tbody tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
+  .price-table.service td{border:0}
+  .price-table.service td:first-child{grid-column:1/-1;font-weight:700}
+  .price-table.service td:nth-child(n+2){width:auto;text-align:left;white-space:normal;padding-top:0}
+  .price-table.service td:nth-child(n+2)::before{display:block;margin-bottom:3px;font-size:.72rem;font-weight:500;color:var(--muted)}
+  .price-table.service td:nth-child(2)::before{content:"Лыжи"}
+  .price-table.service td:nth-child(3)::before{content:"Сноуборд"}
+}
 
 /* ---------- Калькулятор ---------- */
-.calc{display:grid;gap:22px}
-@media(min-width:960px){.calc{grid-template-columns:1.4fr 1fr;align-items:start}}
-.calc-items{display:grid;gap:10px}
-.calc-item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm)}
+.calc{display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+@media(min-width:960px){.calc{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start}}
+.calc-items{display:grid;gap:10px;min-width:0}
+.calc-item{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm)}
+.calc-item > :first-child{flex:1 1 14rem}
 .calc-item .name{font-weight:800}
-.qty{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--bg)}
+.qty{display:inline-flex;flex:0 0 auto;margin-left:auto;align-items:center;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;background:var(--bg)}
 .qty button{width:40px;height:40px;border:0;background:transparent;color:var(--text);font-size:1.25rem;cursor:pointer;font-family:inherit}
 .qty button:hover{background:var(--ice-soft);color:var(--ice)}
 .qty output{min-width:34px;text-align:center;font-weight:800}
-.calc-summary{position:sticky;top:144px;background:linear-gradient(160deg,#ffffff,#f4f7fb)}
-.calc-summary .total{font-family:var(--display);font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.calc-summary{position:sticky;top:144px;min-width:0;background:linear-gradient(160deg,#ffffff,#f4f7fb)}
+.calc-summary .total{font-family:var(--display);font-size:clamp(1.7rem,8vw,2.4rem);font-weight:800;letter-spacing:-.03em;line-height:1;white-space:nowrap}
 .days{display:flex;align-items:center;gap:12px;margin:18px 0}
 .days input[type=range]{flex:1;min-width:0;accent-color:var(--accent)}
 .calc-summary ul{list-style:none;padding:0;margin:14px 0;display:grid;gap:6px;color:var(--muted);font-size:.95rem}
-.calc-summary li{display:flex;justify-content:space-between;gap:1rem}
+.calc-summary li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 1rem}
+.calc-summary li > span:first-child{flex:1 1 12rem}
+.calc-summary li > span:last-child{margin-left:auto;white-space:nowrap}
 .calc-booking{display:grid;gap:10px}
 .calc-booking input{min-width:0}
 .calc-booking .btn{width:100%;justify-content:center;text-align:center;padding-inline:1rem}
 .calc-booking .btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
 .calc-booking .fineprint{margin:4px 0 0}
 .fineprint{font-size:.8rem;color:var(--muted)}
-@media(max-width:360px){.price-row > :first-child,.calc-item .name{overflow-wrap:anywhere}}
 
 /* ---------- Галерея / альбом / медиа ---------- */
 .gallery{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
@@ -513,6 +533,7 @@ footer .copy{border-top-color:rgba(255,255,255,.1)}
 /* ---------- Мобильная панель действий ---------- */
 .actionbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(15,27,45,.08)}
 .actionbar .btn{justify-content:center;width:100%}
+@media(max-width:359px){.actionbar .btn{padding-inline:10px;font-size:.9rem;gap:6px}.actionbar .btn svg{flex:0 0 16px;width:16px}}
 @media(min-width:960px){.actionbar{display:none}}
 
 /* ---------- Прочее ---------- */
@@ -580,7 +601,9 @@ picture{display:contents}
 .quiz-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));transition:width .4s}
 .quiz .res-title{font-family:var(--display);font-weight:800;font-size:1.2rem;margin-bottom:10px}
 .quiz .res-list{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:6px}
-.quiz .res-list li{display:flex;justify-content:space-between;gap:1rem;padding:8px 0;border-bottom:1px solid var(--line)}
+.quiz .res-list li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 1rem;padding:8px 0;border-bottom:1px solid var(--line)}
+.quiz .res-list li > span{flex:1 1 14rem}
+.quiz .res-list li > b{margin-left:auto;white-space:nowrap}
 .quiz .res-list li.tip{display:block;font-size:.9rem;color:var(--muted);border:0;padding-top:10px}
 .quiz .res-total{font-family:var(--display);font-weight:800;font-size:1.9rem;letter-spacing:-.02em}
 .quiz .res-total small{font-family:var(--font);font-size:.8rem;color:var(--muted);font-weight:700;margin-right:6px}
@@ -636,7 +659,7 @@ window.__zskiIntro={show:show,restore:show&&type==="back_forward"?s.p:null};
 /* Скрипт интро не загрузился или упал — сразу показываем сайт */
 window.__zskiIntroFail=function(){var h=document.querySelector(".intro-host");if(h)h.hidden=true;d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))};
 var l=document.createElement("link");l.rel="preload";l.as="image";l.type="image/webp";l.href=show?(matchMedia("(orientation: portrait)").matches?"img/photos/intro-poster-portrait.webp":"img/photos/intro-poster.webp"):"img/photos/hero-freeride.webp";l.setAttribute("fetchpriority","high");document.head.appendChild(l);
-if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v=202611201934";document.head.appendChild(j)}
+if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v=202611201957";document.head.appendChild(j)}
 if(show){d.classList.add("intro-open");setTimeout(function(){if(!(window.__zskiIntro&&window.__zskiIntro.booted)){d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))}},8000)}})();
 </script>
 <style>html.intro-open,html.intro-open body{background:#1a2230;overflow:hidden}html.intro-open body>:not(.intro-host){display:none!important}.intro-host{position:fixed;inset:0;z-index:5000}.intro-host[hidden]{display:none}html.intro-open .intro-host[hidden]{display:block}</style>
@@ -674,14 +697,16 @@ html,body{margin:0;height:100%;background:#1a2230;color:#fff;font-family:var(--f
 .lens{position:absolute;left:4%;top:15%;width:92%;height:72%;border-radius:50%;pointer-events:none;display:none;box-shadow:0 0 0 4000px #1b1f26,inset 0 0 0 12px #2a2f38,inset 0 0 120px rgba(0,0,0,.45),inset 0 0 40px rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,196,138,.14),rgba(255,255,255,0) 45%,rgba(124,200,255,.12))}
 body.pov .lens,.stage.pov .lens{display:block}
 @media(max-aspect-ratio:3/4){.lens{left:5%;top:14%;width:90%;height:72%;border-radius:46%/30%}}
-.hud{position:fixed;inset:0;padding:22px;display:grid;grid-template-rows:auto 1fr auto;pointer-events:none}
+.hud{position:fixed;inset:0;padding:22px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;pointer-events:none}
 .hud[hidden]{display:none}
 .hud > *{pointer-events:auto}
-.hud-top{display:flex;justify-content:space-between;align-items:center}
+.hud-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.hud-top > span{margin-left:auto;max-width:100%}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;letter-spacing:.1em;text-decoration:none;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .brand img{width:38px;height:38px;border-radius:50%;box-shadow:0 6px 18px rgba(227,36,27,.5)}
 .skip{font-weight:800;font-size:.9rem;color:#fff;text-decoration:none;padding:.6rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.45);background:rgba(0,0,0,.3);font-family:inherit;cursor:pointer;line-height:1}
 .skip:hover{background:rgba(255,255,255,.15)}
+@media(max-width:479px){.hud{padding:16px}.hud-top .brand{font-size:.9rem;gap:6px}.hud-top .brand img{width:30px;height:30px}.hud-top .skip{font-size:.75rem;padding:.6rem .65rem}}
 .hud-bottom{display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--display);font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .meter b{display:block;font-size:clamp(1.4rem,4vw,2.4rem);line-height:1}
 .meter span{font-family:var(--font);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
@@ -692,7 +717,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 .route-elevation{display:flex;justify-content:space-between;color:#c9ddea;font-size:.64rem;font-weight:700;line-height:1.2}
 .route-stations{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;list-style:none;margin-block:0;padding:0}
 .route-stations::before{content:"";position:absolute;top:12px;right:0;left:0;height:2px;border-radius:2px;background:linear-gradient(to right,#7cc8ff var(--route-progress,0%),rgba(255,255,255,.34) var(--route-progress,0%));pointer-events:none}
-.route-point{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;width:100%;min-height:41px;padding:5px 1px 2px;border:0;background:none;color:#fff;cursor:pointer;font:700 .7rem/1.16 var(--font);text-align:center;overflow-wrap:anywhere}
+.route-point{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;width:100%;min-height:41px;padding:5px 1px 2px;border:0;background:none;color:#fff;cursor:pointer;font:700 .7rem/1.16 var(--font);text-align:center}
 .route-point::before{content:"";width:13px;height:15px;margin:0 0 1px;background:#a9c2d5;flex:none;clip-path:polygon(42% 0,100% 0,86% 28%,100% 56%,52% 56%,52% 100%,42% 100%)}
 .route-point.passed::before,.route-point:hover::before{background:#7cc8ff}
 .route-point[aria-current="step"]::before{background:#fff;filter:drop-shadow(0 0 3px #7cc8ff)}
@@ -816,14 +841,14 @@ body.pov .lens,.stage.pov .lens{display:block}
     <img id="poster" src="img/photos/intro-poster.webp" alt="" fetchpriority="high">
   </picture>
   <video id="v" muted playsinline preload="none" aria-label="Видео: горнолыжник спускается по склону">
-    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v=202611201934" type='video/webm; codecs="vp9"'>
-    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v=202611201934" type="video/mp4">
-    <source src="video/descent.webm?v=202611201934" type='video/webm; codecs="vp9"'>
-    <source src="video/descent.mp4?v=202611201934" type="video/mp4">
+    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v=202611201957" type='video/webm; codecs="vp9"'>
+    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v=202611201957" type="video/mp4">
+    <source src="video/descent.webm?v=202611201957" type='video/webm; codecs="vp9"'>
+    <source src="video/descent.mp4?v=202611201957" type="video/mp4">
   </video>
   <div class="arrival" aria-hidden="true">
     <div class="arrival-scene">
-      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611201934" alt="" decoding="async">
+      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611201957" alt="" decoding="async">
       <span class="arrival-sign">ZSKI</span>
     </div>
   </div>
@@ -1031,7 +1056,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 <section class="section" style="padding-top:0">
   <div class="wrap">
     <div class="about">
-      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v=202611201934" type="image/webp"><img width="1400" height="933" src="img/photos/shop-exterior.jpg?v=202611201934" alt="Павильон проката ZSKI" loading="lazy" fetchpriority="low" decoding="async" data-fallback ></picture></div>
+      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v=202611201957" type="image/webp"><img width="1400" height="933" src="img/photos/shop-exterior.jpg?v=202611201957" alt="Павильон проката ZSKI" loading="lazy" fetchpriority="low" decoding="async" data-fallback ></picture></div>
       <div>
         <span class="eyebrow">О нашем клубе</span>
         <h2>Более 5 лет в прокате и сервисе</h2>
@@ -1193,7 +1218,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 
 
 <!-- Слой интро «спуск к прокату» вставляется сборкой в начало <body> (intro: yes), см. js/intro.js -->
-<script src="js/intro.js?v=202611201934" defer onerror="window.__zskiIntroFail&&__zskiIntroFail()"></script>
+<script src="js/intro.js?v=202611201957" defer onerror="window.__zskiIntroFail&&__zskiIntroFail()"></script>
 
 </main>
 <footer>
@@ -1225,10 +1250,10 @@ body.pov .lens,.stage.pov .lens{display:block}
   <a class="btn btn-primary" data-phone="link" href="tel:+79919377744"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
   <a class="btn btn-ghost" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать</a>
 </div>
-<script src="js/data.js?v=202611201934" defer></script>
-<script src="js/hours.js?v=202611201934" defer></script>
-<script src="js/drive-links.js?v=202611201934" defer></script>
-<script src="js/main.js?v=202611201934" defer></script>
+<script src="js/data.js?v=202611201957" defer></script>
+<script src="js/hours.js?v=202611201957" defer></script>
+<script src="js/drive-links.js?v=202611201957" defer></script>
+<script src="js/main.js?v=202611201957" defer></script>
 <script>if("serviceWorker"in navigator)addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").then((r)=>r.update()).catch(()=>{});});</script>
 </body>
 </html>
