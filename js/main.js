@@ -65,13 +65,6 @@
     img.addEventListener("error", fail); img.addEventListener("load", ok);
   });
 
-  /* ---------- Дата проката ---------- */
-  function mskNow() {
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-    return new Date(utc + 3 * 3600000); // МСК = UTC+3, без перехода на летнее время
-  }
-
   /* ---------- Прайс проката ---------- */
   function renderPriceList(container, group) {
     container.innerHTML = group.items.map((it) => `
@@ -116,12 +109,6 @@
     const items = Object.values(D.rental).flatMap((g) => g.items);
     const list = $(".calc-items", calc), total = $("[data-total]", calc), lines = $("[data-lines]", calc);
     const range = $("input[type=range]", calc), daysOut = $("[data-days]", calc);
-    const booking = $(".calc-booking", calc), date = $("#rental-date", booking), sizes = $("#rental-sizes", booking);
-    const bookingButtons = $$("button[type=submit]", booking);
-    const today = mskNow();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    date.min = `${today.getFullYear()}-${month}-${day}`;
     const qty = Object.fromEntries(items.map((i) => [i.id, 0]));
     qty["ski-set"] = 1;
     list.innerHTML = items.map((i) => `
@@ -141,7 +128,6 @@
       });
       lines.innerHTML = rows.join("") || `<li class="muted">Добавьте инвентарь, чтобы увидеть расчёт</li>`;
       total.textContent = fmt(sum);
-      bookingButtons.forEach((button) => { button.disabled = rows.length === 0; });
     }
     list.addEventListener("click", (e) => {
       const b = e.target.closest("button[data-d]"); if (!b) return;
@@ -149,25 +135,6 @@
       qty[id] = Math.max(0, Math.min(10, qty[id] + +b.dataset.d)); update();
     });
     range.addEventListener("input", update);
-    booking.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const selected = items.filter((i) => qty[i.id]);
-      if (!selected.length) return;
-
-      const kind = e.submitter?.value || "whatsapp";
-      const start = date.value.split("-").reverse().join(".");
-      const message = [
-        "Здравствуйте! Хочу забронировать инвентарь в ZSKI.",
-        `Дата начала проката — ${start}, на ${daysOut.textContent}.`,
-        "",
-        ...selected.map((i) => `• ${i.name} × ${qty[i.id]}`),
-        "",
-        `Ростовки и размеры — ${sizes.value.trim() || "прошу подобрать на месте"}.`,
-        `Предварительная стоимость — ${total.textContent}.`,
-        "Подскажите, пожалуйста, что есть в наличии."
-      ].join("\n");
-      window.open(`${messengerLinks[kind]}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
-    });
     update();
     calc.hidden = false;
   }
@@ -297,8 +264,8 @@
     f.addEventListener("submit", (e) => {
       e.preventDefault();
       const d = new FormData(f);
-      const body = `Имя: ${d.get("name")}\nТелефон: ${d.get("phone")}\nЧто нужно: ${d.get("need")}\nСообщение: ${d.get("msg") || "-"}`;
-      location.href = `mailto:${D.email}?subject=${encodeURIComponent("Заявка с сайта ZSKI")}&body=${encodeURIComponent(body)}`;
+      const body = `Имя: ${d.get("name")}\nТелефон: ${d.get("phone")}\nТема: ${d.get("need")}\nСообщение: ${d.get("msg") || "-"}`;
+      location.href = `mailto:${D.email}?subject=${encodeURIComponent("Вопрос с сайта ZSKI")}&body=${encodeURIComponent(body)}`;
     });
     f.hidden = false;
     const fallback = $("[data-contact-fallback]", f.parentElement);

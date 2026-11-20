@@ -200,11 +200,6 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .calc-summary li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 1rem}
 .calc-summary li > span:first-child{flex:1 1 12rem}
 .calc-summary li > span:last-child{margin-left:auto;white-space:nowrap}
-.calc-booking{display:grid;gap:10px}
-.calc-booking input{min-width:0}
-.calc-booking .btn{width:100%;justify-content:center;text-align:center;padding-inline:1rem}
-.calc-booking .btn:disabled{opacity:.55;cursor:default;transform:none;box-shadow:none}
-.calc-booking .fineprint{margin:4px 0 0}
 .fineprint{font-size:.8rem;color:var(--muted)}
 
 /* ---------- Галерея / альбом / медиа ---------- */
@@ -296,11 +291,11 @@ details p{padding-bottom:18px;color:var(--muted)}
 .approach-links p:last-child{margin-bottom:0}
 form.cb{display:grid;gap:12px}
 form.cb[hidden],.calc[hidden]{display:none}
-:is(form.cb,.calc-booking) :is(input,textarea,select){width:100%;padding:.9rem 1rem;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--text);font:inherit}
-.band-navy :is(form.cb,.calc-booking) :is(input,textarea,select){color-scheme:dark}
-:is(form.cb,.calc-booking) :is(input,textarea,select):focus{outline:none;border-color:var(--ice);box-shadow:0 0 0 3px var(--ice-soft)}
+form.cb :is(input,textarea,select){width:100%;padding:.9rem 1rem;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--text);font:inherit}
+.band-navy form.cb :is(input,textarea,select){color-scheme:dark}
+form.cb :is(input,textarea,select):focus{outline:none;border-color:var(--ice);box-shadow:0 0 0 3px var(--ice-soft)}
 form.cb textarea{min-height:110px;resize:vertical}
-:is(form.cb,.calc-booking) label{font-size:.82rem;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+form.cb label{font-size:.82rem;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .form-note{font-size:.8rem;color:var(--muted)}
 
 /* ---------- CTA-полоса ---------- */
