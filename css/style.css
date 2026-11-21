@@ -340,7 +340,7 @@ footer .copy{border-top-color:rgba(255,255,255,.1)}
 .stat{min-width:120px}
 .stat b{display:block;font-family:var(--display);font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--accent)}
 .stat span{font-size:.84rem;color:var(--muted)}
-.resort{display:grid;gap:0}
+.resort{display:grid;grid-template-rows:auto 1fr;gap:0}
 .resort .photo{aspect-ratio:16/9;overflow:hidden;border-radius:var(--radius) var(--radius) 0 0;background:var(--card-solid)}
 .resort .photo img{width:100%;height:100%;object-fit:cover;transition:transform .8s}
 .resort:hover .photo img{transform:scale(1.05)}
