@@ -46,7 +46,7 @@
   if (back) back.addEventListener("click", (e) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const ref = document.referrer ? new URL(document.referrer) : null;
-    const pages = ["index.html", "intro.html", "prices.html", "service.html", "slopes.html", "contacts.html"];
+    const pages = ["index.html", "intro.html", "prices.html", "service.html", "slopes.html", "contacts.html", "clients.html"];
     const internal = ref && ref.origin === location.origin &&
       new URL("./", ref).pathname === new URL("./", location.href).pathname &&
       pages.includes(ref.pathname.split("/").pop() || "index.html");

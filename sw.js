@@ -7,7 +7,7 @@
    Новая версия воркера просто начинает отвечать на следующие запросы — страницу не перезагружаем:
    HTML и так приходит из сети, а у CSS/JS в адресе новая версия сборки.
    VERSION подставляется при сборке, старые кэши ZSKI удаляются. */
-const VERSION = "zski-202611202156";
+const VERSION = "zski-202611210841";
 const IMMUTABLE = /\.(woff2|webp|jpg|png|svg)$/;
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => {
