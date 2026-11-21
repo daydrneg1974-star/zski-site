@@ -8,7 +8,7 @@
 Что делает:
   * из src/layout/*.html (шапка <head>, меню, подвал) и src/pages/*.html (содержимое <main>
     с заголовком-описанием в начале файла) собирает index.html, prices.html, service.html,
-    slopes.html, contacts.html в корне;
+    slopes.html, contacts.html, clients.html в корне;
   * прайс, таблицу SKI-сервиса, рейтинг и ссылки на мессенджеры предрендерит
     из js/data.js (src/render.mjs, нужен node);
   * проставляет штамп сборки BUILD (ГГГГММДДЧЧММ, UTC) в ?v=BUILD у css/js/шрифтов и
@@ -29,7 +29,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src"
-PAGES = ["index", "prices", "service", "slopes", "contacts"]  # собираются в шаблон
+PAGES = ["index", "prices", "service", "slopes", "contacts", "clients"]  # собираются в шаблон
 RAW = ["intro"]                                               # копируются с подстановкой BUILD
 
 
