@@ -70,6 +70,10 @@ def fill_data(html: str, data) -> str:
                       lambda m: m.group(1) + escape(value) + m.group(2), html, flags=re.S)
     for kind, url in data["messengerLinks"].items():
         html = html.replace("{{" + kind.upper() + "_URL}}", escape(url, quote=True))
+    html = html.replace("{{RENTAL_CASH_DEPOSIT}}", escape(data["cashDeposit"]))
+    for key, value in data["owner"].items():
+        html = html.replace("{{OWNER_" + key + "}}", escape(value, quote=True))
+        html = html.replace("{{OWNER_" + key + "_JSON}}", json.dumps(value, ensure_ascii=False).replace("<", "\\u003c"))
     return html
 
 
@@ -82,7 +86,7 @@ def intro_markup() -> str:
 
 def intro_host() -> str:
     """Слой интро для главной: скрыт атрибутом hidden, показывается классом html.intro-open (intro-head.html)."""
-    css = read(ROOT / "css" / "intro.css").strip()
+    css = read(ROOT / "css" / "intro.css").strip() + "\n" + read(ROOT / "css" / "route-video.css").strip()
     early = ("<script>/* Ролик начинает грузиться, как только показан постер (не отнимая у него канал); на медленной сети — версия 540p */"
              "(function(){var h=document.querySelector('.intro-host'),r=h&&h.shadowRoot,v=r&&r.getElementById('v');if(!v)return;"
              "var c=navigator.connection||{},slow=!!c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||'')||(c.downlink>0&&c.downlink<2.5);"
@@ -110,8 +114,8 @@ def build_page(name: str, layout: dict, data) -> str:
     if meta.get("intro") == "yes":
         # Стили встроены в страницу: первая отрисовка стартового экрана не ждёт загрузки CSS
         fonts_css = read(ROOT / "fonts" / "fonts.css").replace("url(", "url(fonts/")
-        head = head.replace('<link rel="stylesheet" href="fonts/fonts.css?v={{BUILD}}">\n<link rel="stylesheet" href="css/style.css?v={{BUILD}}">',
-                            "<style>" + fonts_css.strip() + "\n" + read(ROOT / "css" / "style.css").strip() + "</style>")
+        head = head.replace('<link rel="stylesheet" href="fonts/fonts.css?v={{BUILD}}">\n<link rel="stylesheet" href="css/style.css?v={{BUILD}}">\n<link rel="stylesheet" href="css/route-video.css?v={{BUILD}}">',
+                            "<style>" + fonts_css.strip() + "\n" + read(ROOT / "css" / "style.css").strip() + "\n" + read(ROOT / "css" / "route-video.css").strip() + "</style>")
         header = header.replace("<body>\n", "<body>\n" + intro_host() + "\n", 1)
     html = head + header + body.rstrip("\n") + "\n" + layout["footer"]
     return fill_data(html, data)

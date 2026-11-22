@@ -284,6 +284,20 @@ details p{padding-bottom:18px;color:var(--muted)}
 .approach-caption{margin:12px 0 18px}
 .approach-links p{margin:0 0 8px;font-size:.875rem}
 .approach-links p:last-child{margin-bottom:0}
+.owner-card{max-width:900px}
+.owner-card h2{font-size:clamp(1.35rem,3vw,1.8rem)}
+.owner-name{max-width:38em;margin:18px 0 24px;font-size:1.1rem;font-weight:800}
+.owner-details{margin:0 0 24px}
+.owner-details>div{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,1.6fr);gap:12px 28px;padding:16px 0;border-top:1px solid var(--line)}
+.owner-details dt{color:var(--muted)}
+.owner-details dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+.owner-details a{text-underline-offset:.2em}
+.owner-contact{margin-top:24px}
+.owner-contact h2{font-size:1.15rem;line-height:1.3}
+.owner-contact .btn{white-space:normal}
+.owner-foot{margin:30px 0 0;font-size:.875rem;line-height:1.8;overflow-wrap:anywhere}
+.owner-foot a{text-underline-offset:.2em}
+@media(max-width:599px){.owner-details>div{grid-template-columns:minmax(0,1fr);gap:5px}.owner-contact{padding:22px}.owner-contact .btn{font-size:.875rem;padding-inline:14px}}
 form.cb{display:grid;gap:12px}
 form.cb[hidden],.calc[hidden]{display:none}
 form.cb :is(input,textarea,select){width:100%;padding:.9rem 1rem;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--text);font:inherit}
