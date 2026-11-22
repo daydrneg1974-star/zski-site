@@ -30,9 +30,22 @@ const service = tight(D.service.map((g) => `
 const pricelist = Object.fromEntries(Object.entries(D.rental).map(([k, g]) => [k, priceList(g)]));
 const { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } = D.address;
 const rating = { value: D.rating.value, count: new Intl.NumberFormat("ru-RU").format(D.rating.count) };
+const cashDeposit = fmt(D.rentalCashDeposit);
 const phone = D.phoneHref.replace(/\D/g, "");
 const messengerLinks = {
   whatsapp: `https://wa.me/${D.whatsapp || phone}`,
   telegram: `https://t.me/${D.telegram || `+${phone}`}`
 };
-process.stdout.write(JSON.stringify({ pricelist, service, rating, messengerLinks, driveLinks: { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } }));
+const owner = {
+  FULL_NAME: D.owner.fullName,
+  LEGAL_NAME: `Индивидуальный предприниматель ${D.owner.fullName}`,
+  SHORT_NAME: `ИП ${D.owner.fullName}`,
+  INN: D.owner.inn,
+  OGRNIP: D.owner.ogrnip,
+  REGISTRATION_DATE: D.owner.registrationDate,
+  REGISTRATION_AUTHORITY: D.owner.registrationAuthority,
+  TAX_AUTHORITY: D.owner.taxAuthority,
+  TAX_AUTHORITY_CODE: D.owner.taxAuthorityCode,
+  TAX_REGISTRATION_DATE: D.owner.taxRegistrationDate
+};
+process.stdout.write(JSON.stringify({ pricelist, service, rating, cashDeposit, messengerLinks, owner, driveLinks: { yandexNavigator, twoGisRoute, yandexRoute, driveCoordinates } }));

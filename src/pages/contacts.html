@@ -11,11 +11,9 @@ schema: yes
   <p class="lead">Звоните, пишите или приезжайте. Мы в Яхроме, рядом с СНТ Каменка.</p>
   <div id="drive">
     {{DRIVE_LINKS}}
-    <a class="drive-landmark" href="#approach">Видео и ориентиры</a>
     <section class="card drive-help" id="drive-2gis" aria-labelledby="drive-2gis-title">
       <h2 id="drive-2gis-title">Маршрут в 2ГИС</h2>
       <p>Для запуска в один клик откройте сайт на телефоне с установленным 2ГИС. Координаты подъезда для поиска в 2ГИС — <strong>{{DRIVE_COORDINATES}}</strong>.</p>
-      <a class="btn btn-ghost btn-sm" href="{{YANDEX_WEB_ROUTE}}" target="_blank" rel="noopener">Маршрут в браузере</a>
     </section>
   </div>
 </div></section>
@@ -39,7 +37,12 @@ schema: yes
         <h2 id="hours" style="font-size:1.3rem;margin-top:34px">График работы</h2>
         <ul class="hours" data-hours></ul>
         <p class="fineprint" style="margin-top:10px">Время московское. Пятница и суббота — до 02:00 следующего дня.</p>
-        <p style="margin-top:24px"><a class="btn btn-ghost btn-sm" href="clients.html">Информация для клиентов</a></p>
+        <section class="card owner-contact" aria-labelledby="contact-owner-title">
+          <h2 id="contact-owner-title">Владелец проката</h2>
+          <p>{{OWNER_SHORT_NAME}}</p>
+          <p class="muted">ИНН {{OWNER_INN}}<br>ОГРНИП {{OWNER_OGRNIP}}</p>
+          <a class="btn btn-ghost btn-sm" href="clients.html#details">Реквизиты и информация для клиентов</a>
+        </section>
       </div>
       <div>
         <div class="map" data-map><a class="map-ph" href="https://yandex.ru/maps/?ll=37.490032,56.269875&amp;z=18&amp;pt=37.490032,56.269875,pm2rdm" target="_blank" rel="noopener">Точка проката <span>Открыть в Яндекс Картах</span></a></div>
@@ -51,12 +54,16 @@ schema: yes
           </ol>
         </div>
         <section class="card approach" id="approach" aria-labelledby="approach-title">
-          <h2 id="approach-title">Видео и ориентиры</h2>
-          <p class="approach-intro">Как доехать из Яхромы: ориентиры по дороге, съезд и подъезд к павильону ZSKI.</p>
+          <h2 id="approach-title">Как доехать из Яхромы</h2>
+          <p class="approach-intro">Ориентиры по дороге, съезд и подъезд к павильону ZSKI.</p>
           <video class="approach-video" data-video controls playsinline preload="none" width="720" height="1280" poster="img/photos/route-yakhroma.jpg" src="video/clips/route-yakhroma.mp4?v={{BUILD}}" data-video-lite="video/clips/route-yakhroma-480.mp4?v={{BUILD}}" aria-label="Как доехать до проката ZSKI из Яхромы">
             Ваш браузер не поддерживает видео. <a href="video/clips/route-yakhroma.mp4?v={{BUILD}}">Откройте ролик отдельно</a>.
           </video>
           <p class="fineprint approach-caption">1 мин 38 с · Для подробного просмотра разверните видео на весь экран.</p>
+          <div class="route-save">
+            <a class="route-download" href="video/clips/route-yakhroma-480.mp4?v={{BUILD}}" download="ZSKI-kak-doehat-iz-Yahromy.mp4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>Скачать ролик · 8,3 МБ</a>
+            <p class="route-save-note">Сохрани заранее и смотри без интернета. MP4 · 1:38.</p>
+          </div>
           <div class="approach-links">
             <a class="drive-landmark" href="https://yandex.com/maps/?l=pht&amp;ll=37.489554%2C56.270594&amp;photos%5Bid%5D=n432ipHMT6ny2vnRhTP4dw&amp;photos%5Boid%5D=img_47616497%3A6999&amp;photos%5Bpoint%5D=37.489265%2C56.270986&amp;z=19" target="_blank" rel="noopener">Зимнее фото развилки на Животино</a>
             <p class="muted">Соседняя развилка на дороге к прокату.</p>

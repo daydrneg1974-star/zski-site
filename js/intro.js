@@ -301,6 +301,7 @@ function initIntro(root, opts) {
   });
   const onKey = (e) => {
     if (st.suspended) return;
+    if (e.composedPath().some((node) => node instanceof Element && node.matches(".route-dialog"))) return;
     if (e.key === "Escape") opts.close();
     const el = e.composedPath ? e.composedPath()[0] : e.target;  // в Shadow DOM настоящая цель — первая в пути
     if (el && el.closest && el.closest("a,button,input,select,textarea")) return;
@@ -477,6 +478,7 @@ function initIntro(root, opts) {
     }
     const root = rootOf(host);
     root.addEventListener("click", (e) => {
+      if (e.defaultPrevented || e.target.closest(".route-dialog")) return;
       const a = e.target.closest("a[href]"); if (!a) return;
       const u = samePage(a.getAttribute("href"));
       if (u) { e.preventDefault(); hide(true, u.hash); return; }

@@ -1,14 +1,35 @@
 ---
 title: Информация для клиентов — Уголок потребителя ZSKI
-description: Информация для клиентов проката ZSKI в Яхроме: цены на оборудование, услуги SKI-сервиса, адрес, график работы и контакты.
+description: Информация для клиентов ZSKI: реквизиты ИП, цены на прокат, услуги SKI-сервиса, адрес, график работы и контакты.
 canonical: https://zski.ru/clients.html
 ---
 
 <section class="page-head"><div class="wrap">
   <h1>Информация для клиентов</h1>
   <p class="lead">Уголок потребителя</p>
-  <p class="muted">Контакты, график работы, цены и услуги проката ZSKI в Яхроме.</p>
+  <p class="muted">Реквизиты владельца, контакты, график работы, цены и услуги проката ZSKI в Яхроме.</p>
 </div></section>
+
+<section class="section" id="details" style="padding-top:10px" aria-labelledby="owner-title">
+  <div class="wrap">
+    <div class="card owner-card">
+      <span class="eyebrow">Владелец проката</span>
+      <h2 id="owner-title">Реквизиты ZSKI</h2>
+      <p class="owner-name">{{OWNER_LEGAL_NAME}}</p>
+      <dl class="owner-details">
+        <div><dt>ИНН</dt><dd>{{OWNER_INN}}</dd></div>
+        <div><dt>ОГРНИП</dt><dd>{{OWNER_OGRNIP}}</dd></div>
+        <div><dt>Дата государственной регистрации ИП</dt><dd>{{OWNER_REGISTRATION_DATE}}</dd></div>
+        <div><dt>Регистрирующий орган</dt><dd>{{OWNER_REGISTRATION_AUTHORITY}}</dd></div>
+        <div><dt>Налоговый орган по месту учёта</dt><dd>{{OWNER_TAX_AUTHORITY}}<br>Код инспекции: {{OWNER_TAX_AUTHORITY_CODE}}</dd></div>
+        <div><dt>Дата постановки на налоговый учёт в качестве ИП</dt><dd>{{OWNER_TAX_REGISTRATION_DATE}}</dd></div>
+        <div><dt>Адрес пункта проката</dt><dd>Московская область, Дмитровский муниципальный округ, Яхрома, рядом с СНТ Каменка</dd></div>
+        <div><dt>По вопросам работы проката</dt><dd><a data-phone href="tel:+79919377744">+7 (991) 937-77-44</a><br><a data-email href="mailto:z_ski@mail.ru">z_ski@mail.ru</a></dd></div>
+      </dl>
+      <a class="btn btn-ghost btn-sm" href="contacts.html#hours">Адрес и график работы</a>
+    </div>
+  </div>
+</section>
 
 <section class="section" style="padding-top:10px" aria-label="Полезная информация">
   <div class="wrap">
@@ -16,6 +37,7 @@ canonical: https://zski.ru/clients.html
       <article class="card flat">
         <h2 style="font-size:1.3rem">Прокат оборудования</h2>
         <p class="muted">Цены на лыжи, сноуборды, детское оборудование, защиту и аксессуары. Калькулятор стоимости на несколько дней.</p>
+        <p>Залог — <strong>водительское удостоверение либо {{RENTAL_CASH_DEPOSIT}} за комплект</strong>.</p>
         <a class="btn btn-ghost btn-sm" href="prices.html">Цены на прокат</a>
       </article>
       <article class="card flat">
