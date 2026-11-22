@@ -279,6 +279,9 @@ details p{padding-bottom:18px;color:var(--muted)}
 .messenger-links .btn{text-align:center;justify-content:center}
 .approach{margin-top:18px}
 .approach h2{font-size:1.3rem;margin:0}
+.approach-intro{margin:12px 0 18px;color:var(--muted)}
+.approach-video{display:block;width:100%;max-width:360px;height:auto;aspect-ratio:9/16;margin:0 auto;border-radius:16px;background:#0b192c;object-fit:contain}
+.approach-caption{margin:12px 0 18px}
 .approach-links p{margin:0 0 8px;font-size:.875rem}
 .approach-links p:last-child{margin-bottom:0}
 form.cb{display:grid;gap:12px}
