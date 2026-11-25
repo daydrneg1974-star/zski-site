@@ -33,7 +33,7 @@ const rating = { value: D.rating.value, count: new Intl.NumberFormat("ru-RU").fo
 const cashDeposit = fmt(D.rentalCashDeposit);
 const phone = D.phoneHref.replace(/\D/g, "");
 const messengerLinks = {
-  whatsapp: `https://wa.me/${D.whatsapp || phone}`,
+  whatsapp: `https://api.whatsapp.com/send?phone=${String(D.whatsapp || phone).replace(/\D/g, "")}`,
   telegram: `https://t.me/${D.telegram || `+${phone}`}`
 };
 const owner = {

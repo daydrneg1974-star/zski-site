@@ -1,6 +1,6 @@
 /* Версии меняются сборкой. Новый воркер ждёт закрытия старых вкладок.
    HTML и файлы без версии — сначала сеть. Видео, API и POST идут мимо кеша. */
-const VERSION = "zski-202611250700";
+const VERSION = "zski-202611251218";
 const OWN_CACHE = /^zski-\d{12}$/;
 
 self.addEventListener("activate", (event) => {

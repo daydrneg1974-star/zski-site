@@ -9,7 +9,7 @@
   const fmt = (n) => new Intl.NumberFormat("ru-RU").format(n) + " ₽";
   const phone = (D?.phoneHref || "").replace(/\D/g, "");
   const messengerLinks = {
-    whatsapp: `https://wa.me/${D?.whatsapp || phone}`,
+    whatsapp: `https://api.whatsapp.com/send?phone=${String(D?.whatsapp || phone).replace(/\D/g, "")}`,
     telegram: `https://t.me/${D?.telegram || `+${phone}`}`,
     max: "https://max.ru/:share"
   };
@@ -335,7 +335,9 @@ const burger = $(".burger"), drawer = $(".drawer");
       ].join("\n");
       $$("[data-messenger]", res).forEach((a) => {
         const kind = a.dataset.messenger;
-        a.href = kind === "whatsapp" ? messengerLinks.whatsapp + "?text=" + encodeURIComponent(message) : messengerLinks[kind];
+        const url = new URL(messengerLinks[kind]);
+        if (kind === "whatsapp") url.searchParams.set("text", message);
+        a.href = url.href;
       });
       const prepared = $("[data-quiz-message]", res);
       if (prepared) prepared.value = message;

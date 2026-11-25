@@ -23,6 +23,12 @@ for name in pages:
         html = re.sub(r'<meta\s+name="robots"[^>]*>\s*', "", html)
         html = html.replace("<head>", '<head>\n<meta name="robots" content="noindex,nofollow">', 1)
         html = html.replace("https://zski.ru", args.preview_url.rstrip("/"))
+        html = html.replace('<form class="cb card"', '<form data-preview class="cb card"')
+        html = html.replace('data-contact-submit>', 'data-contact-submit disabled aria-describedby="contact-preview">')
+        html = html.replace('<!-- CONTACT_PREVIEW_NOTICE -->',
+            '<p class="form-preview" id="contact-preview">Это версия для просмотра. Отправка формы здесь отключена. '
+            'Чтобы связаться с прокатом, <a href="mailto:z_ski@mail.ru">напишите на z_ski@mail.ru</a> '
+            'или <a href="tel:+79919377744">позвоните</a>.</p>')
     (destination / (name + ".html")).write_text(html)
 for name in ("css", "fonts", "img", "js", "video"):
     shutil.copytree(ROOT / name, destination / name, dirs_exist_ok=True)

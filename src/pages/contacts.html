@@ -1,6 +1,6 @@
 ---
 title: Контакты ZSKI — прокат лыж и сноубордов в Яхроме
-description: Прокат ZSKI: Московская область, Дмитровский муниципальный округ, Яхрома, рядом с СНТ Каменка. Телефон +7 (991) 937-77-44, z_ski@mail.ru. График: Пн–Чт 10–22, Пт–Сб 9–02, Вс 9–24. Карта и форма для подготовки письма.
+description: Прокат ZSKI: Московская область, Дмитровский муниципальный округ, Яхрома, рядом с СНТ Каменка. Телефон +7 (991) 937-77-44, z_ski@mail.ru. График: Пн–Чт 10–22, Пт–Сб 9–02, Вс 9–24. Карта, WhatsApp и форма обращения в прокат.
 canonical: https://zski.ru/contacts.html
 schema: yes
 ---
@@ -30,7 +30,7 @@ schema: yes
         </ul>
         <div class="map-links">
           <a class="btn btn-ghost btn-sm" data-href="yandex" href="https://yandex.ru/maps/?ll=37.490032,56.269875&amp;z=18&amp;pt=37.490032,56.269875,pm2rdm" target="_blank" rel="noopener">Открыть в Яндекс Картах</a>
-          <a class="btn btn-ghost btn-sm" data-messenger="whatsapp" href="{{WHATSAPP_URL}}" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn btn-ghost btn-sm" data-messenger="whatsapp" href="{{WHATSAPP_URL}}">WhatsApp</a>
           <a class="btn btn-ghost btn-sm" data-messenger="telegram" href="{{TELEGRAM_URL}}" target="_blank" rel="noopener">Telegram</a>
         </div>
 
@@ -76,23 +76,22 @@ schema: yes
   </div>
 </section>
 
-<section class="section band-navy">
+<section class="section band-navy" id="feedback">
   <div class="wrap">
     <div class="grid grid-2" style="align-items:start">
       <div>
         <span class="eyebrow">Обратная связь</span>
         <h2>Напишите в прокат</h2>
         <p class="lead">Задайте вопрос о прокате, сервисе или хранении. Можно <a href="mailto:z_ski@mail.ru">написать напрямую</a> или <a data-phone="link" href="tel:+79919377744">позвонить в прокат</a>.</p>
-      </div>
-      <div class="card" data-contact-fallback>
-        <h3>Связаться напрямую</h3>
-        <p>Напишите, что хотите уточнить. Ответим на вопросы об инвентаре и работе проката.</p>
         <div class="map-links">
           <a class="btn btn-primary" data-email="link" href="mailto:z_ski@mail.ru">Написать на почту</a>
           <a class="btn btn-ghost" data-phone="link" href="tel:+79919377744">Позвонить</a>
         </div>
       </div>
-      <form class="cb card" method="post" action="api/contact.php">
+      <form class="cb card" method="post" action="api/contact.php" aria-labelledby="contact-form-title" aria-describedby="contact-recipient">
+        <h3 id="contact-form-title">Сообщение в прокат ZSKI</h3>
+        <p class="form-recipient" id="contact-recipient">Получатель — прокат ZSKI.<br>Электронная почта: <a data-email href="mailto:z_ski@mail.ru">z_ski@mail.ru</a>.<br>Для ответа используем указанный вами телефон.</p>
+        <!-- CONTACT_PREVIEW_NOTICE -->
         <div><label for="f-name">Имя</label><input id="f-name" name="name" autocomplete="name" maxlength="100" aria-describedby="f-name-error" required pattern=".*\S.*" placeholder="Как к вам обращаться"><span class="field-error" id="f-name-error" data-field-error="name"></span></div>
         <div><label for="f-phone">Телефон</label><input id="f-phone" name="phone" aria-describedby="f-phone-error" type="tel" autocomplete="tel" required pattern="\+?(?:[ \(\)\-]*[0-9]){7,15}[ \(\)\-]*" maxlength="30" title="Введите от 7 до 15 цифр. Можно использовать знак +, пробелы, скобки и дефисы." placeholder="+7 ___ ___-__-__"><span class="field-error" id="f-phone-error" data-field-error="phone"></span></div>
         <div><label for="f-need">Тема вопроса</label>
@@ -102,7 +101,7 @@ schema: yes
         <div><label for="f-msg">Сообщение</label><textarea id="f-msg" name="msg" maxlength="3000" aria-describedby="f-msg-error" placeholder="Ваш вопрос о прокате, сервисе или хранении"></textarea><span class="field-error" id="f-msg-error" data-field-error="msg"></span></div>
         <input type="hidden" name="request_id" value="">
         <div class="form-trap" aria-hidden="true"><label for="f-company">Оставьте поле пустым</label><input id="f-company" name="company" tabindex="-1" autocomplete="off"></div>
-        <button class="btn btn-primary" type="submit">Отправить сообщение</button>
+        <button class="btn btn-primary" type="submit" data-contact-submit>Отправить в ZSKI</button>
         <p class="form-status" data-form-status role="status" aria-live="polite"></p>
         <p class="form-note">Имя, телефон и сообщение нужны прокату, чтобы ответить на ваш вопрос. Не указывайте платёжные данные и документы.</p>
       </form>

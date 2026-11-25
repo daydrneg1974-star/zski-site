@@ -4,6 +4,10 @@
     const button = form.querySelector('button[type="submit"]');
     const status = form.querySelector("[data-form-status]");
     const request = form.elements.namedItem("request_id");
+    if (form.hasAttribute("data-preview")) {
+      form.addEventListener("submit", (event) => event.preventDefault());
+      return;
+    }
     let busy = false;
     const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), (n) => n.toString(16).padStart(2, "0")).join("");
     request.value = newId();
