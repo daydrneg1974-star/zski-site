@@ -1,6 +1,7 @@
 /* Московское время, график проката и ночные смены. */
 (function () {
-  const { hours, seasonStart, seasonEnd } = window.ZSKI;
+  const { hours, seasonStart, seasonEnd } = window.ZSKI || {};
+  if (!Array.isArray(hours) || hours.length !== 7 || hours.some((day) => !Number.isFinite(day.open) || !Number.isFinite(day.close))) return;
   const minute = 60_000;
   const hour = 60 * minute;
   const start = seasonStart ? Date.parse(`${seasonStart}T00:00:00+03:00`) : -Infinity;

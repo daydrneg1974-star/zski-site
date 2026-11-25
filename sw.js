@@ -1,44 +1,51 @@
-/* ZSKI — сервис-воркер.
-   HTML — всегда из сети, копия в кэше только на случай офлайна.
-   Шрифты, фото и файлы с версией сборки (?v=…: CSS и JS) неизменны — из кэша, повторный заход не ждёт сети.
-   Видео воркер не трогает: браузер грузит его частями (ответы 206), их нельзя класть в кэш.
-   Запрос самой страницы уходит параллельно запуску воркера (navigation preload), чтобы повторный
-   заход не ждал его старта.
-   Новая версия воркера просто начинает отвечать на следующие запросы — страницу не перезагружаем:
-   HTML и так приходит из сети, а у CSS/JS в адресе новая версия сборки.
-   VERSION подставляется при сборке, старые кэши ZSKI удаляются. */
-const VERSION = "zski-202611221315";
-const IMMUTABLE = /\.(woff2|webp|jpg|png|svg)$/;
-self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", (e) => {
-  e.waitUntil(Promise.all([
-    caches.keys().then((ks) => Promise.all(ks.filter((k) => /^zski-\d{12}$/.test(k) && k !== VERSION).map((k) => caches.delete(k)))),
-    self.registration.navigationPreload ? self.registration.navigationPreload.enable().catch(() => {}) : null,
-  ]).then(() => self.clients.claim()));
+/* Версии меняются сборкой. Новый воркер ждёт закрытия старых вкладок.
+   HTML и файлы без версии — сначала сеть. Видео, API и POST идут мимо кеша. */
+const VERSION = "zski-202611250700";
+const OWN_CACHE = /^zski-\d{12}$/;
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(caches.keys().then((names) => {
+    const previous = names.filter((name) => OWN_CACHE.test(name) && name !== VERSION).sort().pop();
+    return Promise.all(names.filter((name) => OWN_CACHE.test(name) && name !== VERSION && name !== previous)
+      .map((name) => caches.delete(name)));
+  }));
 });
-const store = (req, res) => {
-  if (res.status !== 200 || res.type !== "basic") return;   // 206, редиректы и чужие ответы не кэшируем
-  const copy = res.clone();                                   // копию — сразу, пока тело ответа не отдано странице
-  caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
-};
-self.addEventListener("fetch", (e) => {
-  const req = e.request; if (req.method !== "GET") return;
-  const url = new URL(req.url); if (url.origin !== location.origin) return;
-  if (/\/video\//.test(url.pathname) || req.headers.has("range")) return;
-  if (req.mode === "navigate") {
-    // страница: запрос уже идёт (navigation preload), пока воркер стартует
-    e.respondWith((async () => {
-      try {
-        const res = (await e.preloadResponse) || (await fetch(req));
-        store(req, res); return res;
-      } catch { return (await caches.match(req, { ignoreSearch: true })) || Response.error(); }
-    })());
-    return;
-  }
-  if (IMMUTABLE.test(url.pathname) || url.searchParams.has("v")) {
-    e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => { store(req, res); return res; })));
-  } else {
-    e.respondWith(fetch(req).then((res) => { store(req, res); return res; })
-      .catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || Response.error())));
-  }
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request, url = new URL(request.url);
+  if (request.method !== "GET" || url.origin !== location.origin ||
+      /\/(video|api)\//.test(url.pathname) || request.headers.has("range")) return;
+  let fresh = false;
+  const network = async () => {
+    const response = await fetch(request);
+    if (response.ok) fresh = response.clone();
+    return response;
+  };
+  const response = (async () => {
+    if (request.mode === "navigate") {
+      try { return await network(); } catch {
+        const saved = await caches.match(request, { ignoreSearch: true });
+        if (!saved) return Response.error();
+        const text = await saved.text();
+        const note = '<p class="offline-note" id="offline-notice" role="status">Сохранённая версия. Цены и условия могли измениться. Уточните наличие по телефону. Форма отправляется только при подключении к сети.</p>';
+        return new Response(text.replace(/<body([^>]*)>/i, "<body$1>" + note), {
+          status: 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
+        });
+      }
+    }
+    if (url.searchParams.has("v")) {
+      const cached = await caches.match(request);
+      return cached || network();
+    }
+    try { return await network(); } catch {
+      return (await caches.match(request)) || Response.error();
+    }
+  })();
+  event.respondWith(response);
+  event.waitUntil(response.then(async (res) => {
+    if (fresh && fresh.status === 200 && fresh.type === "basic" && !/no-store|private/.test(fresh.headers.get("cache-control") || "")) {
+      const cache = await caches.open(VERSION);
+      await cache.put(request, fresh);
+    }
+  }).catch(() => {}));
 });

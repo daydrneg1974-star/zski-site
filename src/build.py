@@ -14,7 +14,7 @@
   * проставляет штамп сборки BUILD (ГГГГММДДЧЧММ, UTC) в ?v=BUILD у css/js/шрифтов и
     в VERSION сервис-воркера sw.js — так браузеры и сервис-воркер не держат старые файлы;
   * src/pages/intro.html копируется в intro.html как есть, только с подстановкой BUILD;
-    страницам с `intro: yes` (главная) CSS встраивается в <head> (стартовый экран не ждёт загрузки стилей),
+    страницам с `intro: yes` (резервный режим, текущая главная его не использует) CSS встраивается в <head> (стартовый экран не ждёт загрузки стилей),
     в <head> добавляется src/layout/intro-head.html, а в начало <body> —
     слой интро: разметка src/pages/intro.html и стили css/intro.css в Declarative Shadow DOM
     (<template shadowrootmode>), чтобы стартовый экран рисовался сразу, без ожидания скриптов.
@@ -152,6 +152,9 @@ def main():
                    .replace("{{BUILD}}", build))
         for name, html in pages.items()
     }
+    for name, html in outputs.items():
+        outputs[name] = re.sub(r"(?<![\w/])((?:img|video)/[^\s\"'<>?()]+\.(?:webp|jpg|png|mp4|webm))(?![?\w])",
+                               lambda match: match.group(1) + "?v=" + build, html)
     outputs["sw.js"] = re.sub(r'const VERSION = "zski-\d{12}"', f'const VERSION = "zski-{build}"', sw)
 
     stale = [f for f, text in outputs.items() if not (ROOT / f).exists() or read(ROOT / f) != text]

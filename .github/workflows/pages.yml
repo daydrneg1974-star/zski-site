@@ -23,18 +23,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check generated HTML
-        run: python3 src/build.py --check
+      - name: Check application
+        run: bash tools/check.sh
       - uses: actions/configure-pages@v5
         with:
           enablement: true
       - name: Stage public site files
         run: |
-          mkdir _site
-          cp .nojekyll index.html prices.html service.html slopes.html contacts.html clients.html intro.html intro-3d.html robots.txt sitemap.xml sw.js _site/
-          cp -r css fonts img js video _site/
+          python3 tools/stage.py "$RUNNER_TEMP/zski-preview" --preview-url "https://daydrneg1974-star.github.io/zski-site"
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: ${{ runner.temp }}/zski-preview
       - id: deployment
         uses: actions/deploy-pages@v4

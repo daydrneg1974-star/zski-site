@@ -1,5 +1,5 @@
 # Проверка, что HTML в корне собран из актуальных исходников src/ (python3 src/build.py --check).
-# Не блокирует публикацию: деплой идёт отдельным workflow pages.yml.
+# Эти же проверки выполняются перед публикацией в pages.yml.
 name: Check build
 on:
   push:
@@ -12,4 +12,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: python3 src/build.py --check
+      - run: bash tools/check.sh

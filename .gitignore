@@ -3,3 +3,8 @@
 .env
 .env.*
 !.env.example
+/config/contact.local.php
+/zski-private/
+/test-results/
+__pycache__/
+*.pyc

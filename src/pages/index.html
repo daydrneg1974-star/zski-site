@@ -3,7 +3,7 @@ title: ZSKI — прокат лыж и сноубордов в Яхроме | ц
 description: Прокат горных лыж и сноубордов ZSKI в Яхроме, рядом с СНТ Каменка, Дмитровский муниципальный округ, Московская область. Комплект от 2000 ₽/день, шлемы, маски, SKI-сервис, ремонт и хранение. Открыто до 02:00 в пятницу и субботу.
 canonical: https://zski.ru/
 schema: yes
-intro: yes
+preload: img/photos/hero-freeride.webp
 ---
 
 <section class="hero" id="drive">
@@ -20,7 +20,7 @@ intro: yes
     </div>
     <div class="hero-actions">
       <a class="btn btn-primary" data-phone="link" href="tel:+79919377744"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
-      <a class="btn btn-ghost" href="intro.html" data-intro aria-label="Посмотреть видео-спуск к прокату">▶ Спуск к прокату</a>
+      <a class="btn btn-ghost" href="intro.html" aria-label="Посмотреть видео-спуск к прокату">▶ Спуск к прокату</a>
       <a class="btn btn-ghost" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать стоимость</a>
     </div>
     <div class="hero-badges">
@@ -100,10 +100,14 @@ intro: yes
           <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:14px"><a class="btn btn-primary" data-phone="link" href="tel:+79919377744">Уточнить наличие</a><a class="btn btn-ghost" href="prices.html#calc">Открыть калькулятор</a></div>
           <div class="messenger-links" role="group" aria-label="Отправить подбор в мессенджер">
             <a class="btn btn-ghost btn-sm" data-messenger="whatsapp" href="{{WHATSAPP_URL}}" target="_blank" rel="noopener">Отправить в WhatsApp</a>
-            <a class="btn btn-ghost btn-sm" data-messenger="telegram" href="{{TELEGRAM_URL}}" target="_blank" rel="noopener">Отправить в Telegram</a>
+            <a class="btn btn-ghost btn-sm" data-messenger="telegram" href="{{TELEGRAM_URL}}" target="_blank" rel="noopener">Открыть Telegram</a>
             <a class="btn btn-ghost btn-sm" data-messenger="max" href="https://max.ru/:share" target="_blank" rel="noopener" aria-describedby="quiz-max-help">Передать в MAX</a>
           </div>
           <p class="fineprint" id="quiz-max-help">В MAX выберите чат проката. Номер для поиска — <span data-phone>+7 (991) 937-77-44</span>.</p>
+          <p class="fineprint">Подбор предварительный. Наличие и окончательную настройку уточняйте у мастера. Для Telegram и MAX скопируйте текст и вставьте его в нужный чат.</p>
+          <button type="button" class="btn btn-ghost btn-sm" data-copy-quiz>Скопировать подбор</button>
+          <textarea class="quiz-message" data-quiz-message aria-label="Текст подбора для копирования" readonly hidden></textarea>
+          <p class="fineprint" data-copy-status role="status"></p>
           <button type="button" class="quiz-again">↺ Начать заново</button>
         </div>
         <div class="quiz-progress"><i></i></div>
@@ -274,8 +278,3 @@ intro: yes
     </div>
   </div>
 </section>
-
-
-
-<!-- Слой интро «спуск к прокату» вставляется сборкой в начало <body> (intro: yes), см. js/intro.js -->
-<script src="js/intro.js?v={{BUILD}}" defer onerror="window.__zskiIntroFail&&__zskiIntroFail()"></script>

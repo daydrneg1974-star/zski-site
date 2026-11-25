@@ -92,16 +92,19 @@ schema: yes
           <a class="btn btn-ghost" data-phone="link" href="tel:+79919377744">Позвонить</a>
         </div>
       </div>
-      <form class="cb card" hidden>
-        <div><label for="f-name">Имя</label><input id="f-name" name="name" required pattern=".*\S.*" placeholder="Как к вам обращаться"></div>
-        <div><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" required pattern="\+?(?:[ \(\)\-]*[0-9]){7,15}[ \(\)\-]*" maxlength="30" title="Введите от 7 до 15 цифр. Можно использовать знак +, пробелы, скобки и дефисы." placeholder="+7 ___ ___-__-__"></div>
+      <form class="cb card" method="post" action="api/contact.php">
+        <div><label for="f-name">Имя</label><input id="f-name" name="name" autocomplete="name" maxlength="100" aria-describedby="f-name-error" required pattern=".*\S.*" placeholder="Как к вам обращаться"><span class="field-error" id="f-name-error" data-field-error="name"></span></div>
+        <div><label for="f-phone">Телефон</label><input id="f-phone" name="phone" aria-describedby="f-phone-error" type="tel" autocomplete="tel" required pattern="\+?(?:[ \(\)\-]*[0-9]){7,15}[ \(\)\-]*" maxlength="30" title="Введите от 7 до 15 цифр. Можно использовать знак +, пробелы, скобки и дефисы." placeholder="+7 ___ ___-__-__"><span class="field-error" id="f-phone-error" data-field-error="phone"></span></div>
         <div><label for="f-need">Тема вопроса</label>
-          <select id="f-need" name="need">
+          <select id="f-need" name="need" aria-describedby="f-need-error">
             <option>Прокат горных лыж</option><option>Прокат сноуборда</option><option>SKI-сервис</option><option>Хранение / консервация</option><option>Другое</option>
-          </select></div>
-        <div><label for="f-msg">Сообщение</label><textarea id="f-msg" name="msg" placeholder="Ваш вопрос о прокате, сервисе или хранении"></textarea></div>
-        <button class="btn btn-primary" type="submit">Подготовить письмо</button>
-        <p class="form-note">Форма откроет черновик. Отправьте его из своей почты.</p>
+          </select><span class="field-error" id="f-need-error" data-field-error="need"></span></div>
+        <div><label for="f-msg">Сообщение</label><textarea id="f-msg" name="msg" maxlength="3000" aria-describedby="f-msg-error" placeholder="Ваш вопрос о прокате, сервисе или хранении"></textarea><span class="field-error" id="f-msg-error" data-field-error="msg"></span></div>
+        <input type="hidden" name="request_id" value="">
+        <div class="form-trap" aria-hidden="true"><label for="f-company">Оставьте поле пустым</label><input id="f-company" name="company" tabindex="-1" autocomplete="off"></div>
+        <button class="btn btn-primary" type="submit">Отправить сообщение</button>
+        <p class="form-status" data-form-status role="status" aria-live="polite"></p>
+        <p class="form-note">Имя, телефон и сообщение нужны прокату, чтобы ответить на ваш вопрос. Не указывайте платёжные данные и документы.</p>
       </form>
     </div>
   </div>
