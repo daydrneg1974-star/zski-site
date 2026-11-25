@@ -424,7 +424,7 @@ table.price-table{width:100%;border-collapse:collapse;background:var(--card);bor
 .video video:focus-visible{outline:3px solid #7cc8ff;outline-offset:-5px}
 
 /* ---------- Лайтбокс ---------- */
-.lightbox{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px}
+.lightbox{position:fixed;inset:0;z-index:100;width:100%;height:100%;height:100dvh;max-width:none;max-height:none;margin:0;border:0;background:rgba(5,8,14,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px}
 .lightbox[hidden]{display:none}
 .lightbox img{max-width:min(96vw,1400px);max-height:84vh;border-radius:14px;box-shadow:0 40px 100px rgba(0,0,0,.6)}
 .lightbox .cap{position:absolute;left:0;right:0;bottom:22px;text-align:center;color:#cfd8e6;font-size:.95rem;font-weight:600}
@@ -697,27 +697,33 @@ try{
 }catch(e){}
 window.__zskiIntro={show:show,restore:show&&type==="back_forward"?s.p:null};
 /* Скрипт интро не загрузился или упал — сразу показываем сайт */
-window.__zskiIntroFail=function(){var h=document.querySelector(".intro-host");if(h)h.hidden=true;d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))};
+window.__zskiIntroFail=function(){var h=document.querySelector(".intro-host"),v=h&&h.shadowRoot&&h.shadowRoot.querySelector('video');if(v)v.pause();if(h)h.hidden=true;d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))};
 var l=document.createElement("link");l.rel="preload";l.as="image";l.type="image/webp";l.href=show?(matchMedia("(orientation: portrait)").matches?"img/photos/intro-poster-portrait.webp":"img/photos/intro-poster.webp"):"img/photos/hero-freeride.webp";l.setAttribute("fetchpriority","high");document.head.appendChild(l);
-if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v=202611221315";document.head.appendChild(j)}
-if(show){d.classList.add("intro-open");setTimeout(function(){if(!(window.__zskiIntro&&window.__zskiIntro.booted)){d.classList.remove("intro-open");dispatchEvent(new Event("zski:intro-closed"))}},8000)}})();
+if(show){var j=document.createElement("link");j.rel="preload";j.as="script";j.href="js/intro.js?v=202611231712";document.head.appendChild(j)}
+if(show){d.classList.add("intro-open");setTimeout(function fallback(){if(window.__zskiIntro&&window.__zskiIntro.booted)return;var h=document.querySelector('.intro-host'),v=h&&h.shadowRoot&&h.shadowRoot.querySelector('video');if(window.__zskiGo&&v&&!v.paused&&!v.ended){setTimeout(fallback,1000);return}window.__zskiIntroFail()},8000)}})();
 </script>
 <style>html.intro-open,html.intro-open body{background:#1a2230;overflow:hidden}html.intro-open body>:not(.intro-host){display:none!important}.intro-host{position:fixed;inset:0;z-index:5000}.intro-host[hidden]{display:none}html.intro-open .intro-host[hidden]{display:block}</style>
+<noscript><style>.price-tabs,.quiz,.burger{display:none!important}.price-list[hidden]{display:block}.drawer{display:block}</style></noscript>
 </head>
 <body>
 <div class="intro-host" hidden role="dialog" aria-label="Видео-интро: спуск к прокату"><template shadowrootmode="open"><style>/* ZSKI — видео-интро «спуск к прокату» */
 :root{--accent:#e3241b;--ice:#7cc8ff;--display:"Unbounded","Unbounded Fallback",system-ui,sans-serif;--font:"Manrope","Manrope Fallback",system-ui,sans-serif}
 *{box-sizing:border-box}
 :host{position:fixed;inset:0;z-index:5000;overflow:hidden;background:#1a2230;color:#fff;font-family:var(--font);--ice:#7cc8ff}
-:root,:host{--route-rail:calc(64px + env(safe-area-inset-bottom,0px))}
+:root,:host{--route-rail:calc(78px + env(safe-area-inset-bottom,0px))}
 html,body{margin:0;height:100%;background:#1a2230;color:#fff;font-family:var(--font);overflow:hidden}
-.stage{position:fixed;inset:0;overflow:hidden;background:#1a2230}
+.stage{position:fixed;inset:0;z-index:0;overflow:hidden;background:#1a2230}
 .stage.route-on,.stage.route-on + .hud{bottom:var(--route-rail)}
 .stage video,.stage .poster,.stage .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.stage video{opacity:0;transition:opacity .22s}
+.stage video{opacity:0;transition:opacity .22s;pointer-events:none}
+.stage video[hidden]{display:none}
 .stage::after{content:"";position:absolute;inset:0;background:rgba(10,14,22,.34);opacity:0;transition:opacity .45s ease;pointer-events:none}
 .stage.hold::after,.stage.buffering::after{opacity:1}
 .stage video.on{opacity:1}
+.video-recovery{position:fixed;z-index:30;top:50%;left:50%;transform:translate(-50%,-50%);width:min(92%,440px);padding:22px;border-radius:20px;background:#101b2a;text-align:center;box-shadow:0 8px 40px #0006}
+.video-recovery[hidden]{display:none}
+.video-recovery p{margin:0 0 16px}
+.video-recovery .skip{display:inline-block;margin:5px}
 .arrival{position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none}
 .stage.arrival-on .arrival{opacity:1}
 .arrival-scene{position:absolute;top:50%;left:50%;width:max(100vw,150.1vh);aspect-ratio:1400/933;transform:translate(-50%,-50%) scale(1.06);transition:transform 2.4s ease-out}
@@ -737,7 +743,7 @@ html,body{margin:0;height:100%;background:#1a2230;color:#fff;font-family:var(--f
 .lens{position:absolute;left:4%;top:15%;width:92%;height:72%;border-radius:50%;pointer-events:none;display:none;box-shadow:0 0 0 4000px #1b1f26,inset 0 0 0 12px #2a2f38,inset 0 0 120px rgba(0,0,0,.45),inset 0 0 40px rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,196,138,.14),rgba(255,255,255,0) 45%,rgba(124,200,255,.12))}
 body.pov .lens,.stage.pov .lens{display:block}
 @media(max-aspect-ratio:3/4){.lens{left:5%;top:14%;width:90%;height:72%;border-radius:46%/30%}}
-.hud{position:fixed;inset:0;padding:22px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;pointer-events:none}
+.hud{position:fixed;inset:0;z-index:10;padding:22px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;pointer-events:none}
 .hud[hidden]{display:none}
 .hud > *{pointer-events:auto}
 .hud-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
@@ -751,10 +757,11 @@ body.pov .lens,.stage.pov .lens{display:block}
 .meter b{display:block;font-size:clamp(1.4rem,4vw,2.4rem);line-height:1}
 .meter span{font-family:var(--font);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
 .meter.right{text-align:right}
-.descent-route{position:fixed;inset:auto 0 0;height:var(--route-rail);padding:4px 14px calc(3px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.24);background:#101b2a;font-family:var(--font)}
+.descent-route{position:fixed;inset:auto 0 0;z-index:20;height:var(--route-rail);padding:4px 14px calc(3px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.24);background:#101b2a;font-family:var(--font)}
 .descent-route[hidden]{display:none}
 .route-elevation,.route-stations{width:min(100%,610px);margin-inline:auto}
 .route-elevation{display:flex;justify-content:space-between;color:#c9ddea;font-size:.64rem;font-weight:700;line-height:1.2}
+.route-exit{display:inline-flex;align-items:center;min-height:28px;color:#fff;font-size:.78rem;text-underline-offset:2px;padding:2px 12px;margin:-2px 0}
 .route-stations{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;list-style:none;margin-block:0;padding:0}
 .route-stations::before{content:"";position:absolute;top:12px;right:0;left:0;height:2px;border-radius:2px;background:linear-gradient(to right,#7cc8ff var(--route-progress,0%),rgba(255,255,255,.34) var(--route-progress,0%));pointer-events:none}
 .route-point{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;width:100%;min-height:41px;padding:5px 1px 2px;border:0;background:none;color:#fff;cursor:pointer;font:700 .7rem/1.16 var(--font);text-align:center}
@@ -770,7 +777,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 .title p{margin:0;font-weight:700;opacity:.9;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .hint{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;font-weight:800;opacity:.75;text-shadow:0 2px 12px rgba(0,0,0,.6);animation:pulse 2s infinite;white-space:nowrap}
 @keyframes pulse{50%{opacity:.3}}
-.menu{position:fixed;inset:0;display:flex;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:24px;background:radial-gradient(ellipse at 50% 60%,rgba(20,27,40,.3),rgba(20,27,40,.73));opacity:0;visibility:hidden;pointer-events:none}
+.menu{position:fixed;inset:0;z-index:20;display:flex;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:24px;background:radial-gradient(ellipse at 50% 60%,rgba(20,27,40,.3),rgba(20,27,40,.73));opacity:0;visibility:hidden;pointer-events:none}
 .menu.show{opacity:1;visibility:visible;pointer-events:auto}
 .panel{max-width:860px;width:100%;margin:auto;text-align:center}
 .panel h2{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,4.5vw,3rem);margin:0 0 .4rem;text-shadow:0 6px 30px rgba(0,0,0,.6)}
@@ -914,15 +921,15 @@ body.pov .lens,.stage.pov .lens{display:block}
     <source media="(orientation: portrait)" srcset="img/photos/intro-poster-portrait.webp">
     <img id="poster" src="img/photos/intro-poster.webp" alt="" fetchpriority="high">
   </picture>
-  <video id="v" muted playsinline preload="none" aria-label="Видео: горнолыжник спускается по склону">
-    <source media="(orientation: portrait)" src="video/portrait/descent.webm?v=202611221315" type='video/webm; codecs="vp9"'>
-    <source media="(orientation: portrait)" src="video/portrait/descent.mp4?v=202611221315" type="video/mp4">
-    <source src="video/descent.webm?v=202611221315" type='video/webm; codecs="vp9"'>
-    <source src="video/descent.mp4?v=202611221315" type="video/mp4">
+  <video id="v" muted playsinline webkit-playsinline x5-video-player-type="h5-page" disablepictureinpicture disableremoteplayback preload="none" aria-label="Видео: горнолыжник спускается по склону">
+    <source media="(orientation: portrait)" src="video/portrait/descent-540.mp4?v=202611231712" type="video/mp4">
+    <source media="(orientation: portrait)" src="video/portrait/descent-540.webm?v=202611231712" type='video/webm; codecs="vp9"'>
+    <source src="video/descent-540.mp4?v=202611231712" type="video/mp4">
+    <source src="video/descent-540.webm?v=202611231712" type='video/webm; codecs="vp9"'>
   </video>
   <div class="arrival" aria-hidden="true">
     <div class="arrival-scene">
-      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611221315" alt="" decoding="async">
+      <img id="arrival-photo" data-src="img/photos/shop-exterior.webp?v=202611231712" alt="" decoding="async">
       <span class="arrival-sign">ZSKI</span>
     </div>
   </div>
@@ -945,7 +952,7 @@ body.pov .lens,.stage.pov .lens{display:block}
   </div>
 </div>
 <nav class="descent-route" id="route" aria-label="Остановки спуска" hidden>
-  <div class="route-elevation" aria-hidden="true"><span>220 м</span><span>0 м</span></div>
+  <div class="route-elevation"><span aria-hidden="true">220 м</span><a class="route-exit" href="index.html#main">Перейти на сайт →</a><span aria-hidden="true">0 м</span></div>
   <ol class="route-stations" id="route-stations"></ol>
 </nav>
 
@@ -980,22 +987,27 @@ body.pov .lens,.stage.pov .lens{display:block}
     <h1>Ваш спуск к прокату</h1>
     <p>Пять остановок по пути — выберите, куда свернуть. Со звуком ветра.</p>
     <div class="start-actions">
-      <button class="btn-start" id="go" type="button" onclick="window.__zskiGo=1"><span>▶</span>Поехали</button>
+      <button class="btn-start" id="go" type="button" onclick="if(!this.dataset.ready){window.__zskiGo=1;var r=this.getRootNode(),v=r.querySelector('#v');if(v){v.muted=true;v.preload='auto';v.addEventListener('playing',function(){v.classList.add('on');r.querySelector('#start').classList.add('off')},{once:true});v.play().catch(function(){})}}"><span>▶</span>Поехали</button>
       <a class="start-skip" href="index.html#main">Перейти на сайт →</a>
     </div>
     <nav class="drive-links" aria-label="Маршрут на машине">
   <a class="btn btn-ghost btn-sm" href="https://yandex.ru/maps/?rtext=~56.270071,37.48997&amp;rtt=auto" data-route-app="yandexnavi://build_route_on_map?lat_to=56.270071&amp;lon_to=37.48997" data-route-package="ru.yandex.yandexnavi" target="_blank" rel="noopener">Открыть в Яндекс Навигаторе</a>
   <a class="btn btn-ghost btn-sm" href="contacts.html#drive-2gis" data-route-app="dgis://2gis.ru/routeSearch/rsType/car/to/37.48997,56.270071" data-route-package="ru.dublgis.dgismobile">Открыть в 2ГИС</a>
 </nav>
-<a class="route-card" href="contacts.html#approach" data-route-video data-route-src="video/clips/route-yakhroma.mp4?v=202611221315" data-route-lite="video/clips/route-yakhroma-480.mp4?v=202611221315">
+<a class="route-card" href="contacts.html#approach" data-route-video data-route-src="video/clips/route-yakhroma.mp4?v=202611231712" data-route-lite="video/clips/route-yakhroma-480.mp4?v=202611231712">
   <span class="route-card-image"><img src="img/photos/route-yakhroma.jpg" alt="" width="720" height="1280" decoding="async"><span class="route-card-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 11 7-11 7z"/></svg></span></span>
   <span class="route-card-copy"><strong>Как доехать из Яхромы</strong><span>Смотреть видео · 1:38</span><small>Можно скачать в дорогу</small></span>
 </a>
   </div>
 </div>
+<div class="video-recovery" id="video-recovery" role="status" hidden>
+  <p id="video-message">Видео пока не загрузилось.</p>
+  <button class="skip" id="video-retry" type="button">Повторить запуск</button>
+  <a class="skip" href="index.html#main">Перейти на сайт →</a>
+</div>
 <div class="fade" id="fade"></div>
 </template></div>
-<script>/* Ролик начинает грузиться, как только показан постер (не отнимая у него канал); на медленной сети — версия 540p */(function(){var h=document.querySelector('.intro-host'),r=h&&h.shadowRoot,v=r&&r.getElementById('v');if(!v)return;var c=navigator.connection||{},slow=!!c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||'')||(c.downlink>0&&c.downlink<2.5);if(slow){v.querySelectorAll('source').forEach(function(s){s.setAttribute('src',s.getAttribute('src').replace('descent.','descent-540.'))});v.dataset.quality='540'}if(document.documentElement.classList.contains('intro-open')){var go=function(){if(v.preload!=='auto'){v.preload='auto';v.load()}};var im=r.getElementById('poster');if(im.complete){go()}else{im.addEventListener('load',go,{once:true});im.addEventListener('error',go,{once:true});setTimeout(go,1500)}}})();</script>
+<script>/* Облегчённое интро загружается сразу при открытии стартового экрана, без ожидания постера. */(function(){var h=document.querySelector('.intro-host'),r=h&&h.shadowRoot,v=r&&r.getElementById('v');if(!v)return;if(document.documentElement.classList.contains('intro-open')&&v.preload!=='auto'){v.preload='auto';v.load()}})();</script>
 <a class="skip" href="#main">К содержанию</a>
 <header class="topbar">
   <div class="wrap">
@@ -1029,7 +1041,7 @@ body.pov .lens,.stage.pov .lens{display:block}
   <a class="btn btn-ghost btn-sm" href="https://yandex.ru/maps/?rtext=~56.270071,37.48997&amp;rtt=auto" data-route-app="yandexnavi://build_route_on_map?lat_to=56.270071&amp;lon_to=37.48997" data-route-package="ru.yandex.yandexnavi" target="_blank" rel="noopener">Открыть в Яндекс Навигаторе</a>
   <a class="btn btn-ghost btn-sm" href="contacts.html#drive-2gis" data-route-app="dgis://2gis.ru/routeSearch/rsType/car/to/37.48997,56.270071" data-route-package="ru.dublgis.dgismobile">Открыть в 2ГИС</a>
 </nav>
-<a class="route-card" href="contacts.html#approach" data-route-video data-route-src="video/clips/route-yakhroma.mp4?v=202611221315" data-route-lite="video/clips/route-yakhroma-480.mp4?v=202611221315">
+<a class="route-card" href="contacts.html#approach" data-route-video data-route-src="video/clips/route-yakhroma.mp4?v=202611231712" data-route-lite="video/clips/route-yakhroma-480.mp4?v=202611231712">
   <span class="route-card-image"><img src="img/photos/route-yakhroma.jpg" alt="" width="720" height="1280" decoding="async"><span class="route-card-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 11 7-11 7z"/></svg></span></span>
   <span class="route-card-copy"><strong>Как доехать из Яхромы</strong><span>Смотреть видео · 1:38</span><small>Можно скачать в дорогу</small></span>
 </a>
@@ -1099,6 +1111,7 @@ body.pov .lens,.stage.pov .lens{display:block}
         <h2>Какой комплект вам нужен?</h2>
         <p class="lead">Три вопроса — и мы покажем комплект, цену за день и что взять с собой. Отправьте подбор в мессенджер или позвоните, чтобы уточнить наличие.</p>
       </div>
+      <noscript><p class="card">Для подбора комплекта <a href="tel:+79919377744">позвоните в прокат</a> или <a href="prices.html">посмотрите полный прайс</a>.</p></noscript>
       <div class="card quiz" data-quiz>
         <div class="quiz-step" data-step="1">
           <div class="q">На чём катаетесь?</div>
@@ -1135,7 +1148,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 <section class="section" style="padding-top:0">
   <div class="wrap">
     <div class="about">
-      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v=202611221315" type="image/webp"><img width="1400" height="933" src="img/photos/shop-exterior.jpg?v=202611221315" alt="Павильон проката ZSKI" loading="lazy" fetchpriority="low" decoding="async" data-fallback ></picture></div>
+      <div class="photo" data-ph><picture><source srcset="img/photos/shop-exterior.webp?v=202611231712" type="image/webp"><img width="1400" height="933" src="img/photos/shop-exterior.jpg?v=202611231712" alt="Павильон проката ZSKI" loading="lazy" fetchpriority="low" decoding="async" data-fallback ></picture></div>
       <div>
         <span class="eyebrow">О нашем клубе</span>
         <h2>Более 5 лет в прокате и сервисе</h2>
@@ -1172,13 +1185,13 @@ body.pov .lens,.stage.pov .lens{display:block}
     <p class="lead">Аксессуары и защита — от 500 ₽ в день. Полный прайс и калькулятор — на странице «Цены».</p>
     <div data-tabs>
       <div class="price-tabs" role="tablist">
-        <button class="tab" role="tab" data-tab="ski" aria-selected="true">Горные лыжи</button>
-        <button class="tab" role="tab" data-tab="snowboard" aria-selected="false">Сноуборд</button>
-        <button class="tab" role="tab" data-tab="extras" aria-selected="false">Защита</button>
+        <button class="tab" role="tab" id="tab-ski" aria-controls="panel-ski" data-tab="ski" aria-selected="true">Горные лыжи</button>
+        <button class="tab" role="tab" id="tab-snowboard" aria-controls="panel-snowboard" data-tab="snowboard" aria-selected="false" tabindex="-1">Сноуборд</button>
+        <button class="tab" role="tab" id="tab-extras" aria-controls="panel-extras" data-tab="extras" aria-selected="false" tabindex="-1">Защита</button>
       </div>
-      <ul class="price-list" data-panel="ski" data-pricelist="ski"><li class="price-row"><div><span class="name">Комплект горных лыж<span class="pill">хит</span></span><span class="note">лыжи + ботинки + палки</span></div><div class="price">2 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Горные лыжи</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Горнолыжные ботинки</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Горнолыжные палки</span><span class="note">отдельно</span></div><div class="price">500 ₽ <small>/ день</small></div></li></ul>
-      <ul class="price-list" data-panel="snowboard" data-pricelist="snowboard" hidden><li class="price-row"><div><span class="name">Сноубордический комплект<span class="pill">хит</span></span><span class="note">доска + ботинки</span></div><div class="price">2 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Сноуборд</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Сноубордические ботинки</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li></ul>
-      <ul class="price-list" data-panel="extras" data-pricelist="extras" hidden><li class="price-row"><div><span class="name">Шлем</span><span class="note">взрослые и детские размеры</span></div><div class="price">500 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Маска</span><span class="note">горнолыжные очки</span></div><div class="price">500 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Перчатки</span></div><div class="price">500 ₽ <small>/ день</small></div></li></ul>
+      <ul class="price-list" id="panel-ski" aria-labelledby="tab-ski" data-panel="ski" data-pricelist="ski"><li class="price-row"><div><span class="name">Комплект горных лыж<span class="pill">хит</span></span><span class="note">лыжи + ботинки + палки</span></div><div class="price">2 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Горные лыжи</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Горнолыжные ботинки</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Горнолыжные палки</span><span class="note">отдельно</span></div><div class="price">500 ₽ <small>/ день</small></div></li></ul>
+      <ul class="price-list" id="panel-snowboard" aria-labelledby="tab-snowboard" data-panel="snowboard" data-pricelist="snowboard" hidden><li class="price-row"><div><span class="name">Сноубордический комплект<span class="pill">хит</span></span><span class="note">доска + ботинки</span></div><div class="price">2 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Сноуборд</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Сноубордические ботинки</span><span class="note">отдельно</span></div><div class="price">1 000 ₽ <small>/ день</small></div></li></ul>
+      <ul class="price-list" id="panel-extras" aria-labelledby="tab-extras" data-panel="extras" data-pricelist="extras" hidden><li class="price-row"><div><span class="name">Шлем</span><span class="note">взрослые и детские размеры</span></div><div class="price">500 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Маска</span><span class="note">горнолыжные очки</span></div><div class="price">500 ₽ <small>/ день</small></div></li><li class="price-row"><div><span class="name">Перчатки</span></div><div class="price">500 ₽ <small>/ день</small></div></li></ul>
     </div>
     <div style="margin-top:22px;display:flex;gap:.8rem;flex-wrap:wrap">
       <a class="btn btn-primary" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать комплект</a>
@@ -1298,7 +1311,7 @@ body.pov .lens,.stage.pov .lens{display:block}
 
 
 <!-- Слой интро «спуск к прокату» вставляется сборкой в начало <body> (intro: yes), см. js/intro.js -->
-<script src="js/intro.js?v=202611221315" defer onerror="window.__zskiIntroFail&&__zskiIntroFail()"></script>
+<script src="js/intro.js?v=202611231712" async onerror="window.__zskiIntroFail&&__zskiIntroFail()"></script>
 
 </main>
 <footer>
@@ -1331,11 +1344,7 @@ body.pov .lens,.stage.pov .lens{display:block}
   <a class="btn btn-primary" data-phone="link" href="tel:+79919377744"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.9 2z"/></svg> Позвонить</a>
   <a class="btn btn-ghost" href="prices.html#calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M16 14v4M8 18h2M12 18h2"/></svg> Рассчитать</a>
 </div>
-<script src="js/data.js?v=202611221315" defer></script>
-<script src="js/hours.js?v=202611221315" defer></script>
-<script src="js/drive-links.js?v=202611221315" defer></script>
-<script src="js/route-video.js?v=202611221315" defer></script>
-<script src="js/main.js?v=202611221315" defer></script>
+<script src="js/site.js?v=202611231712" defer></script>
 <script>if("serviceWorker"in navigator)addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").then((r)=>r.update()).catch(()=>{});});</script>
 </body>
 </html>

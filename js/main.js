@@ -31,9 +31,20 @@
   /* ---------- Меню ---------- */
   const burger = $(".burger"), drawer = $(".drawer");
   if (burger && drawer) {
-    burger.addEventListener("click", () => {
-      const open = drawer.classList.toggle("open");
+    const setMenu = (open) => {
+      drawer.classList.toggle("open", open);
       burger.setAttribute("aria-expanded", String(open));
+      burger.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню");
+    };
+    burger.addEventListener("click", () => setMenu(!drawer.classList.contains("open")));
+    drawer.addEventListener("click", (e) => { if (e.target.closest("a")) setMenu(false); });
+    document.addEventListener("click", (e) => {
+      if (!drawer.contains(e.target) && !burger.contains(e.target)) setMenu(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && drawer.classList.contains("open")) {
+        setMenu(false); burger.focus();
+      }
     });
   }
   const here = location.pathname.split("/").pop() || "index.html";
@@ -87,10 +98,22 @@
   /* Вкладки */
   $$("[data-tabs]").forEach((box) => {
     const tabs = $$(".tab", box), panels = $$("[data-panel]", box);
-    tabs.forEach((t) => t.addEventListener("click", () => {
-      tabs.forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+    const select = (t) => {
+      tabs.forEach((x) => {
+        x.setAttribute("aria-selected", String(x === t));
+        x.tabIndex = x === t ? 0 : -1;
+      });
       panels.forEach((p) => (p.hidden = p.dataset.panel !== t.dataset.tab));
-    }));
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => select(t));
+      t.addEventListener("keydown", (e) => {
+        const n = e.key === "ArrowRight" ? (i + 1) % tabs.length : e.key === "ArrowLeft" ? (i + tabs.length - 1) % tabs.length : e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : -1;
+        if (n < 0) return;
+        e.preventDefault(); select(tabs[n]); tabs[n].focus();
+      });
+    });
+    if (tabs.length) select(tabs.find((t) => t.getAttribute("aria-selected") === "true") || tabs[0]);
   });
 
   /* ---------- Таблица SKI-сервиса ---------- */
@@ -160,15 +183,7 @@
       video.addEventListener("focus", prepare, { once: true });
     });
 
-    // Первые кадры готовятся рядом с экраном, не мешая началу страницы.
-    if (!saveData && "IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        if (entry.target.preload === "none") entry.target.preload = "auto";
-        observer.unobserve(entry.target);
-      }), { rootMargin: "1000px 0px" });
-      videos.forEach((video) => observer.observe(video));
-    }
+    // Не скачиваем мегабайты только из-за прокрутки: подготовка — по действию пользователя.
   }
 
   /* ---------- Карта ---------- */
@@ -250,16 +265,39 @@
   /* ---------- Лайтбокс для фото ---------- */
   const figs = $$(".album figure, .gallery figure");
   if (figs.length) {
-    const lb = document.createElement("div"); lb.className = "lightbox"; lb.hidden = true;
+    const nativeDialog = typeof HTMLDialogElement !== "undefined" && !!HTMLDialogElement.prototype.showModal;
+    const lb = document.createElement(nativeDialog ? "dialog" : "div"); lb.className = "lightbox"; lb.hidden = true;
+    lb.setAttribute("role", "dialog"); lb.setAttribute("aria-modal", "true"); lb.setAttribute("aria-label", "Фотографии проката");
     lb.innerHTML = `<button class="close" aria-label="Закрыть">✕</button><button class="prev" aria-label="Предыдущее">‹</button><img alt=""><button class="next" aria-label="Следующее">›</button><div class="cap"></div>`;
     document.body.appendChild(lb);
-    const img = $("img", lb), cap = $(".cap", lb); let i = 0;
-    const show = (n) => { i = (n + figs.length) % figs.length; const f = $("img", figs[i]); img.src = f.currentSrc || f.src; img.alt = f.alt; cap.textContent = f.alt; lb.hidden = false; document.body.style.overflow = "hidden"; };
-    const hide = () => { lb.hidden = true; document.body.style.overflow = ""; };
-    figs.forEach((f, n) => { f.setAttribute("tabindex", "0"); f.setAttribute("role", "button"); f.addEventListener("click", () => show(n)); f.addEventListener("keydown", (e) => { if (e.key === "Enter") show(n); }); });
+    const img = $("img", lb), cap = $(".cap", lb); let i = 0, opener = null, previousOverflow = "";
+    const show = (n) => { i = (n + figs.length) % figs.length; const f = $("img", figs[i]); img.src = f.currentSrc || f.src; img.alt = f.alt; cap.textContent = f.alt; };
+    const open = (n) => {
+      opener = figs[n]; previousOverflow = document.body.style.overflow;
+      show(n); lb.hidden = false;
+      if (nativeDialog) lb.showModal();
+      document.body.style.overflow = "hidden"; $(".close", lb).focus();
+    };
+    const hide = () => {
+      if (lb.hidden) return;
+      if (nativeDialog && lb.open) lb.close();
+      lb.hidden = true; document.body.style.overflow = previousOverflow;
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+    };
+    figs.forEach((f, n) => { f.setAttribute("tabindex", "0"); f.setAttribute("role", "button"); f.addEventListener("click", () => open(n)); f.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(n); } }); });
     $(".close", lb).addEventListener("click", hide); $(".prev", lb).addEventListener("click", () => show(i - 1)); $(".next", lb).addEventListener("click", () => show(i + 1));
     lb.addEventListener("click", (e) => { if (e.target === lb) hide(); });
-    document.addEventListener("keydown", (e) => { if (lb.hidden) return; if (e.key === "Escape") hide(); if (e.key === "ArrowLeft") show(i - 1); if (e.key === "ArrowRight") show(i + 1); });
+    lb.addEventListener("cancel", (e) => { e.preventDefault(); hide(); });
+    lb.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { e.preventDefault(); hide(); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); show(i - 1); }
+      if (e.key === "ArrowRight") { e.preventDefault(); show(i + 1); }
+      if (e.key === "Tab") {
+        const buttons = $$("button", lb), first = buttons[0], last = buttons[buttons.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
   }
 
 
@@ -338,4 +376,31 @@
 
   /* ---------- Год в футере ---------- */
   $$("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
+
+  /* ---------- Быстрые переходы, в том числе на тестовом HTTP-адресе ---------- */
+  // Speculation Rules работают только в защищённом контексте. Здесь браузер заранее
+  // получает лишь HTML меню: скрипты страниц и их видео при этом не запускаются.
+  const prefetchMenu = () => {
+    const connection = navigator.connection;
+    if (connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType || "")) return;
+    if (location.protocol === "https:" && HTMLScriptElement.supports?.("speculationrules")) return;
+    // Не полагаемся на relList.supports: неподдерживаемую подсказку браузер просто игнорирует.
+    const currentPage = new URL(location.href);
+    currentPage.hash = "";
+    if (currentPage.pathname.endsWith("/")) currentPage.pathname += "index.html";
+    const seen = new Set([currentPage.href]);
+    $$(".menu a[href]").forEach((a) => {
+      const url = new URL(a.href);
+      url.hash = "";
+      if (url.origin !== location.origin || !url.pathname.endsWith(".html") || seen.has(url.href)) return;
+      seen.add(url.href);
+      const link = document.createElement("link");
+      link.rel = "prefetch";
+      link.as = "document";
+      link.href = url.href;
+      document.head.appendChild(link);
+    });
+  };
+  if (document.readyState === "complete") prefetchMenu();
+  else addEventListener("load", prefetchMenu, { once: true });
 })();

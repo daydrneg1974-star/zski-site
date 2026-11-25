@@ -9,8 +9,6 @@ const TIMELINE = {"duration": 18.0, "cruise": 0.6, "stations": [2.542, 4.898, 7.
 
 const CFG = {
   hold: 2000,      // пауза на станции, мс
-  preroll: 5.5,    // с: запас видео до второй остановки и разгона после неё
-  prerollMax: 8000,// мс: дольше не ждём — едем с тем, что есть
   maxSpeed: 68,    // км/ч на спидометре при обычном ходе
   startAlt: 220,   // м, высота на старте
 };
@@ -42,6 +40,48 @@ function initIntro(root, opts) {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const st = { phase: "start", idx: 0, card: null, holdTimer: 0, vfc: 0, raf: 0, shownSpeed: -1, shownAlt: -1, soundLevel: -1, routeStep: "", hovered: false, focused: false, pinned: false, suspended: false, buffering: false, loadTimer: 0 };
   const wind = {};
+  const recovery = $("#video-recovery"), retry = $("#video-retry"), message = $("#video-message");
+  let stallTimer = 0, lastTime = -1, playAttempt = 0;
+  const triedSources = new Set();
+  goBtn.dataset.ready = "1";
+  v.muted = true;
+  function clearStall() { clearTimeout(stallTimer); stallTimer = 0; }
+  function showFailure(text) {
+    if (st.suspended || st.phase === "end") return;
+    ++playAttempt; clearStall(); clearTimeout(st.loadTimer); clearTimeout(st.holdTimer);
+    unwatch(); v.pause(); st.phase = "error"; st.buffering = false;
+    stage.classList.remove("buffering"); hint.classList.remove("show");
+    message.textContent = text; recovery.hidden = false; hud(v.currentTime);
+  }
+  function armStall() {
+    clearStall();
+    if (st.phase !== "run" || st.suspended) return;
+    stallTimer = setTimeout(() => showFailure("Видео не загружается. Повтори запуск или перейди на сайт."), 12000);
+  }
+  v.addEventListener("timeupdate", () => {
+    if (v.currentTime !== lastTime) { lastTime = v.currentTime; armStall(); }
+  });
+  function recoverSource() {
+    if (st.suspended || st.phase === "end" || st.aborted) return;
+    const failed = v.currentSrc || v.src;
+    if (failed) triedSources.add(failed);
+    const next = Array.from(v.querySelectorAll("source")).find((s) =>
+      (!s.media || matchMedia(s.media).matches) && !triedSources.has(s.src) && v.canPlayType(s.type));
+    if (!next) { st.noVideo = true; showFailure("Не удалось воспроизвести видео. Повтори запуск или открой сайт."); return; }
+    triedSources.add(next.src);
+    const time = v.currentTime, running = st.phase === "run" || st.phase === "blocked";
+    ++playAttempt; v.src = next.src; v.load();
+    if (time > 0) v.addEventListener("loadedmetadata", () => { if (!st.suspended) v.currentTime = time; }, { once: true });
+    if (running) { st.phase = "run"; play(); }
+  }
+  retry.addEventListener("click", () => {
+    recovery.hidden = true;
+    if (st.phase === "blocked") { unblock(); return; }
+    st.noVideo = false; st.idx = 0; lastTime = -1; triedSources.clear();
+    startScreen.classList.add("off"); stage.classList.remove("waiting");
+    hideCard(); stage.classList.remove("hold"); showRoute(true);
+    v.load(); st.phase = "run"; play(); startWind();
+  });
 
   const routePoints = STATIONS.map((station, index) => {
     const item = document.createElement("li");
@@ -190,7 +230,7 @@ function initIntro(root, opts) {
     card.classList.remove("in"); card.classList.add("out"); setTimeout(() => card.remove(), 200);
   }
   function arrive() {
-    unwatch(); v.pause(); st.phase = "hold";
+    clearStall(); unwatch(); v.pause(); st.phase = "hold";
     title.classList.remove("show"); stage.classList.add("hold"); hud(v.currentTime);
     showCard(st.idx); armHold();
   }
@@ -203,7 +243,7 @@ function initIntro(root, opts) {
   function seekStation(i) {
     if (route.hidden || st.suspended || !canSeekTo(i)) return;
     if (st.phase === "hold" && st.idx === i) { armHold(); return; }
-    clearTimeout(st.loadTimer);
+    clearTimeout(st.loadTimer); recovery.hidden = true;
     hideCard();
     st.idx = i;
     st.buffering = false;
@@ -218,46 +258,58 @@ function initIntro(root, opts) {
     st.idx++; st.phase = "run"; play();
   }
   function play() {
+    const attempt = ++playAttempt;
+    armStall();
     if (!st.buffering) hint.classList.remove("show");
     hud(v.currentTime);
     const p = v.play();
     if (p && p.catch) p.catch((err) => {
-      if (st.suspended || st.phase !== "run" || !err || err.name !== "NotAllowedError") return;
+      if (attempt !== playAttempt || st.suspended || st.phase !== "run" || !err) return;
+      if (err.name === "AbortError") return;
+      if (err.name !== "NotAllowedError") { recoverSource(); return; }
+      clearStall(); clearTimeout(st.loadTimer); st.buffering = false; stage.classList.remove("buffering");
       unwatch(); st.phase = "blocked";               // браузер требует касания — просим и ждём
-      hint.textContent = "Коснитесь экрана, чтобы продолжить спуск"; hint.classList.add("show");
+      message.textContent = "Нажми «Повторить запуск», чтобы продолжить спуск."; recovery.hidden = false;
+      hint.classList.remove("show");
       hud(v.currentTime);
     });
     watch();
   }
-  function unblock() { if (st.phase !== "blocked") return; st.phase = "run"; play(); }
+  function unblock() { if (st.phase !== "blocked") return; recovery.hidden = true; st.phase = "run"; play(); }
 
   /* ---------- Загрузка ролика ----------
-     Перед стартом ждём, пока подгрузится запас (CFG.preroll с), чтобы спуск не замирал на медленной сети;
-     показываем «Готовим спуск… N%». Если буфер иссяк по дороге (событие waiting) — подсказка и нулевая
-     скорость на спидометре, пока видео само не продолжит (playing). */
-  const bufferedAhead = (t) => { const b = v.buffered; for (let i = 0; i < b.length; i++) if (b.start(i) <= t + 0.1 && b.end(i) > t) return b.end(i) - t; return 0; };
-  const ready = () => v.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA || bufferedAhead(0) >= Math.min(CFG.preroll, TIMELINE.duration - 0.5);
+     play() вызывается прямо по нажатию «Поехали», без ожидания запаса видео.
+     Браузер начинает показ с первых доступных кадров. Подсказка нужна только при
+     реальной задержке сети; короткие события waiting не перекрывают картинку. */
   function startPlayback() {
     st.phase = "run";
     title.classList.add("show");
     setTimeout(() => title.classList.remove("show"), 1500);
     play();
   }
-  function waitForVideo() {
-    st.phase = "loading"; const t0 = performance.now();
-    const show = () => { const pct = Math.min(99, Math.round(bufferedAhead(0) / Math.min(CFG.preroll, TIMELINE.duration) * 100)); hint.textContent = `Готовим спуск… ${pct}%`; hint.classList.add("show"); };
-    const tick = () => {
-      if (st.phase !== "loading") return;
-      if (st.noVideo || noVideoNow()) { finish(); return; }
-      if (ready() || performance.now() - t0 > CFG.prerollMax) { startPlayback(); return; }
-      show(); st.loadTimer = setTimeout(tick, 200);
-    };
-    tick();
-  }
-  v.addEventListener("waiting", () => { if (st.phase !== "run" || st.suspended) return; st.buffering = true; stage.classList.add("buffering"); hint.textContent = "Подгружаем видео…"; hint.classList.add("show"); hud(v.currentTime); });
-  v.addEventListener("playing", () => { if (!st.buffering) return; st.buffering = false; stage.classList.remove("buffering"); if (st.phase === "run") hint.classList.remove("show"); });
+  v.addEventListener("waiting", () => {
+    if (st.phase !== "run" || st.suspended) return;
+    st.buffering = true;
+    hud(v.currentTime);
+    clearTimeout(st.loadTimer);
+    st.loadTimer = setTimeout(() => {
+      if (!st.buffering || st.phase !== "run" || st.suspended) return;
+      stage.classList.add("buffering");
+      hint.textContent = "Подгружаем видео…";
+      hint.classList.add("show");
+    }, 600);
+  });
+  v.addEventListener("playing", () => {
+    clearTimeout(st.loadTimer);
+    st.buffering = false;
+    stage.classList.remove("buffering");
+    if (st.phase === "run") hint.classList.remove("show");
+  });
   function finish() {
     if (st.phase === "end") return;
+    // Убираем сам видеослой: мобильный встроенный плеер не должен закрывать меню финиша.
+    v.pause(); v.hidden = true;
+    clearStall(); recovery.hidden = true;
     unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer); hideCard(); stage.classList.remove("hold"); stage.classList.remove("buffering"); st.buffering = false; hint.classList.remove("show");
     showRoute(false);
     loadArrival();
@@ -270,8 +322,7 @@ function initIntro(root, opts) {
   const lastSource = v.querySelector("source:last-of-type");
   v.addEventListener("error", (e) => {
     if (e.target !== v && e.target !== lastSource) return; // первый источник не подошёл — браузер берёт следующий
-    st.noVideo = true;                                     // ролик недоступен (офлайн, 404, формат) — сразу меню
-    if (st.phase === "run" || st.phase === "blocked" || st.phase === "loading" || st.restoring) finish();
+    recoverSource();
   }, true);
   /* Страховка: после старта ролик так и не начал грузиться (нет ни одного источника, ошибка) — показать меню */
   const noVideoNow = () => st.noVideo || !!v.error || (v.readyState === 0 && v.networkState === HTMLMediaElement.NETWORK_NO_SOURCE);
@@ -282,20 +333,19 @@ function initIntro(root, opts) {
     window.__zskiGo = 0;
     if (st.phase !== "start") return;
     startScreen.classList.add("off"); stage.classList.remove("waiting");
-    startWind();
     if (reduce) { finish(); return; }
-    if (st.noVideo) { finish(); return; }
+    if (st.noVideo) { showFailure("Не удалось загрузить видео. Повтори запуск или перейди на сайт."); return; }
     st.idx = 0;
     showRoute(true);
     if (v.preload !== "auto") { v.preload = "auto"; v.load(); }
-    if (ready()) startPlayback();
-    else waitForVideo();
-    setTimeout(() => { if ((st.phase === "run" || st.phase === "loading") && st.idx === 0 && v.currentTime === 0 && noVideoNow()) finish(); }, 2500);
+    startPlayback();
+    startWind();
+    setTimeout(() => { if (st.phase === "run" && st.idx === 0 && v.currentTime === 0 && noVideoNow()) recoverSource(); }, 2500);
   });
 
   /* Клик мимо карточки во время остановки — едем дальше; пробел/Enter — тоже; Esc — на сайт */
   root.addEventListener("click", (e) => {
-    if (st.phase === "blocked") { if (!e.target.closest("a")) { e.preventDefault(); unblock(); } return; }
+    if (st.phase === "blocked") { if (!e.target.closest("a,#go,#video-retry")) { e.preventDefault(); unblock(); } return; }
     if (e.target.closest("a,button,.station,.descent-route")) return;
     if (st.phase === "hold") resume();
   });
@@ -312,7 +362,7 @@ function initIntro(root, opts) {
   $("#replay").addEventListener("click", () => opts.replay());
   setTimeout(() => fade.remove(), 600);
 
-  /* Ролик в разметке с preload="none": качаем, только когда плеер действительно запущен */
+  /* Ролик в разметке с preload="none": заранее загружаем, когда открыт экран интро. */
   if (v.preload !== "auto") { v.preload = "auto"; v.load(); }
   /* Нажали «Поехали» раньше, чем загрузился этот скрипт, — стартуем сейчас */
   if (window.__zskiGo) { window.__zskiGo = 0; setTimeout(() => goBtn.click(), 0); }
@@ -371,7 +421,7 @@ function initIntro(root, opts) {
   return {
     /* Слой спрятан (переход на главную): всё останавливаем, место спуска запоминаем */
     suspend() {
-      st.suspended = true; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
+      st.suspended = true; ++playAttempt; clearStall(); unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
       resetCardHold(); syncSound(0);
       try {
         v.pause();
@@ -380,6 +430,7 @@ function initIntro(root, opts) {
         const b = v.buffered, whole = b.length && b.end(b.length - 1) >= (v.duration || TIMELINE.duration) - 0.5;
         if (st.phase !== "end" && !whole) {
           st.resumeT = v.currentTime; st.aborted = true;
+          st.directSrc = v.getAttribute("src"); v.removeAttribute("src");
           st.sources = Array.from(v.querySelectorAll("source")); st.sources.forEach((el) => el.remove()); v.load(); // без источников закачка прекращается
         }
       } catch {}
@@ -392,16 +443,16 @@ function initIntro(root, opts) {
       const go = () => {
         if (st.phase === "hold") armHold();
         else if (st.phase === "run" || st.phase === "blocked") { st.phase = "run"; play(); }
-        else if (st.phase === "loading") waitForVideo();
       };
       if (st.aborted) {                                   // закачку останавливали — продолжаем с того же места
+        if (st.directSrc) v.src = st.directSrc;
         st.aborted = false; (st.sources || []).forEach((el) => v.appendChild(el)); v.preload = "auto"; v.load();
         const seek = () => { if (st.suspended) return; try { v.currentTime = st.resumeT || 0; } catch {} go(); };
         if (v.readyState >= 1) seek(); else v.addEventListener("loadedmetadata", seek, { once: true });
       } else go();
       if (st.phase !== "start" && st.phase !== "end" && wind.wake) wind.wake();
     },
-    progress() { return { phase: st.phase === "loading" || st.phase === "blocked" ? "run" : st.phase, idx: st.idx, t: Math.round(v.currentTime * 1000) / 1000 }; },
+    progress() { return { phase: st.phase === "blocked" ? "run" : st.phase, idx: st.idx, t: Math.round(v.currentTime * 1000) / 1000 }; },
     /* Возврат «Назад» без кэша страницы: продолжить с сохранённой станции (звук — по касанию) */
     restore(p) {
       if (!p || p.phase === "start") return;
@@ -422,9 +473,9 @@ function initIntro(root, opts) {
       else { st.restoring = true; v.addEventListener("loadedmetadata", go, { once: true }); }
     },
     stop() {
-      st.suspended = true; st.phase = "end"; unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
+      st.suspended = true; st.phase = "end"; ++playAttempt; clearStall(); unwatch(); clearTimeout(st.holdTimer); clearTimeout(st.loadTimer);
       removeEventListener("keydown", onKey);
-      try { v.pause(); v.removeAttribute("src"); v.load(); } catch {}
+      try { v.pause(); v.removeAttribute("src"); v.querySelectorAll("source").forEach((s) => s.remove()); v.load(); } catch {}
       if (wind.ctx) wind.ctx.close().catch(() => {});
     },
   };
